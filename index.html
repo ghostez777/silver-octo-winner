@@ -1,43 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Scratch Project</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #eee;
-      text-align: center;
-      margin: 0;
-      padding: 20px;
-    }
-    iframe {
-      width: 960px;
-      height: 720px;
-      border: none;
-      margin-top: 20px;
-    }
-    a {
-      color: #4fd;
-      text-decoration: none;
-      font-size: 18px;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Play Papa's Scooperia</title>
+
+    <!-- Load Ruffle -->
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+
+    <style>
+        body {
+            background: #222;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #game-container {
+            width: 800px;
+            height: 600px;
+        }
+    </style>
 </head>
+
 <body>
-  <h1>My Scratch Project</h1>
-  <p>Enjoy my game! Powered by TurboWarp.</p>
-
-  <iframe src="https://turbowarp.org/986872932/embed?fps=60&turbo=1&fullscreen-background=black"></iframe>
-
-  <p>
-    <a href="https://turbowarp.org/986872932" target="_blank">
-      Open Fullscreen
-    </a>
-  </p>
+    <div id="game-container">
+        <embed src="papas-scooperia.swf"
+               width="800"
+               height="600"
+               allowfullscreen="true">
+        </embed>
+    </div>
 </body>
 </html>
