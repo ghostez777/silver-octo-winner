@@ -1,55 +1,22 @@
-const gameListEl = document.getElementById("game-list");
-const gameFrame = document.getElementById("game-frame");
-const gameTitleEl = document.getElementById("game-title");
-const refreshBtn = document.getElementById("refresh-btn");
-const fullscreenBtn = document.getElementById("fullscreen-btn");
+fetch("data/games.json")
+.then(response => response.json())
+.then(games => {
 
-let games = [];
-let currentGame = null;
+const container = document.getElementById("games");
 
-async function loadGames() {
-  try {
-    const res = await fetch("games.json");
-    games = await res.json();
-    renderGameList();
-  } catch (err) {
-    console.error("Failed to load games.json", err);
-    gameTitleEl.textContent = "Error loading games list";
-  }
-}
+games.forEach(game => {
 
-function renderGameList() {
-  gameListEl.innerHTML = "";
-  games.forEach((game) => {
-    const li = document.createElement("li");
-    li.textContent = game.title;
-    li.dataset.id = game.id;
-    li.addEventListener("click", () => selectGame(game.id));
-    gameListEl.appendChild(li);
-  });
-}
+container.innerHTML += `
+<div class="card">
+    <img src="${game.image}" alt="${game.title}">
+    <h3>${game.title}</h3>
 
-function selectGame(id) {
-  const game = games.find((g) => g.id === id);
-  if (!game) return;
+    <a href="game.html?game=${game.file}">
+        Play
+    </a>
+</div>
+`;
 
-  currentGame = game;
-  gameTitleEl.textContent = game.title;
-  gameFrame.src = game.url;
-
-  [...gameListEl.children].forEach((li) => {
-    li.classList.toggle("active", li.dataset.id === id);
-  });
-}
-
-refreshBtn.addEventListener("click", () => {
-  if (!currentGame || !gameFrame.src) return;
-  gameFrame.src = gameFrame.src;
 });
 
-fullscreenBtn.addEventListener("click", () => {
-  const iframe = document.getElementById("game-frame");
-  if (iframe.requestFullscreen) iframe.requestFullscreen();
 });
-
-loadGames();
