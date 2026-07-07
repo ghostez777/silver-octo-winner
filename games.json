@@ -1,0 +1,12 @@
+[
+  {
+    "id": "papa-pizzeria",
+    "title": "Papa's Pizzeria",
+    "url": "games/papas_pizzeria/index.html"
+  },
+  {
+    "id": "papa-burgeria",
+    "title": "Papa's Burgeria",
+    "url": "games/papas_burgeria/index.html"
+  }
+]
