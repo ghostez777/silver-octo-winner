@@ -1,333 +1,88 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Papa's Games</title>
+    <title>Papa's Games Hub</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:400,700">
 
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Nunito, sans-serif;
+            background: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+        header {
+            background: #ff6b6b;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        #games {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .game {
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .game:hover {
+            transform: scale(1.05);
+        }
+
+        .game img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        #player {
+            width: 100%;
+            height: 600px;
+            background: black;
+            margin-top: 20px;
+        }
+
+        #fullscreenBtn {
+            margin: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        #fullscreenBtn:hover {
+            background: #45a049;
+        }
+    </style>
 </head>
 
 <body>
 
-<nav class="navbar">
-    <div class="logo">
-        🍔 Papa's Games
-    </div>
+<header>Papa's Games Hub</header>
 
-    <div class="nav-links">
-        <a href="#">Home</a>
-        <a href="#games">Games</a>
-        <a href="#">About</a>
-    </div>
-</nav>
+<div id="games"></div>
 
-<section class="hero">
+<button id="fullscreenBtn">Fullscreen</button>
 
-    <div class="hero-content">
+<div id="player"></div>
 
-        <h1>Play Every Papa's Game</h1>
-
-        <p>
-            Enjoy every Papa's restaurant game directly in your browser with
-            Ruffle. Fast, modern, and mobile friendly.
-        </p>
-
-        <a href="#games" class="play-button">
-            Browse Games
-        </a>
-
-    </div>
-
-</section>
-
-<section class="search-section">
-
-    <input
-        id="search"
-        type="text"
-        placeholder="🔍 Search games..."
-    >
-
-</section>
-
-<section class="games-section">
-
-    <h2>All Games</h2>
-
-    <div id="games" class="games-grid">
-        <!-- Cards are loaded by script.js -->
-    </div>
-
-</section>
-
-<footer>
-
-    <p>Made with ❤️ using Ruffle</p>
-
-</footer>
-
+<script src="ruffle/web.ruffle.js"></script>
 <script src="script.js"></script>
 
 </body>
 </html>
-```
-
----
-
-```css
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Inter',sans-serif;
-}
-
-body{
-    background:#0f172a;
-    color:white;
-}
-
-.navbar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:20px 8%;
-    background:rgba(15,23,42,.75);
-    backdrop-filter:blur(12px);
-    position:sticky;
-    top:0;
-    z-index:1000;
-}
-
-.logo{
-    font-size:28px;
-    font-weight:800;
-}
-
-.nav-links{
-    display:flex;
-    gap:30px;
-}
-
-.nav-links a{
-    color:white;
-    text-decoration:none;
-    transition:.3s;
-}
-
-.nav-links a:hover{
-    color:#38bdf8;
-}
-
-.hero{
-
-    min-height:70vh;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    text-align:center;
-
-    background:
-    radial-gradient(circle at top,#2563eb,#0f172a);
-
-    padding:40px;
-}
-
-.hero h1{
-    font-size:64px;
-    font-weight:800;
-}
-
-.hero p{
-    margin-top:20px;
-    font-size:20px;
-    color:#cbd5e1;
-}
-
-.play-button{
-
-    display:inline-block;
-
-    margin-top:35px;
-
-    padding:16px 34px;
-
-    border-radius:50px;
-
-    background:#3b82f6;
-
-    color:white;
-
-    text-decoration:none;
-
-    font-weight:700;
-
-    transition:.3s;
-}
-
-.play-button:hover{
-
-    transform:translateY(-4px);
-
-    background:#2563eb;
-
-}
-
-.search-section{
-
-    padding:40px 8%;
-
-}
-
-#search{
-
-    width:100%;
-
-    max-width:700px;
-
-    display:block;
-
-    margin:auto;
-
-    padding:18px;
-
-    border:none;
-
-    border-radius:16px;
-
-    background:#1e293b;
-
-    color:white;
-
-    font-size:18px;
-
-}
-
-.games-section{
-
-    padding:60px 8%;
-
-}
-
-.games-section h2{
-
-    margin-bottom:35px;
-
-    font-size:34px;
-
-}
-
-.games-grid{
-
-    display:grid;
-
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-
-    gap:28px;
-
-}
-
-.card{
-
-    background:#1e293b;
-
-    border-radius:20px;
-
-    overflow:hidden;
-
-    transition:.3s;
-
-    box-shadow:0 8px 25px rgba(0,0,0,.25);
-
-}
-
-.card:hover{
-
-    transform:translateY(-8px);
-
-}
-
-.card img{
-
-    width:100%;
-
-    height:180px;
-
-    object-fit:cover;
-
-}
-
-.card h3{
-
-    padding:18px;
-
-    font-size:22px;
-
-}
-
-.card a{
-
-    display:block;
-
-    margin:0 18px 18px;
-
-    text-align:center;
-
-    background:#3b82f6;
-
-    padding:14px;
-
-    border-radius:12px;
-
-    color:white;
-
-    text-decoration:none;
-
-    font-weight:700;
-
-}
-
-.card a:hover{
-
-    background:#2563eb;
-
-}
-
-footer{
-
-    padding:50px;
-
-    text-align:center;
-
-    color:#94a3b8;
-
-}
-
-@media(max-width:768px){
-
-.hero h1{
-
-font-size:42px;
-
-}
-
-.nav-links{
-
-display:none;
-
-}
-
-.games-section{
-
-padding:40px 20px;
-
-}
-
-}
-```
