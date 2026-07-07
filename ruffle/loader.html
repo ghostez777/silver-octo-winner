@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Game Loader</title>
   <script src="ruffle.js"></script>
   <style>
-    body, html {
+    html, body {
       margin: 0;
       height: 100%;
-      background: black;
+      background: #000;
     }
     #game {
       width: 100%;
@@ -28,6 +28,8 @@
       const player = ruffle.createPlayer();
       document.getElementById("game").appendChild(player);
       player.load(`../games/${gameFile}`);
+    } else {
+      document.body.innerHTML = "<p style='color:white'>No game specified.</p>";
     }
   </script>
 </body>
