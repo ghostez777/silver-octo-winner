@@ -2,22 +2,24 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 body {
-  background: #111;
-  color: #eee;
-  min-height: 100vh;
+  background: #0d0d0d;
+  color: #fff;
   display: flex;
   flex-direction: column;
+  height: 100vh;
 }
 
 header {
-  padding: 1rem;
-  background: #222;
-  text-align: center;
-  border-bottom: 1px solid #333;
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
 main {
@@ -26,17 +28,20 @@ main {
   overflow: hidden;
 }
 
+/* Sidebar */
 .sidebar {
-  width: 260px;
-  max-width: 40%;
-  background: #181818;
-  border-right: 1px solid #333;
+  width: 300px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
   padding: 1rem;
   overflow-y: auto;
 }
 
 .sidebar h2 {
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 #game-list {
@@ -44,23 +49,35 @@ main {
 }
 
 #game-list li {
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.25rem;
-  background: #222;
-  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0.6rem;
+  margin-bottom: 0.5rem;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: 0.2s;
 }
 
 #game-list li:hover {
-  background: #333;
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(4px);
 }
 
 #game-list li.active {
   background: #3b82f6;
-  color: #fff;
 }
 
+/* Thumbnail */
+.game-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+/* Game Area */
 .game-area {
   flex: 1;
   display: flex;
@@ -75,42 +92,30 @@ main {
   align-items: center;
 }
 
-.buttons {
-  display: flex;
-  gap: 0.5rem;
-}
-
-button {
-  padding: 0.4rem 0.8rem;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
+.buttons button {
+  padding: 0.5rem 1rem;
   background: #3b82f6;
+  border: none;
+  border-radius: 6px;
   color: #fff;
-  font-size: 0.9rem;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-button:hover {
+.buttons button:hover {
   background: #2563eb;
 }
 
 .game-frame-wrapper {
   flex: 1;
   background: #000;
-  border-radius: 6px;
+  border-radius: 10px;
   overflow: hidden;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
 #game-frame {
   width: 100%;
   height: 100%;
   border: none;
-}
-
-footer {
-  padding: 0.5rem 1rem;
-  background: #222;
-  font-size: 0.8rem;
-  text-align: center;
-  border-top: 1px solid #333;
 }
