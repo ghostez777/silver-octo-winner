@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Papa's Game Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>Papa's Game Hub</header>
+
+  <main>
+    <section class="sidebar">
+      <h2>Games</h2>
+      <ul id="game-list"></ul>
+    </section>
+
+    <section class="game-area">
+      <div class="game-header">
+        <span id="game-title">Select a game</span>
+        <div class="buttons">
+          <button id="refresh-btn">Refresh</button>
+          <button id="fullscreen-btn">Fullscreen</button>
+        </div>
+      </div>
+
+      <div class="game-frame-wrapper">
+        <iframe
+          id="game-frame"
+          src=""
+          frameborder="0"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Hosted on GitHub Pages • Powered by Ruffle</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
