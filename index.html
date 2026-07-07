@@ -8,41 +8,52 @@
     <style>
         body {
             font-family: Nunito, sans-serif;
-            background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+            background: #1e1e1e;
             margin: 0;
             padding: 0;
-        }
-
-        header {
-            background: #ff6b6b;
-            padding: 25px;
-            text-align: center;
             color: white;
-            font-size: 32px;
-            font-weight: 700;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
+        /* Top Navigation Bar */
+        nav {
+            background: #222;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        nav h1 {
+            margin: 0;
+            font-size: 28px;
+            color: #00eaff;
+            font-weight: 700;
+        }
+
+        /* Game Grid */
         #games {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 25px;
             padding: 30px;
         }
 
         .game {
-            background: white;
+            background: #2b2b2b;
             border-radius: 15px;
             padding: 15px;
             text-align: center;
             cursor: pointer;
             transition: 0.25s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border: 3px solid #00eaff;
         }
 
         .game:hover {
             transform: translateY(-8px) scale(1.05);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            border-color: #ffea00;
         }
 
         .game img {
@@ -50,37 +61,49 @@
             border-radius: 12px;
         }
 
+        .game h3 {
+            margin-top: 12px;
+            font-size: 20px;
+            color: #ffea00;
+        }
+
+        /* Fullscreen Button */
         #fullscreenBtn {
             margin: 20px auto;
             display: block;
             padding: 12px 25px;
             font-size: 20px;
-            background: #4CAF50;
-            color: white;
+            background: #00eaff;
+            color: black;
             border: none;
             border-radius: 10px;
             cursor: pointer;
             transition: 0.2s;
+            font-weight: 700;
         }
 
         #fullscreenBtn:hover {
-            background: #45a049;
+            background: #ffea00;
         }
 
+        /* Game Player */
         #player {
             width: 100%;
             height: 650px;
             background: black;
             margin-top: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 4px solid #00eaff;
         }
     </style>
 </head>
 
 <body>
 
-<header>Papa's Games Hub</header>
+<nav>
+    <h1>Papa's Games Hub</h1>
+</nav>
 
 <div id="games"></div>
 
@@ -88,7 +111,7 @@
 
 <div id="player"></div>
 
-<!-- IMPORTANT: These filenames match your real folder -->
+<!-- Matches your actual Ruffle folder -->
 <script src="ruffle/web.ruffle.js"></script>
 <script src="script.js"></script>
 
