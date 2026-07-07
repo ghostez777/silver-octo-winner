@@ -2,84 +2,84 @@
   {
     "id": "pizzeria",
     "title": "Papa's Pizzeria",
-    "url": "ruffle/loader.html?game=papas_pizzeria.swf"
+    "url": "ruffle/loader.html?game=papaspizzeria.swf"
   },
   {
     "id": "burgeria",
     "title": "Papa's Burgeria",
-    "url": "ruffle/loader.html?game=papas_burgeria.swf"
+    "url": "ruffle/loader.html?game=papasburgeria.swf"
   },
   {
     "id": "tacomia",
     "title": "Papa's Taco Mia",
-    "url": "ruffle/loader.html?game=papas_tacomia.swf"
+    "url": "ruffle/loader.html?game=papastacomia.swf"
   },
   {
     "id": "freezeria",
     "title": "Papa's Freezeria",
-    "url": "ruffle/loader.html?game=papas_freezeria.swf"
+    "url": "ruffle/loader.html?game=papasfreezeria.swf"
   },
   {
     "id": "pancakeria",
     "title": "Papa's Pancakeria",
-    "url": "ruffle/loader.html?game=papas_pancakeria.swf"
+    "url": "ruffle/loader.html?game=papaspancakeria.swf"
   },
   {
     "id": "wingeria",
     "title": "Papa's Wingeria",
-    "url": "ruffle/loader.html?game=papas_wingeria.swf"
+    "url": "ruffle/loader.html?game=papaswingeria.swf"
   },
   {
     "id": "hotdoggeria",
     "title": "Papa's Hot Doggeria",
-    "url": "ruffle/loader.html?game=papas_hotdoggeria.swf"
+    "url": "ruffle/loader.html?game=papashotdoggeria.swf"
   },
   {
     "id": "cupcakeria",
     "title": "Papa's Cupcakeria",
-    "url": "ruffle/loader.html?game=papas_cupcakeria.swf"
+    "url": "ruffle/loader.html?game=papascupcakeria.swf"
   },
   {
     "id": "pastaria",
     "title": "Papa's Pastaria",
-    "url": "ruffle/loader.html?game=papas_pastaria.swf"
+    "url": "ruffle/loader.html?game=papaspastaria.swf"
   },
   {
     "id": "donuteria",
     "title": "Papa's Donuteria",
-    "url": "ruffle/loader.html?game=papas_donuteria.swf"
+    "url": "ruffle/loader.html?game=papasdonuteria.swf"
   },
   {
     "id": "cheeseria",
     "title": "Papa's Cheeseria",
-    "url": "ruffle/loader.html?game=papas_cheeseria.swf"
+    "url": "ruffle/loader.html?game=papascheeseria_102.swf"
   },
   {
     "id": "bakeria",
     "title": "Papa's Bakeria",
-    "url": "ruffle/loader.html?game=papas_bakeria.swf"
+    "url": "ruffle/loader.html?game=papasbakeria.swf"
   },
   {
     "id": "sushiria",
     "title": "Papa's Sushiria",
-    "url": "ruffle/loader.html?game=papas_sushiria.swf"
+    "url": "ruffle/loader.html?game=papassushiria.swf"
   },
 
   /* Papa Louie platformers */
   {
     "id": "papa-louie-1",
     "title": "Papa Louie: When Pizzas Attack",
-    "url": "ruffle/loader.html?game=papa_louie_1.swf"
+    "url": "ruffle/loader.html?game=papalouie1.swf"
   },
   {
     "id": "papa-louie-2",
     "title": "Papa Louie 2: When Burgers Attack",
-    "url": "ruffle/loader.html?game=papa_louie_2.swf"
+    "url": "ruffle/loader.html?game=papalouie2.swf"
   },
   {
     "id": "papa-louie-3",
     "title": "Papa Louie 3: When Sundaes Attack",
-    "url": "ruffle/loader.html?game=papa_louie_3.swf"
+    "url": "ruffle/loader.html?game=papalouie3.swf"
   },
 
   /* Jacksmith */
@@ -88,4 +88,5 @@
     "title": "Jacksmith",
     "url": "ruffle/loader.html?game=jacksmith.swf"
   }
-]
+]  
+
