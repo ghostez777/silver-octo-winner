@@ -1,5 +1,5 @@
 [
-  { "id": "pizzeria", "name": "Papa's Pizzeria", "file": "games/papaspizzeria.swf", "thumb": "thumbs/papaspizzeria.png" },
+  { "id": "pizzeria", "name": "Papa's Pizzeria", "file": "games/papaspizzeria_v2.swf", "thumb": "thumbs/papaspizzeria.png" },
   { "id": "burgeria", "name": "Papa's Burgeria", "file": "games/papasburgeria.swf", "thumb": "thumbs/papasburgeria.png" },
   { "id": "tacomia", "name": "Papa's Taco Mia", "file": "games/papastacomia.swf", "thumb": "thumbs/papastacomia.png" },
   { "id": "freezeria", "name": "Papa's Freezeria", "file": "games/papasfreezeria.swf", "thumb": "thumbs/papasfreezeria.png" },
@@ -9,8 +9,8 @@
   { "id": "cupcakeria", "name": "Papa's Cupcakeria", "file": "games/papascupcakeria.swf", "thumb": "thumbs/papascupcakeria.png" },
   { "id": "pastaria", "name": "Papa's Pastaria", "file": "games/papaspastaria.swf", "thumb": "thumbs/papaspastaria.png" },
   { "id": "donuteria", "name": "Papa's Donuteria", "file": "games/papasdonuteria.swf", "thumb": "thumbs/papasdonuteria.png" },
-  { "id": "cheeseria", "name": "Papa's Cheeseria", "file": "games/papascheeseria.swf", "thumb": "thumbs/papascheeseria.png" },
+  { "id": "cheeseria", "name": "Papa's Cheeseria", "file": "games/papascheeseria_102.swf", "thumb": "thumbs/papascheeseria.png" },
   { "id": "bakeria", "name": "Papa's Bakeria", "file": "games/papasbakeria.swf", "thumb": "thumbs/papasbakeria.png" },
   { "id": "sushiria", "name": "Papa's Sushiria", "file": "games/papassushiria.swf", "thumb": "thumbs/papassushiria.png" },
-  { "id": "scooperia", "name": "Papa's Scooperia", "file": "games/papasscooperia.swf", "thumb": "thumbs/papasscooperia.png" }
+  { "id": "scooperia", "name": "Papa's Scooperia", "file": "games/papasscooperia_v102.swf", "thumb": "thumbs/papasscooperia.png" }
 ]
