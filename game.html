@@ -25,6 +25,9 @@ const ruffle = window.RufflePlayer.newest();
 
 const player = ruffle.createPlayer();
 
+<button id="fullscreenBtn">⛶ Fullscreen</button>
+
+<div id="player"></div>
 document.getElementById("player").appendChild(player);
 
 player.load("games/" + game);
