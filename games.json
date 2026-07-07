@@ -2,7 +2,7 @@
   {
     "id": "pizzeria",
     "title": "Papa's Pizzeria",
-    "url": "ruffle/loader.html?game=papaspizzeria.swf"
+    "url": "ruffle/loader.html?game=papaspizzeria_v2.swf"
   },
   {
     "id": "burgeria",
@@ -64,6 +64,11 @@
     "title": "Papa's Sushiria",
     "url": "ruffle/loader.html?game=papassushiria.swf"
   },
+  {
+    "id": "scooperia",
+    "title": "Papa's Scooperia",
+    "url": "ruffle/loader.html?game=papasscooperia_v102.swf"
+  },
 
   /* Papa Louie platformers */
   {
@@ -86,6 +91,10 @@
   {
     "id": "jacksmith",
     "title": "Jacksmith",
+    "url": "ruffle/loader.html?game=jacksmith.swf"
+  }
+]
+
     "url": "ruffle/loader.html?game=jacksmith.swf"
   }
 ]  
