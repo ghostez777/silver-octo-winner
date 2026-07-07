@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Play</title>
+
+<script src="ruffle/ruffle.js"></script>
+
+</head>
+
+<body>
+
+<div id="player"></div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+
+const game = params.get("game");
+
+const ruffle = window.RufflePlayer.newest();
+
+const player = ruffle.createPlayer();
+
+document.getElementById("player").appendChild(player);
+
+player.load("games/" + game);
+
+</script>
+
+</body>
+
+</html>
