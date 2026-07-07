@@ -1,0 +1,12 @@
+[
+  {
+    "title":"Papa's Freezeria",
+    "file":"papas-freezeria.swf",
+    "image":"assets/thumbnails/freezeria.png"
+  },
+  {
+    "title":"Papa's Pizzeria",
+    "file":"papas-pizzeria.swf",
+    "image":"assets/thumbnails/pizzeria.png"
+  }
+]
