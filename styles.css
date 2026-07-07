@@ -46,4 +46,27 @@ header{
     background:#ff9800;
     color:white;
     text-decoration:none;
+#fullscreenBtn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #ff9800;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 1000;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+#fullscreenBtn:hover {
+    background: #ffb74d;
+    transform: scale(1.05);
+}
+
+#player {
+    width: 100vw;
+    height: 100vh;
 }
