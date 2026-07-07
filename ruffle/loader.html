@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Game Loader</title>
+  <script src="ruffle.js"></script>
+  <style>
+    body, html {
+      margin: 0;
+      height: 100%;
+      background: black;
+    }
+    #game {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="game"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const gameFile = params.get("game");
+
+    if (gameFile) {
+      const ruffle = window.RufflePlayer.newest();
+      const player = ruffle.createPlayer();
+      document.getElementById("game").appendChild(player);
+      player.load(`../games/${gameFile}`);
+    }
+  </script>
+</body>
+</html>
