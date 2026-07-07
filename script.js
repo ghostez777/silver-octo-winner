@@ -50,3 +50,4 @@ function goFullscreen() {
 document.getElementById("fullscreenBtn").onclick = goFullscreen;
 
 loadGames();
+
