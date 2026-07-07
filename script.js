@@ -7,7 +7,6 @@ const fullscreenBtn = document.getElementById("fullscreen-btn");
 let games = [];
 let currentGame = null;
 
-// Load games.json
 async function loadGames() {
   try {
     const res = await fetch("games.json");
@@ -19,19 +18,28 @@ async function loadGames() {
   }
 }
 
-// Build sidebar list
 function renderGameList() {
   gameListEl.innerHTML = "";
   games.forEach((game) => {
     const li = document.createElement("li");
-    li.textContent = game.title;
     li.dataset.id = game.id;
+
+    // Thumbnail
+    const img = document.createElement("img");
+    img.src = `thumbnails/${game.id}.png`;
+    img.className = "game-thumb";
+
+    const title = document.createElement("span");
+    title.textContent = game.title;
+
+    li.appendChild(img);
+    li.appendChild(title);
+
     li.addEventListener("click", () => selectGame(game.id));
     gameListEl.appendChild(li);
   });
 }
 
-// Load selected game
 function selectGame(id) {
   const game = games.find((g) => g.id === id);
   if (!game) return;
@@ -40,30 +48,22 @@ function selectGame(id) {
   gameTitleEl.textContent = game.title;
   gameFrame.src = game.url;
 
-  // highlight active game
   [...gameListEl.children].forEach((li) => {
     li.classList.toggle("active", li.dataset.id === id);
   });
 }
 
-// Refresh button
 refreshBtn.addEventListener("click", () => {
   if (!currentGame || !gameFrame.src) return;
   gameFrame.src = gameFrame.src;
 });
 
-// Fullscreen button
 fullscreenBtn.addEventListener("click", () => {
   const iframe = document.getElementById("game-frame");
 
-  if (iframe.requestFullscreen) {
-    iframe.requestFullscreen();
-  } else if (iframe.webkitRequestFullscreen) {
-    iframe.webkitRequestFullscreen();
-  } else if (iframe.msRequestFullscreen) {
-    iframe.msRequestFullscreen();
-  }
+  if (iframe.requestFullscreen) iframe.requestFullscreen();
+  else if (iframe.webkitRequestFullscreen) iframe.webkitRequestFullscreen();
+  else if (iframe.msRequestFullscreen) iframe.msRequestFullscreen();
 });
 
-// Start
 loadGames();
