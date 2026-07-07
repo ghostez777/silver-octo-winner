@@ -69,8 +69,6 @@
     "title": "Papa's Scooperia",
     "url": "ruffle/loader.html?game=papasscooperia_v102.swf"
   },
-
-  /* Papa Louie platformers */
   {
     "id": "papa-louie-1",
     "title": "Papa Louie: When Pizzas Attack",
@@ -86,16 +84,9 @@
     "title": "Papa Louie 3: When Sundaes Attack",
     "url": "ruffle/loader.html?game=papalouie3.swf"
   },
-
-  /* Jacksmith */
   {
     "id": "jacksmith",
     "title": "Jacksmith",
     "url": "ruffle/loader.html?game=jacksmith.swf"
   }
 ]
-
-    "url": "ruffle/loader.html?game=jacksmith.swf"
-  }
-]  
-
