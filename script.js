@@ -7,6 +7,7 @@ const fullscreenBtn = document.getElementById("fullscreen-btn");
 let games = [];
 let currentGame = null;
 
+// Load games.json
 async function loadGames() {
   try {
     const res = await fetch("games.json");
@@ -18,6 +19,7 @@ async function loadGames() {
   }
 }
 
+// Build sidebar list
 function renderGameList() {
   gameListEl.innerHTML = "";
   games.forEach((game) => {
@@ -29,6 +31,7 @@ function renderGameList() {
   });
 }
 
+// Load selected game
 function selectGame(id) {
   const game = games.find((g) => g.id === id);
   if (!game) return;
@@ -37,26 +40,17 @@ function selectGame(id) {
   gameTitleEl.textContent = game.title;
   gameFrame.src = game.url;
 
-  // highlight active
+  // highlight active game
   [...gameListEl.children].forEach((li) => {
     li.classList.toggle("active", li.dataset.id === id);
   });
 }
 
+// Refresh button
 refreshBtn.addEventListener("click", () => {
   if (!currentGame || !gameFrame.src) return;
   gameFrame.src = gameFrame.src;
 });
 
-fullscreenBtn.addEventListener("click", () => {
-  const wrapper = document.querySelector(".game-frame-wrapper");
-  if (!document.fullscreenElement) {
-    wrapper.requestFullscreen().catch((err) => {
-      console.error("Fullscreen error:", err);
-    });
-  } else {
-    document.exitFullscreen();
-  }
-});
-
-loadGames();
+// Fullscreen button
+fullscreen
