@@ -1,0 +1,116 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  background: #111;
+  color: #eee;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  padding: 1rem;
+  background: #222;
+  text-align: center;
+  border-bottom: 1px solid #333;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 260px;
+  max-width: 40%;
+  background: #181818;
+  border-right: 1px solid #333;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.sidebar h2 {
+  margin-bottom: 0.75rem;
+}
+
+#game-list {
+  list-style: none;
+}
+
+#game-list li {
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.25rem;
+  background: #222;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#game-list li:hover {
+  background: #333;
+}
+
+#game-list li.active {
+  background: #3b82f6;
+  color: #fff;
+}
+
+.game-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  gap: 0.5rem;
+}
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+button {
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  background: #3b82f6;
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+button:hover {
+  background: #2563eb;
+}
+
+.game-frame-wrapper {
+  flex: 1;
+  background: #000;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+#game-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+footer {
+  padding: 0.5rem 1rem;
+  background: #222;
+  font-size: 0.8rem;
+  text-align: center;
+  border-top: 1px solid #333;
+}
