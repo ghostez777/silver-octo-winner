@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,23 +7,327 @@
     <title>Papa's Games</title>
 
     <link rel="stylesheet" href="style.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-<header>
-    <h1>Papa's Games</h1>
+<nav class="navbar">
+    <div class="logo">
+        🍔 Papa's Games
+    </div>
+
+    <div class="nav-links">
+        <a href="#">Home</a>
+        <a href="#games">Games</a>
+        <a href="#">About</a>
+    </div>
+</nav>
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <h1>Play Every Papa's Game</h1>
+
+        <p>
+            Enjoy every Papa's restaurant game directly in your browser with
+            Ruffle. Fast, modern, and mobile friendly.
+        </p>
+
+        <a href="#games" class="play-button">
+            Browse Games
+        </a>
+
+    </div>
+
+</section>
+
+<section class="search-section">
 
     <input
-        type="search"
         id="search"
-        placeholder="Search games..."
+        type="text"
+        placeholder="🔍 Search games..."
     >
-</header>
 
-<main id="games"></main>
+</section>
+
+<section class="games-section">
+
+    <h2>All Games</h2>
+
+    <div id="games" class="games-grid">
+        <!-- Cards are loaded by script.js -->
+    </div>
+
+</section>
+
+<footer>
+
+    <p>Made with ❤️ using Ruffle</p>
+
+</footer>
 
 <script src="script.js"></script>
 
 </body>
 </html>
+```
+
+---
+
+```css
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;
+}
+
+body{
+    background:#0f172a;
+    color:white;
+}
+
+.navbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:20px 8%;
+    background:rgba(15,23,42,.75);
+    backdrop-filter:blur(12px);
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+
+.logo{
+    font-size:28px;
+    font-weight:800;
+}
+
+.nav-links{
+    display:flex;
+    gap:30px;
+}
+
+.nav-links a{
+    color:white;
+    text-decoration:none;
+    transition:.3s;
+}
+
+.nav-links a:hover{
+    color:#38bdf8;
+}
+
+.hero{
+
+    min-height:70vh;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+
+    background:
+    radial-gradient(circle at top,#2563eb,#0f172a);
+
+    padding:40px;
+}
+
+.hero h1{
+    font-size:64px;
+    font-weight:800;
+}
+
+.hero p{
+    margin-top:20px;
+    font-size:20px;
+    color:#cbd5e1;
+}
+
+.play-button{
+
+    display:inline-block;
+
+    margin-top:35px;
+
+    padding:16px 34px;
+
+    border-radius:50px;
+
+    background:#3b82f6;
+
+    color:white;
+
+    text-decoration:none;
+
+    font-weight:700;
+
+    transition:.3s;
+}
+
+.play-button:hover{
+
+    transform:translateY(-4px);
+
+    background:#2563eb;
+
+}
+
+.search-section{
+
+    padding:40px 8%;
+
+}
+
+#search{
+
+    width:100%;
+
+    max-width:700px;
+
+    display:block;
+
+    margin:auto;
+
+    padding:18px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:#1e293b;
+
+    color:white;
+
+    font-size:18px;
+
+}
+
+.games-section{
+
+    padding:60px 8%;
+
+}
+
+.games-section h2{
+
+    margin-bottom:35px;
+
+    font-size:34px;
+
+}
+
+.games-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+
+    gap:28px;
+
+}
+
+.card{
+
+    background:#1e293b;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    transition:.3s;
+
+    box-shadow:0 8px 25px rgba(0,0,0,.25);
+
+}
+
+.card:hover{
+
+    transform:translateY(-8px);
+
+}
+
+.card img{
+
+    width:100%;
+
+    height:180px;
+
+    object-fit:cover;
+
+}
+
+.card h3{
+
+    padding:18px;
+
+    font-size:22px;
+
+}
+
+.card a{
+
+    display:block;
+
+    margin:0 18px 18px;
+
+    text-align:center;
+
+    background:#3b82f6;
+
+    padding:14px;
+
+    border-radius:12px;
+
+    color:white;
+
+    text-decoration:none;
+
+    font-weight:700;
+
+}
+
+.card a:hover{
+
+    background:#2563eb;
+
+}
+
+footer{
+
+    padding:50px;
+
+    text-align:center;
+
+    color:#94a3b8;
+
+}
+
+@media(max-width:768px){
+
+.hero h1{
+
+font-size:42px;
+
+}
+
+.nav-links{
+
+display:none;
+
+}
+
+.games-section{
+
+padding:40px 20px;
+
+}
+
+}
+```
