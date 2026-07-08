@@ -10,6 +10,7 @@
   { "id": "pastaria", "name": "Papa's Pastaria", "file": "games/papaspastaria.swf", "thumb": "thumbs/papaspastaria.png" },
   { "id": "donuteria", "name": "Papa's Donuteria", "file": "games/papasdonuteria.swf", "thumb": "thumbs/papasdonuteria.png" },
   { "id": "cheeseria", "name": "Papa's Cheeseria", "file": "games/papascheeseria_102.swf", "thumb": "thumbs/papascheeseria.png" },
+  { "id": "TBOI", "name": "Binding Of Isaac", "file": "games/TBOI.swf", "thumb": "thumbs/TBOI.png" },
   { "id": "bakeria", "name": "Papa's Bakeria", "file": "games/papasbakeria.swf", "thumb": "thumbs/papasbakeria.png" },
   { "id": "sushiria", "name": "Papa's Sushiria", "file": "games/papassushiria.swf", "thumb": "thumbs/papassushiria.png" },
   { "id": "scooperia", "name": "Papa's Scooperia", "file": "games/papasscooperia_v102.swf", "thumb": "thumbs/papasscooperia.png" }
