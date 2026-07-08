@@ -1,5 +1,8 @@
+let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+
 async function loadGames() {
     const container = document.getElementById("games");
+    const favContainer = document.getElementById("favorites");
 
     try {
         const res = await fetch("games.json");
@@ -7,18 +10,16 @@ async function loadGames() {
 
         const games = await res.json();
         container.innerHTML = "";
+        favContainer.innerHTML = "";
 
         games.forEach(game => {
-            const div = document.createElement("div");
-            div.className = "game";
+            const card = createGameCard(game);
+            container.appendChild(card);
 
-            div.innerHTML = `
-                <img src="${game.thumb}" alt="${game.name}">
-                <h3>${game.name}</h3>
-            `;
-
-            div.addEventListener("click", () => openPopup(game.file));
-            container.appendChild(div);
+            if (favorites.includes(game.id)) {
+                const favCard = createGameCard(game);
+                favContainer.appendChild(favCard);
+            }
         });
 
         setupSearch(games);
@@ -30,13 +31,51 @@ async function loadGames() {
     }
 }
 
-/* Popup launcher – fullscreen-sized */
-function openPopup(file) {
-    const modal = document.getElementById("gameModal");
-    const modalPlayer = document.getElementById("modalPlayer");
+/* ⭐ Create Game Card */
+function createGameCard(game) {
+    const div = document.createElement("div");
+    div.className = "game";
 
-    modal.style.display = "block";
-    modalPlayer.innerHTML = "";
+    div.innerHTML = `
+        <img src="${game.thumb}" alt="${game.name}">
+        <h3>${game.name}</h3>
+    `;
+
+    // ⭐ Favorite star
+    const star = document.createElement("div");
+    star.className = "favoriteBtn";
+    star.innerHTML = favorites.includes(game.id) ? "⭐" : "☆";
+    if (!favorites.includes(game.id)) star.classList.add("inactive");
+
+    star.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleFavorite(game.id);
+    });
+
+    div.appendChild(star);
+
+    // Load game into embedded player
+    div.addEventListener("click", () => loadGame(game.file));
+
+    return div;
+}
+
+/* ⭐ Toggle Favorites */
+function toggleFavorite(id) {
+    if (favorites.includes(id)) {
+        favorites = favorites.filter(f => f !== id);
+    } else {
+        favorites.push(id);
+    }
+
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+    loadGames(); // refresh UI
+}
+
+/* ⭐ Load game into embedded player */
+function loadGame(file) {
+    const playerContainer = document.getElementById("player");
+    playerContainer.innerHTML = "";
 
     try {
         const ruffle = window.RufflePlayer.newest();
@@ -45,28 +84,17 @@ function openPopup(file) {
         player.style.width = "100%";
         player.style.height = "100%";
 
-        modalPlayer.appendChild(player);
-
-        player.load(file).catch(err => {
-            console.error("Ruffle load error:", err);
-            modalPlayer.innerHTML =
-                "<p style='color:white;text-align:center;padding-top:40px;'>Failed to load game.</p>";
-        });
+        playerContainer.appendChild(player);
+        player.load(file);
 
     } catch (error) {
         console.error("Ruffle error:", error);
-        modalPlayer.innerHTML =
-            "<p style='color:white;text-align:center;padding-top:40px;'>Error starting Ruffle.</p>";
+        playerContainer.innerHTML =
+            "<p style='color:white;text-align:center;padding-top:40px;'>Error loading game.</p>";
     }
 }
 
-/* Close popup */
-document.getElementById("closeModal").onclick = () => {
-    document.getElementById("gameModal").style.display = "none";
-    document.getElementById("modalPlayer").innerHTML = "";
-};
-
-/* Fullscreen button */
+/* ⭐ Fullscreen */
 function goFullscreen() {
     const rufflePlayer = document.querySelector("ruffle-player");
 
@@ -86,7 +114,7 @@ function goFullscreen() {
 
 document.getElementById("fullscreenBtn").addEventListener("click", goFullscreen);
 
-/* Search bar */
+/* ⭐ Search */
 function setupSearch(games) {
     const search = document.getElementById("search");
     const container = document.getElementById("games");
@@ -98,16 +126,8 @@ function setupSearch(games) {
         games
             .filter(g => g.name.toLowerCase().includes(term))
             .forEach(game => {
-                const div = document.createElement("div");
-                div.className = "game";
-
-                div.innerHTML = `
-                    <img src="${game.thumb}" alt="${game.name}">
-                    <h3>${game.name}</h3>
-                `;
-
-                div.addEventListener("click", () => openPopup(game.file));
-                container.appendChild(div);
+                const card = createGameCard(game);
+                container.appendChild(card);
             });
     });
 }
