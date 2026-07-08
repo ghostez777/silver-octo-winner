@@ -10,25 +10,13 @@
   { "id": "pastaria", "name": "Papa's Pastaria", "file": "games/papaspastaria.swf", "thumb": "thumbs/papaspastaria.png" },
   { "id": "donuteria", "name": "Papa's Donuteria", "file": "games/papasdonuteria.swf", "thumb": "thumbs/papasdonuteria.png" },
   { "id": "cheeseria", "name": "Papa's Cheeseria", "file": "games/papascheeseria_102.swf", "thumb": "thumbs/papascheeseria.png" },
-  {
-  "id": "html_minesweeper",
-  "name": "Minesweeper",
-  "thumb": "thumbs/minesweeper.png",
-  "html": "games/minesweeper/index.html"
-},
-{
-  "id": "html_nonogram",
-  "name": "Nonogram",
-  "thumb": "thumbs/nonogram.png",
-  "html": "games/nonogram/index.html"
-}
-
+  { "id": "html_minesweeper", "name": "Minesweeper", "thumb": "thumbs/minesweeper.png", "html": "games/minesweeper/index.html"},
+  { "id": "html_nonogram", "name": "Nonogram", "thumb": "thumbs/nonogram.png", "html": "games/nonogram/index.html"},
+  { "id": "html_wallsmash", "name": "Wallsmash", "thumb": "thumbs/wallsmash.png", "html": "games/wallsmash/index.html"},
   { "id": "tboi", "name": "The Binding of Isaac", "file": "games/TBOI.swf", "thumb": "thumbs/TBOI.png" },
-
   { "id": "bakeria", "name": "Papa's Bakeria", "file": "games/papasbakeria.swf", "thumb": "thumbs/papasbakeria.png" },
   { "id": "sushiria", "name": "Papa's Sushiria", "file": "games/papassushiria.swf", "thumb": "thumbs/papassushiria.png" },
   { "id": "scooperia", "name": "Papa's Scooperia", "file": "games/papasscooperia_v102.swf", "thumb": "thumbs/papasscooperia.png" },
-
   { "id": "btd1", "name": "Bloons Tower Defense", "file": "games/btd1.swf", "thumb": "thumbs/btd1.png" },
   { "id": "btd2", "name": "Bloons Tower Defense 2", "file": "games/btd2.swf", "thumb": "thumbs/btd2.png" },
   { "id": "btd3", "name": "Bloons Tower Defense 3", "file": "games/btd3.swf", "thumb": "thumbs/btd3.png" },
