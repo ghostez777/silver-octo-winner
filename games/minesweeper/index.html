@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Minesweeper</title>
+<style>
+    body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        background: #0f172a;
+        color: #e5e7eb;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 100vh;
+    }
+    h1 {
+        margin: 20px 0 10px;
+    }
+    #board {
+        display: grid;
+        gap: 2px;
+        margin-top: 10px;
+        touch-action: manipulation;
+    }
+    .cell {
+        width: 32px;
+        height: 32px;
+        background: #1f2937;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        cursor: pointer;
+        user-select: none;
+    }
+    .cell.revealed {
+        background: #374151;
+    }
+    .cell.mine {
+        background: #b91c1c;
+    }
+    #controls {
+        margin-top: 10px;
+    }
+    button {
+        padding: 8px 14px;
+        border-radius: 6px;
+        border: none;
+        background: #3b82f6;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    button:hover {
+        background: #2563eb;
+    }
+</style>
+</head>
+<body>
+
+<h1>Minesweeper</h1>
+<div id="controls">
+    <button id="resetBtn">New Game</button>
+</div>
+<div id="board"></div>
+
+<script>
+const rows = 10;
+const cols = 10;
+const minesCount = 15;
+let board = [];
+let minePositions = [];
+
+function createBoard() {
+    board = [];
+    minePositions = [];
+    const boardEl = document.getElementById('board');
+    boardEl.innerHTML = '';
+    boardEl.style.gridTemplateColumns = `repeat(${cols}, 32px)`;
+
+    // Place mines
+    while (minePositions.length < minesCount) {
+        const r = Math.floor(Math.random() * rows);
+        const c = Math.floor(Math.random() * cols);
+        const key = `${r},${c}`;
+        if (!minePositions.includes(key)) {
+            minePositions.push(key);
+        }
+    }
+
+    for (let r = 0; r < rows; r++) {
+        const row = [];
+        for (let c = 0; c < cols; c++) {
+            const cell = {
+                r,
+                c,
+                mine: minePositions.includes(`${r},${c}`),
+                revealed: false,
+                element: null
+            };
+            const div = document.createElement('div');
+            div.className = 'cell';
+            div.dataset.r = r;
+            div.dataset.c = c;
+
+            const handler = () => revealCell(r, c);
+            div.addEventListener('click', handler);
+            div.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                handler();
+            });
+
+            cell.element = div;
+            row.push(cell);
+            boardEl.appendChild(div);
+        }
+        board.push(row);
+    }
+}
+
+function getNeighbors(r, c) {
+    const neighbors = [];
+    for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+            if (dr === 0 && dc === 0) continue;
+            const nr = r + dr;
+            const nc = c + dc;
+            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                neighbors.push(board[nr][nc]);
+            }
+        }
+    }
+    return neighbors;
+}
+
+function revealCell(r, c) {
+    const cell = board[r][c];
+    if (cell.revealed) return;
+    cell.revealed = true;
+    cell.element.classList.add('revealed');
+
+    if (cell.mine) {
+        cell.element.classList.add('mine');
+        cell.element.textContent = '💣';
+        revealAllMines();
+        alert('Game Over!');
+        return;
+    }
+
+    const neighbors = getNeighbors(r, c);
+    const minesAround = neighbors.filter(n => n.mine).length;
+    if (minesAround > 0) {
+        cell.element.textContent = minesAround;
+    } else {
+        neighbors.forEach(n => revealCell(n.r, n.c));
+    }
+}
+
+function revealAllMines() {
+    minePositions.forEach(pos => {
+        const [r, c] = pos.split(',').map(Number);
+        const cell = board[r][c];
+        cell.element.classList.add('mine', 'revealed');
+        cell.element.textContent = '💣';
+    });
+}
+
+document.getElementById('resetBtn').addEventListener('click', createBoard);
+
+createBoard();
+</script>
+
+</body>
+</html>
