@@ -21,6 +21,8 @@ async function loadGames() {
             container.appendChild(div);
         });
 
+        setupSearch(games);
+
     } catch (err) {
         console.error("Error loading games list:", err);
         container.innerHTML =
@@ -28,7 +30,7 @@ async function loadGames() {
     }
 }
 
-/* ⭐ Open popup modal and load game */
+/* ⭐ Popup Launcher */
 function openPopup(file) {
     const modal = document.getElementById("gameModal");
     const modalPlayer = document.getElementById("modalPlayer");
@@ -53,13 +55,13 @@ function openPopup(file) {
     }
 }
 
-/* ⭐ Close popup */
+/* ⭐ Close Popup */
 document.getElementById("closeModal").onclick = () => {
     document.getElementById("gameModal").style.display = "none";
     document.getElementById("modalPlayer").innerHTML = "";
 };
 
-/* ⭐ Fullscreen fix */
+/* ⭐ Fullscreen Fix */
 function goFullscreen() {
     const rufflePlayer = document.querySelector("ruffle-player");
 
@@ -78,5 +80,31 @@ function goFullscreen() {
 }
 
 document.getElementById("fullscreenBtn").addEventListener("click", goFullscreen);
+
+/* ⭐ Search Bar */
+function setupSearch(games) {
+    const search = document.getElementById("search");
+    const container = document.getElementById("games");
+
+    search.addEventListener("input", () => {
+        const term = search.value.toLowerCase();
+        container.innerHTML = "";
+
+        games
+            .filter(g => g.name.toLowerCase().includes(term))
+            .forEach(game => {
+                const div = document.createElement("div");
+                div.className = "game";
+
+                div.innerHTML = `
+                    <img src="${game.thumb}" alt="${game.name}">
+                    <h3>${game.name}</h3>
+                `;
+
+                div.addEventListener("click", () => openPopup(game.file));
+                container.appendChild(div);
+            });
+    });
+}
 
 loadGames();
