@@ -148,3 +148,29 @@ ruffle-player {
     width: 100% !important;
     height: 100% !important;
 }
+.sectionTitle {
+    margin: 20px 40px 10px;
+    font-size: 26px;
+    font-weight: 700;
+    color: #38bdf8;
+}
+
+/* Favorite star button */
+.favoriteBtn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 26px;
+    color: #facc15;
+    cursor: pointer;
+    transition: .2s;
+    text-shadow: 0 2px 6px rgba(0,0,0,.5);
+}
+
+.favoriteBtn:hover {
+    transform: scale(1.2);
+}
+
+.favoriteBtn.inactive {
+    color: rgba(255,255,255,0.4);
+}
