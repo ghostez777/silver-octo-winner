@@ -31,7 +31,7 @@ async function loadGames() {
     }
 }
 
-/* ⭐ Create Game Card */
+/* Create a game card (works for SWF + HTML) */
 function createGameCard(game) {
     const div = document.createElement("div");
     div.className = "game";
@@ -41,7 +41,7 @@ function createGameCard(game) {
         <h3>${game.name}</h3>
     `;
 
-    // ⭐ Favorite star
+    // Favorite star
     const star = document.createElement("div");
     star.className = "favoriteBtn";
     star.innerHTML = favorites.includes(game.id) ? "⭐" : "☆";
@@ -54,13 +54,13 @@ function createGameCard(game) {
 
     div.appendChild(star);
 
-    // Load game fullscreen
-    div.addEventListener("click", () => loadGame(game.file));
+    // Click to load game (SWF or HTML)
+    div.addEventListener("click", () => loadGame(game));
 
     return div;
 }
 
-/* ⭐ Toggle Favorites */
+/* Toggle favorites */
 function toggleFavorite(id) {
     if (favorites.includes(id)) {
         favorites = favorites.filter(f => f !== id);
@@ -72,48 +72,65 @@ function toggleFavorite(id) {
     loadGames(); // refresh UI
 }
 
-/* ⭐ Load game fullscreen */
-function loadGame(file) {
+/* Load game into fullscreen embedded player (SWF + HTML) */
+function loadGame(game) {
     const playerContainer = document.getElementById("player");
     const closeBtn = document.getElementById("closeGameBtn");
 
     playerContainer.style.display = "block";
     closeBtn.style.display = "block";
 
-    document.getElementById("games").style.display = "none";
-    document.getElementById("favorites").style.display = "none";
+    document.getElementById("games").style.display = "grid";
+    document.getElementById("favorites").style.display = "grid";
 
     playerContainer.innerHTML = "";
 
-    try {
-        const ruffle = window.RufflePlayer.newest();
-        const player = ruffle.createPlayer();
+    // HTML game → iframe
+    if (game.html) {
+        const iframe = document.createElement("iframe");
+        iframe.src = game.html;
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+        iframe.style.border = "none";
+        playerContainer.appendChild(iframe);
+        return;
+    }
 
-        player.style.width = "100%";
-        player.style.height = "100%";
+    // SWF game → Ruffle
+    if (game.file) {
+        try {
+            const ruffle = window.RufflePlayer.newest();
+            const player = ruffle.createPlayer();
 
-        playerContainer.appendChild(player);
-        player.load(file);
+            player.style.width = "100%";
+            player.style.height = "100%";
 
-    } catch (error) {
-        console.error("Ruffle error:", error);
-        playerContainer.innerHTML =
-            "<p style='color:white;text-align:center;padding-top:40px;'>Error loading game.</p>";
+            playerContainer.appendChild(player);
+            player.load(game.file);
+
+        } catch (error) {
+            console.error("Ruffle error:", error);
+            playerContainer.innerHTML =
+                "<p style='color:white;text-align:center;padding-top:40px;'>Error loading game.</p>";
+        }
     }
 }
 
-/* ⭐ Close Game */
+/* Close game and go back to list */
 document.getElementById("closeGameBtn").onclick = () => {
-    document.getElementById("player").style.display = "none";
-    document.getElementById("closeGameBtn").style.display = "none";
+    const playerContainer = document.getElementById("player");
+    const closeBtn = document.getElementById("closeGameBtn");
+
+    playerContainer.style.display = "none";
+    closeBtn.style.display = "none";
 
     document.getElementById("games").style.display = "grid";
     document.getElementById("favorites").style.display = "grid";
 
-    document.getElementById("player").innerHTML = "";
+    playerContainer.innerHTML = "";
 };
 
-/* ⭐ Search */
+/* Search bar */
 function setupSearch(games) {
     const search = document.getElementById("search");
     const container = document.getElementById("games");
@@ -125,7 +142,7 @@ function setupSearch(games) {
         games
             .filter(g => g.name.toLowerCase().includes(term))
             .forEach(game => {
-                const card = createGameCard(game);
+                const card = createGameCard(g);
                 container.appendChild(card);
             });
     });
