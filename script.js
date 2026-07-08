@@ -47,6 +47,20 @@ function goFullscreen() {
     }
 }
 
+function goFullscreen() {
+    const rufflePlayer = document.querySelector("ruffle-player");
+    if (!rufflePlayer) return;
+
+    if (rufflePlayer.requestFullscreen) {
+        rufflePlayer.requestFullscreen();
+    } else if (rufflePlayer.webkitRequestFullscreen) {
+        rufflePlayer.webkitRequestFullscreen();
+    } else if (rufflePlayer.msRequestFullscreen) {
+        rufflePlayer.msRequestFullscreen();
+    }
+}
+
+
 document.getElementById("fullscreenBtn").onclick = goFullscreen;
 
 loadGames();
