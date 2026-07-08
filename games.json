@@ -1,4 +1,12 @@
 [
+  
+{
+  "id": "test",
+  "name": "TEST GAME",
+  "file": "games/test.swf",
+  "thumb": "thumbs/test.png"
+},
+
   { "id": "pizzeria", "name": "Papa's Pizzeria", "file": "games/papaspizzeria_v2.swf", "thumb": "thumbs/papaspizzeria.png" },
   { "id": "burgeria", "name": "Papa's Burgeria", "file": "games/papasburgeria.swf", "thumb": "thumbs/papasburgeria.png" },
   { "id": "tacomia", "name": "Papa's Taco Mia", "file": "games/papastacomia.swf", "thumb": "thumbs/papastacomia.png" },
