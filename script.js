@@ -17,7 +17,9 @@ async function loadGames() {
                 <h3>${game.name}</h3>
             `;
 
+            // FIXED CLICK HANDLER
             div.addEventListener("click", () => openPopup(game.file));
+
             container.appendChild(div);
         });
 
