@@ -4,90 +4,7 @@
     <meta charset="UTF-8">
     <title>EzPzGhostez</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:400,700">
-
-    <style>
-        body {
-            font-family: Nunito, sans-serif;
-            background: #1e1e1e;
-            margin: 0;
-            padding: 0;
-            color: white;
-        }
-
-        nav {
-            background: #222;
-            padding: 15px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-        }
-
-        nav h1 {
-            margin: 0;
-            font-size: 28px;
-            color: #00eaff;
-            font-weight: 700;
-        }
-
-        #games {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 25px;
-            padding: 30px;
-        }
-
-        .game {
-            background: #2b2b2b;
-            border-radius: 15px;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.25s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            border: 3px solid #00eaff;
-        }
-
-        .game:hover {
-            transform: translateY(-8px) scale(1.05);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-            border-color: #ffea00;
-        }
-
-        .game img {
-            width: 100%;
-            border-radius: 12px;
-        }
-
-        .game h3 {
-            margin-top: 12px;
-            font-size: 20px;
-            color: #ffea00;
-        }
-
-        #fullscreenBtn {
-            margin: 20px auto;
-            display: block;
-            padding: 12px 25px;
-            font-size: 20px;
-            background: #00eaff;
-            color: black;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-weight: 700;
-        }
-
-        #fullscreenBtn:hover {
-            background: #ffea00;
-        }
-
-        #player {
-            width: 100%;
-            height: 100vh;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -98,11 +15,16 @@
 
 <div id="games"></div>
 
-<button id="fullscreenBtn">Fullscreen</button>
+<button id="fullscreenBtn">⛶</button>
 
-<div id="player"></div>
+<!-- Popup Game Launcher -->
+<div id="gameModal">
+    <div id="modalContent">
+        <span id="closeModal">&times;</span>
+        <div id="modalPlayer"></div>
+    </div>
+</div>
 
-<!-- IMPORTANT: This matches your real folder -->
 <script src="ruffle/web.ruffle.js"></script>
 <script src="script.js"></script>
 
