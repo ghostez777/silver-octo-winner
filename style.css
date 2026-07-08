@@ -108,15 +108,14 @@ nav h1 {
     transform: scale(1.2);
 }
 
-/* EMBEDDED PLAYER */
+/* EMBEDDED PLAYER — FULLSCREEN SIZE */
 #player {
-    width: 95%;
-    height: 85vh;
-    margin: 0 auto 40px;
+    width: 100%;
+    height: calc(100vh - 80px);
     background: black;
-    border-radius: 20px;
+    display: none;
+    border-radius: 0;
     overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0,0,0,.4);
 }
 
 ruffle-player {
@@ -124,27 +123,30 @@ ruffle-player {
     height: 100% !important;
 }
 
-/* FULLSCREEN BUTTON */
-#fullscreenBtn {
+/* CLOSE GAME BUTTON */
+#closeGameBtn {
     position: fixed;
-    bottom: 25px;
+    top: 90px;
     right: 25px;
 
-    width: 65px;
-    height: 65px;
+    width: 120px;
+    height: 50px;
 
     border: none;
-    border-radius: 50%;
-    background: #3b82f6;
+    border-radius: 12px;
+    background: #ef4444;
     color: white;
-    font-size: 26px;
+    font-size: 20px;
 
     cursor: pointer;
     transition: .25s;
     box-shadow: 0 10px 25px rgba(0,0,0,.4);
+
+    display: none;
 }
 
-#fullscreenBtn:hover {
-    background: #2563eb;
-    transform: scale(1.12);
+#closeGameBtn:hover {
+    background: #dc2626;
+    transform: scale(1.05);
 }
+
