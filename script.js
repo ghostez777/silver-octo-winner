@@ -3,13 +3,9 @@ async function loadGames() {
 
     try {
         const res = await fetch("games.json");
-
-        if (!res.ok) {
-            throw new Error(`HTTP ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const games = await res.json();
-
         container.innerHTML = "";
 
         games.forEach(game => {
@@ -17,13 +13,11 @@ async function loadGames() {
             div.className = "game";
 
             div.innerHTML = `
-                <img
-                    src="${game.thumb}"
-                    alt="${game.name}"
-           tener("click", () => {
-                loadGame(game.file);
-            });
+                <img src="${game.thumb}" alt="${game.name}">
+                <h3>${game.name}</h3>
+            `;
 
+            div.addEventListener("click", () => openPopup(game.file));
             container.appendChild(div);
         });
 
@@ -34,10 +28,13 @@ async function loadGames() {
     }
 }
 
-function loadGame(file) {
-    const playerContainer = document.getElementById("player");
+/* ⭐ Open popup modal and load game */
+function openPopup(file) {
+    const modal = document.getElementById("gameModal");
+    const modalPlayer = document.getElementById("modalPlayer");
 
-    playerContainer.innerHTML = "";
+    modal.style.display = "block";
+    modalPlayer.innerHTML = "";
 
     try {
         const ruffle = window.RufflePlayer.newest();
@@ -46,38 +43,23 @@ function loadGame(file) {
         player.style.width = "100%";
         player.style.height = "100%";
 
-        playerContainer.appendChild(player);
-
-        player.load(file).catch(error => {
-            console.error("Failed to load SWF:", file, error);
-
-            playerContainer.innerHTML = `
-                <div style="
-                    color:white;
-                    text-align:center;
-                    padding:40px;
-                    font-size:24px;">
-                    Failed to load game:<br>
-                    ${file}
-                </div>
-            `;
-        });
+        modalPlayer.appendChild(player);
+        player.load(file);
 
     } catch (error) {
-        console.error(error);
-
-        playerContainer.innerHTML = `
-            <div style="
-                color:red;
-                text-align:center;
-                padding:40px;
-                font-size:24px;">
-                Error starting Ruffle.
-            </div>
-        `;
+        console.error("Ruffle error:", error);
+        modalPlayer.innerHTML =
+            "<p style='color:white;text-align:center;'>Error loading game.</p>";
     }
 }
 
+/* ⭐ Close popup */
+document.getElementById("closeModal").onclick = () => {
+    document.getElementById("gameModal").style.display = "none";
+    document.getElementById("modalPlayer").innerHTML = "";
+};
+
+/* ⭐ Fullscreen fix */
 function goFullscreen() {
     const rufflePlayer = document.querySelector("ruffle-player");
 
@@ -95,8 +77,6 @@ function goFullscreen() {
     }
 }
 
-document
-    .getElementById("fullscreenBtn")
-    .addEventListener("click", goFullscreen);
+document.getElementById("fullscreenBtn").addEventListener("click", goFullscreen);
 
 loadGames();
