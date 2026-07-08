@@ -54,7 +54,7 @@ function createGameCard(game) {
 
     div.appendChild(star);
 
-    // Load game into embedded player
+    // Load game fullscreen
     div.addEventListener("click", () => loadGame(game.file));
 
     return div;
@@ -72,9 +72,17 @@ function toggleFavorite(id) {
     loadGames(); // refresh UI
 }
 
-/* ⭐ Load game into embedded player */
+/* ⭐ Load game fullscreen */
 function loadGame(file) {
     const playerContainer = document.getElementById("player");
+    const closeBtn = document.getElementById("closeGameBtn");
+
+    playerContainer.style.display = "block";
+    closeBtn.style.display = "block";
+
+    document.getElementById("games").style.display = "none";
+    document.getElementById("favorites").style.display = "none";
+
     playerContainer.innerHTML = "";
 
     try {
@@ -94,25 +102,16 @@ function loadGame(file) {
     }
 }
 
-/* ⭐ Fullscreen */
-function goFullscreen() {
-    const rufflePlayer = document.querySelector("ruffle-player");
+/* ⭐ Close Game */
+document.getElementById("closeGameBtn").onclick = () => {
+    document.getElementById("player").style.display = "none";
+    document.getElementById("closeGameBtn").style.display = "none";
 
-    if (!rufflePlayer) {
-        alert("Load a game first.");
-        return;
-    }
+    document.getElementById("games").style.display = "grid";
+    document.getElementById("favorites").style.display = "grid";
 
-    if (rufflePlayer.requestFullscreen) {
-        rufflePlayer.requestFullscreen();
-    } else if (rufflePlayer.webkitRequestFullscreen) {
-        rufflePlayer.webkitRequestFullscreen();
-    } else if (rufflePlayer.msRequestFullscreen) {
-        rufflePlayer.msRequestFullscreen();
-    }
-}
-
-document.getElementById("fullscreenBtn").addEventListener("click", goFullscreen);
+    document.getElementById("player").innerHTML = "";
+};
 
 /* ⭐ Search */
 function setupSearch(games) {
