@@ -35,18 +35,7 @@ function loadGame(file) {
     playerInstance.load(file);
 }
 
-function goFullscreen() {
-    const player = document.getElementById("player");
-
-    if (player.requestFullscreen) {
-        player.requestFullscreen();
-    } else if (player.webkitRequestFullscreen) {
-        player.webkitRequestFullscreen();
-    } else if (player.msRequestFullscreen) {
-        player.msRequestFullscreen();
-    }
-}
-
+/* ⭐ FIXED FULLSCREEN — fullscreen the actual Ruffle player */
 function goFullscreen() {
     const rufflePlayer = document.querySelector("ruffle-player");
     if (!rufflePlayer) return;
@@ -59,7 +48,6 @@ function goFullscreen() {
         rufflePlayer.msRequestFullscreen();
     }
 }
-
 
 document.getElementById("fullscreenBtn").onclick = goFullscreen;
 
