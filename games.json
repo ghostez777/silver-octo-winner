@@ -10,6 +10,18 @@
   { "id": "pastaria", "name": "Papa's Pastaria", "file": "games/papaspastaria.swf", "thumb": "thumbs/papaspastaria.png" },
   { "id": "donuteria", "name": "Papa's Donuteria", "file": "games/papasdonuteria.swf", "thumb": "thumbs/papasdonuteria.png" },
   { "id": "cheeseria", "name": "Papa's Cheeseria", "file": "games/papascheeseria_102.swf", "thumb": "thumbs/papascheeseria.png" },
+  {
+  "id": "html_minesweeper",
+  "name": "Minesweeper",
+  "thumb": "thumbs/minesweeper.png",
+  "html": "games/minesweeper/index.html"
+},
+{
+  "id": "html_nonogram",
+  "name": "Nonogram",
+  "thumb": "thumbs/nonogram.png",
+  "html": "games/nonogram/index.html"
+}
 
   { "id": "tboi", "name": "The Binding of Isaac", "file": "games/TBOI.swf", "thumb": "thumbs/TBOI.png" },
 
