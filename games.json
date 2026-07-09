@@ -14,6 +14,7 @@
   { "id": "html_nonogram", "name": "Nonogram", "thumb": "thumbs/nonogram.png", "html": "games/nonogram/index.html"},
   { "id": "html_wallsmash", "name": "Wallsmash", "thumb": "thumbs/wallsmash.png", "html": "games/wallsmash/index.html"},
   { "id": "tboi", "name": "The Binding of Isaac", "file": "games/TBOI.swf", "thumb": "thumbs/TBOI.png" },
+  { "id": "Happywheels", "name": "HappyWheels", "file": "games/happywheels.swf", "thumb": "thumbs/happywheels.png" },
   { "id": "bakeria", "name": "Papa's Bakeria", "file": "games/papasbakeria.swf", "thumb": "thumbs/papasbakeria.png" },
   { "id": "sushiria", "name": "Papa's Sushiria", "file": "games/papassushiria.swf", "thumb": "thumbs/papassushiria.png" },
   { "id": "scooperia", "name": "Papa's Scooperia", "file": "games/papasscooperia_v102.swf", "thumb": "thumbs/papasscooperia.png" },
