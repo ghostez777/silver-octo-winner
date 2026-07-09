@@ -108,7 +108,7 @@ function toggleFavorite(id) {
     loadGames();
 }
 
-function loadGame(game) {
+async function loadGame(game) {
 
     const player =
         document.getElementById("player");
@@ -128,22 +128,36 @@ function loadGame(game) {
 
         iframe.src = game.html;
         iframe.style.border = "none";
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
 
         player.appendChild(iframe);
         return;
     }
 
     if (game.file) {
+        try {
+            // Wait for Ruffle to be available
+            let attempts = 0;
+            while (!window.RufflePlayer && attempts < 50) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
 
-        const ruffle =
-            window.RufflePlayer.newest();
+            if (!window.RufflePlayer) {
+                player.innerHTML = "<div style='display: flex; align-items: center; justify-content: center; height: 100%; color: white; font-size: 18px;'>Error: Flash player not loaded. Please refresh the page.</div>";
+                return;
+            }
 
-        const playerInstance =
-            ruffle.createPlayer();
+            const ruffle = window.RufflePlayer.newest();
+            const playerInstance = ruffle.createPlayer();
 
-        player.appendChild(playerInstance);
-
-        playerInstance.load(game.file);
+            player.appendChild(playerInstance);
+            playerInstance.load(game.file);
+        } catch (error) {
+            console.error("Error loading game:", error);
+            player.innerHTML = "<div style='display: flex; align-items: center; justify-content: center; height: 100%; color: white; font-size: 18px;'>Error loading game. Please try again.</div>";
+        }
     }
 }
 
