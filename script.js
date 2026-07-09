@@ -1,151 +1,197 @@
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
 async function loadGames() {
-    const container = document.getElementById("games");
-    const favContainer = document.getElementById("favorites");
+    const gamesContainer = document.getElementById("games");
+    const favoritesContainer = document.getElementById("favorites");
 
     try {
-        const res = await fetch("games.json");
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const response = await fetch("games.json");
 
-        const games = await res.json();
-        container.innerHTML = "";
-        favContainer.innerHTML = "";
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const games = await response.json();
+
+        gamesContainer.innerHTML = "";
+        favoritesContainer.innerHTML = "";
 
         games.forEach(game => {
             const card = createGameCard(game);
-            container.appendChild(card);
+            gamesContainer.appendChild(card);
 
             if (favorites.includes(game.id)) {
-                const favCard = createGameCard(game);
-                favContainer.appendChild(favCard);
+                favoritesContainer.appendChild(
+                    createGameCard(game)
+                );
             }
         });
 
         setupSearch(games);
 
-    } catch (err) {
-        console.error("Error loading games list:", err);
-        container.innerHTML =
-            "<p style='text-align:center;color:red;'>Error loading games list.</p>";
+    } catch (error) {
+
+        console.error(error);
+
+        gamesContainer.innerHTML = `
+            <p style="color:red">
+                Failed to load games.
+            </p>
+        `;
     }
 }
 
-/* Create a game card (works for SWF + HTML) */
 function createGameCard(game) {
-    const div = document.createElement("div");
-    div.className = "game";
 
-    div.innerHTML = `
-        <img src="${game.thumb}" alt="${game.name}">
+    const card = document.createElement("div");
+    card.className = "game";
+
+    card.innerHTML = `
+        ${game.thumb}
         <h3>${game.name}</h3>
     `;
 
-    // Favorite star
-    const star = document.createElement("div");
-    star.className = "favoriteBtn";
-    star.innerHTML = favorites.includes(game.id) ? "⭐" : "☆";
-    if (!favorites.includes(game.id)) star.classList.add("inactive");
+    const favoriteBtn = document.createElement("div");
 
-    star.addEventListener("click", (event) => {
+    favoriteBtn.className =
+        favorites.includes(game.id)
+            ? "favoriteBtn"
+            : "favoriteBtn inactive";
+
+    favoriteBtn.innerHTML =
+        favorites.includes(game.id)
+            ? "⭐"
+            : "☆";
+
+    favoriteBtn.addEventListener("click", event => {
         event.stopPropagation();
         toggleFavorite(game.id);
     });
 
-    div.appendChild(star);
+    card.appendChild(favoriteBtn);
 
-    // Click to load game (SWF or HTML)
-    div.addEventListener("click", () => loadGame(game));
+    card.addEventListener("click", () => {
+        loadGame(game);
+    });
 
-    return div;
+    return card;
 }
 
-/* Toggle favorites */
 function toggleFavorite(id) {
+
     if (favorites.includes(id)) {
-        favorites = favorites.filter(f => f !== id);
+        favorites = favorites.filter(
+            favorite => favorite !== id
+        );
     } else {
         favorites.push(id);
     }
 
-    localStorage.setItem("favorites", JSON.stringify(favorites));
-    loadGames(); // refresh UI
+    localStorage.setItem(
+        "favorites",
+        JSON.stringify(favorites)
+    );
+
+    loadGames();
 }
 
-/* Load game into fullscreen embedded player (SWF + HTML) */
 function loadGame(game) {
-    const playerContainer = document.getElementById("player");
-    const closeBtn = document.getElementById("closeGameBtn");
 
-    playerContainer.style.display = "block";
-    closeBtn.style.display = "block";
+    const player = document.getElementById("player");
+    const closeButton =
+        document.getElementById("closeGameBtn");
 
-    document.getElementById("games").style.display = "grid";
-    document.getElementById("favorites").style.display = "grid";
+    player.style.display = "block";
+    closeButton.style.display = "block";
 
-    playerContainer.innerHTML = "";
+    player.innerHTML = "";
 
-    // HTML game → iframe
     if (game.html) {
-        const iframe = document.createElement("iframe");
+
+        const iframe =
+            document.createElement("iframe");
+
         iframe.src = game.html;
-        iframe.style.width = "100%";
-        iframe.style.height = "100%";
         iframe.style.border = "none";
-        playerContainer.appendChild(iframe);
+
+        player.appendChild(iframe);
+
         return;
     }
 
-    // SWF game → Ruffle
     if (game.file) {
+
         try {
-            const ruffle = window.RufflePlayer.newest();
-            const player = ruffle.createPlayer();
 
-            player.style.width = "100%";
-            player.style.height = "100%";
+            const ruffle =
+                window.RufflePlayer.newest();
 
-            playerContainer.appendChild(player);
-            player.load(game.file);
+            const playerInstance =
+                ruffle.createPlayer();
+
+            player.appendChild(playerInstance);
+
+            playerInstance.load(game.file);
 
         } catch (error) {
-            console.error("Ruffle error:", error);
-            playerContainer.innerHTML =
-                "<p style='color:white;text-align:center;padding-top:40px;'>Error loading game.</p>";
+
+            console.error(error);
+
+            player.innerHTML = `
+                <div style="
+                    color:white;
+                    padding-top:50px;
+                    text-align:center;
+                    font-size:24px;">
+                    Failed to load game
+                </div>
+            `;
         }
     }
 }
 
-/* Close game and go back to list */
-document.getElementById("closeGameBtn").onclick = () => {
-    const playerContainer = document.getElementById("player");
-    const closeBtn = document.getElementById("closeGameBtn");
+document
+    .getElementById("closeGameBtn")
+    .addEventListener("click", () => {
 
-    playerContainer.style.display = "none";
-    closeBtn.style.display = "none";
+        const player =
+            document.getElementById("player");
 
-    document.getElementById("games").style.display = "grid";
-    document.getElementById("favorites").style.display = "grid";
+        player.style.display = "none";
+        player.innerHTML = "";
 
-    playerContainer.innerHTML = "";
-};
+        document
+            .getElementById("closeGameBtn")
+            .style.display = "none";
+    });
 
-/* Search bar */
 function setupSearch(games) {
-    const search = document.getElementById("search");
-    const container = document.getElementById("games");
 
-    search.addEventListener("input", () => {
-        const term = search.value.toLowerCase();
-        container.innerHTML = "";
+    const search =
+        document.getElementById("search");
+
+    search.oninput = () => {
+
+        const term =
+            search.value.toLowerCase();
+
+        const gamesContainer =
+            document.getElementById("games");
+
+        gamesContainer.innerHTML = "";
 
         games
-            .filter(g => g.name.toLowerCase().includes(term))
+            .filter(game =>
+                game.name
+                    .toLowerCase()
+                    .includes(term)
+            )
             .forEach(game => {
-                const card = createGameCard(g);
-                container.appendChild(card);
+                gamesContainer.appendChild(
+                    createGameCard(game)
+                );
             });
-    });
+    };
 }
 
 loadGames();
