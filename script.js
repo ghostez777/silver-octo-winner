@@ -1,26 +1,33 @@
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
 async function loadGames() {
-    const gamesContainer = document.getElementById("games");
-    const favoritesContainer = document.getElementById("favorites");
+
+    const gamesContainer =
+        document.getElementById("games");
+
+    const favoritesContainer =
+        document.getElementById("favorites");
 
     try {
-        const response = await fetch("games.json");
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
+        const response =
+            await fetch("games.json");
 
-        const games = await response.json();
+        const games =
+            await response.json();
 
         gamesContainer.innerHTML = "";
         favoritesContainer.innerHTML = "";
 
         games.forEach(game => {
-            const card = createGameCard(game);
+
+            const card =
+                createGameCard(game);
+
             gamesContainer.appendChild(card);
 
             if (favorites.includes(game.id)) {
+
                 favoritesContainer.appendChild(
                     createGameCard(game)
                 );
@@ -33,17 +40,16 @@ async function loadGames() {
 
         console.error(error);
 
-        gamesContainer.innerHTML = `
-            <p style="color:red">
-                Failed to load games.
-            </p>
-        `;
+        gamesContainer.innerHTML =
+            "<p>Error loading games.</p>";
     }
 }
 
 function createGameCard(game) {
 
-    const card = document.createElement("div");
+    const card =
+        document.createElement("div");
+
     card.className = "game";
 
     card.innerHTML = `
@@ -51,24 +57,27 @@ function createGameCard(game) {
         <h3>${game.name}</h3>
     `;
 
-    const favoriteBtn = document.createElement("div");
+    const star =
+        document.createElement("div");
 
-    favoriteBtn.className =
+    star.className =
         favorites.includes(game.id)
-            ? "favoriteBtn"
-            : "favoriteBtn inactive";
+        ? "favoriteBtn"
+        : "favoriteBtn inactive";
 
-    favoriteBtn.innerHTML =
+    star.innerHTML =
         favorites.includes(game.id)
-            ? "⭐"
-            : "☆";
+        ? "⭐"
+        : "☆";
 
-    favoriteBtn.addEventListener("click", event => {
-        event.stopPropagation();
+    star.addEventListener("click", e => {
+
+        e.stopPropagation();
+
         toggleFavorite(game.id);
     });
 
-    card.appendChild(favoriteBtn);
+    card.appendChild(star);
 
     card.addEventListener("click", () => {
         loadGame(game);
@@ -80,10 +89,14 @@ function createGameCard(game) {
 function toggleFavorite(id) {
 
     if (favorites.includes(id)) {
-        favorites = favorites.filter(
-            favorite => favorite !== id
-        );
+
+        favorites =
+            favorites.filter(
+                game => game !== id
+            );
+
     } else {
+
         favorites.push(id);
     }
 
@@ -97,14 +110,16 @@ function toggleFavorite(id) {
 
 function loadGame(game) {
 
-    const player = document.getElementById("player");
+    const player =
+        document.getElementById("player");
+
     const closeButton =
         document.getElementById("closeGameBtn");
 
+    player.innerHTML = "";
+
     player.style.display = "block";
     closeButton.style.display = "block";
-
-    player.innerHTML = "";
 
     if (game.html) {
 
@@ -115,38 +130,20 @@ function loadGame(game) {
         iframe.style.border = "none";
 
         player.appendChild(iframe);
-
         return;
     }
 
     if (game.file) {
 
-        try {
+        const ruffle =
+            window.RufflePlayer.newest();
 
-            const ruffle =
-                window.RufflePlayer.newest();
+        const playerInstance =
+            ruffle.createPlayer();
 
-            const playerInstance =
-                ruffle.createPlayer();
+        player.appendChild(playerInstance);
 
-            player.appendChild(playerInstance);
-
-            playerInstance.load(game.file);
-
-        } catch (error) {
-
-            console.error(error);
-
-            player.innerHTML = `
-                <div style="
-                    color:white;
-                    padding-top:50px;
-                    text-align:center;
-                    font-size:24px;">
-                    Failed to load game
-                </div>
-            `;
-        }
+        playerInstance.load(game.file);
     }
 }
 
@@ -154,11 +151,13 @@ document
     .getElementById("closeGameBtn")
     .addEventListener("click", () => {
 
-        const player =
-            document.getElementById("player");
+        document
+            .getElementById("player")
+            .style.display = "none";
 
-        player.style.display = "none";
-        player.innerHTML = "";
+        document
+            .getElementById("player")
+            .innerHTML = "";
 
         document
             .getElementById("closeGameBtn")
@@ -173,7 +172,9 @@ function setupSearch(games) {
     search.oninput = () => {
 
         const term =
-            search.value.toLowerCase();
+            search.value
+                .toLowerCase()
+                .trim();
 
         const gamesContainer =
             document.getElementById("games");
@@ -187,6 +188,7 @@ function setupSearch(games) {
                     .includes(term)
             )
             .forEach(game => {
+
                 gamesContainer.appendChild(
                     createGameCard(game)
                 );
