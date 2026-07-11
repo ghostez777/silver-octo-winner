@@ -1,26 +1,39 @@
 [
-  { "id": "pizzeria", "name": "Papa's Pizzeria", "file": "games/papaspizzeria_v2.swf", "thumb": "thumbs/papaspizzeria.png" },
-  { "id": "burgeria", "name": "Papa's Burgeria", "file": "games/papasburgeria.swf", "thumb": "thumbs/papasburgeria.png" },
-  { "id": "tacomia", "name": "Papa's Taco Mia", "file": "games/papastacomia.swf", "thumb": "thumbs/papastacomia.png" },
-  { "id": "freezeria", "name": "Papa's Freezeria", "file": "games/papasfreezeria.swf", "thumb": "thumbs/papasfreezeria.png" },
-  { "id": "pancakeria", "name": "Papa's Pancakeria", "file": "games/papaspancakeria.swf", "thumb": "thumbs/papaspancakeria.png" },
-  { "id": "wingeria", "name": "Papa's Wingeria", "file": "games/papaswingeria.swf", "thumb": "thumbs/papaswingeria.png" },
-  { "id": "hotdoggeria", "name": "Papa's Hot Doggeria", "file": "games/papashotdoggeria.swf", "thumb": "thumbs/papashotdoggeria.png" },
-  { "id": "cupcakeria", "name": "Papa's Cupcakeria", "file": "games/papascupcakeria.swf", "thumb": "thumbs/papascupcakeria.png" },
-  { "id": "pastaria", "name": "Papa's Pastaria", "file": "games/papaspastaria.swf", "thumb": "thumbs/papaspastaria.png" },
-  { "id": "donuteria", "name": "Papa's Donuteria", "file": "games/papasdonuteria.swf", "thumb": "thumbs/papasdonuteria.png" },
-  { "id": "cheeseria", "name": "Papa's Cheeseria", "file": "games/papascheeseria_102.swf", "thumb": "thumbs/papascheeseria.png" },
-  { "id": "html_minesweeper", "name": "Minesweeper", "thumb": "thumbs/minesweeper.png", "html": "games/minesweeper/index.html"},
-  { "id": "html_nonogram", "name": "Nonogram", "thumb": "thumbs/nonogram.png", "html": "games/nonogram/index.html"},
-  { "id": "html_wallsmash", "name": "Wallsmash", "thumb": "thumbs/wallsmash.png", "html": "games/wallsmash/index.html"},
-  { "id": "tboi", "name": "The Binding of Isaac", "file": "games/TBOI.swf", "thumb": "thumbs/TBOI.png" },
-  { "id": "Happywheels", "name": "HappyWheels", "file": "games/happywheels.swf", "thumb": "thumbs/happywheels.png" },
+  { "id": "ageofwar", "name": "Age of War", "file": "games/ageofwar.swf", "thumb": "thumbs/ageofwar.png" },
+  { "id": "angrygran2", "name": "Angry Gran 2", "file": "games/angrygran2.swf", "thumb": "thumbs/angrygran2.png" },
+
   { "id": "bakeria", "name": "Papa's Bakeria", "file": "games/papasbakeria.swf", "thumb": "thumbs/papasbakeria.png" },
-  { "id": "sushiria", "name": "Papa's Sushiria", "file": "games/papassushiria.swf", "thumb": "thumbs/papassushiria.png" },
-  { "id": "scooperia", "name": "Papa's Scooperia", "file": "games/papasscooperia_v102.swf", "thumb": "thumbs/papasscooperia.png" },
+  { "id": "bobtherobber", "name": "Bob the Robber", "file": "games/bobtherobber.swf", "thumb": "thumbs/bobtherobber.png" },
+  { "id": "bobtherobber2", "name": "Bob the Robber 2", "file": "games/bobtherobber2.swf", "thumb": "thumbs/bobtherobber2.png" },
   { "id": "btd1", "name": "Bloons Tower Defense", "file": "games/btd1.swf", "thumb": "thumbs/btd1.png" },
   { "id": "btd2", "name": "Bloons Tower Defense 2", "file": "games/btd2.swf", "thumb": "thumbs/btd2.png" },
   { "id": "btd3", "name": "Bloons Tower Defense 3", "file": "games/btd3.swf", "thumb": "thumbs/btd3.png" },
   { "id": "btd4", "name": "Bloons Tower Defense 4", "file": "games/btd4.swf", "thumb": "thumbs/btd4.png" },
-  { "id": "btd5", "name": "Bloons Tower Defense 5", "file": "games/btd5.swf", "thumb": "thumbs/btd5.png" }
-]
+  { "id": "btd5", "name": "Bloons Tower Defense 5", "file": "games/btd5.swf", "thumb": "thumbs/btd5.png" },
+
+  { "id": "cheeseria", "name": "Papa's Cheeseria", "file": "games/papascheeseria_102.swf", "thumb": "thumbs/papascheeseria.png" },
+  { "id": "cupcakeria", "name": "Papa's Cupcakeria", "file": "games/papascupcakeria.swf", "thumb": "thumbs/papascupcakeria.png" },
+
+  { "id": "donuteria", "name": "Papa's Donuteria", "file": "games/papasdonuteria.swf", "thumb": "thumbs/papasdonuteria.png" },
+
+  { "id": "freezeria", "name": "Papa's Freezeria", "file": "games/papasfreezeria.swf", "thumb": "thumbs/papasfreezeria.png" },
+
+  { "id": "growisland", "name": "Grow Island", "file": "games/growisland.swf", "thumb": "thumbs/growisland.png" },
+
+  { "id": "happywheels", "name": "HappyWheels", "file": "games/happywheels.swf", "thumb": "thumbs/happywheels.png" },
+  { "id": "hotdoggeria", "name": "Papa's Hot Doggeria", "file": "games/papashotdoggeria.swf", "thumb": "thumbs/papashotdoggeria.png" },
+
+  { "id": "html_minesweeper", "name": "Minesweeper", "thumb": "thumbs/minesweeper.png", "html": "games/minesweeper/index.html" },
+  { "id": "html_nonogram", "name": "Nonogram", "thumb": "thumbs/nonogram.png", "html": "games/nonogram/index.html" },
+  { "id": "html_wallsmash", "name": "Wallsmash", "thumb": "thumbs/wallsmash.png", "html": "games/wallsmash/index.html" },
+
+  { "id": "jacksmith", "name": "Jacksmith", "file": "games/jacksmith.swf", "thumb": "thumbs/jacksmith.png" },
+
+  { "id": "kingdomrush", "name": "Kingdom Rush", "file": "games/kingdomrush.swf", "thumb": "thumbs/kingdomrush.png" },
+
+  { "id": "pancakeria", "name": "Papa's Pancakeria", "file": "games/papaspancakeria.swf", "thumb": "thumbs/papaspancakeria.png" },
+  { "id": "pastaria", "name": "Papa's Pastaria", "file": "games/papaspastaria.swf", "thumb": "thumbs/papaspastaria.png" },
+  { "id": "pizzeria", "name": "Papa's Pizzeria", "file": "games/papaspizzeria_v2.swf", "thumb": "thumbs/papaspizzeria.png" },
+
+  { "id": "scooperia", "name": "Papa's Scooperia", "file": "games/papasscooperia_v102.swf", "thumb": "thumbs/papasscooperia.png" },
+  { "id": "sushiria", "name": "Papa's Sushiria", "file
