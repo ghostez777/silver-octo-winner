@@ -36,4 +36,12 @@
   { "id": "pizzeria", "name": "Papa's Pizzeria", "file": "games/papaspizzeria_v2.swf", "thumb": "thumbs/papaspizzeria.png" },
 
   { "id": "scooperia", "name": "Papa's Scooperia", "file": "games/papasscooperia_v102.swf", "thumb": "thumbs/papasscooperia.png" },
-  { "id": "sushiria", "name": "Papa's Sushiria", "file
+  { "id": "sushiria", "name": "Papa's Sushiria", "file": "games/papassushiria.swf", "thumb": "thumbs/papassushiria.png" },
+
+  { "id": "tacomia", "name": "Papa's Taco Mia", "file": "games/papastacomia.swf", "thumb": "thumbs/papastacomia.png" },
+  { "id": "tboi", "name": "The Binding of Isaac", "file": "games/TBOI.swf", "thumb": "thumbs/TBOI.png" },
+
+  { "id": "utopianmining", "name": "Utopian Mining", "file": "games/utopianmining.swf", "thumb": "thumbs/utopianmining.png" },
+
+  { "id": "wingeria", "name": "Papa's Wingeria", "file": "games/papaswingeria.swf", "thumb": "thumbs/papaswingeria.png" }
+]
