@@ -1,5 +1,6 @@
 [
   { "id": "ageofwar", "name": "Age of War", "file": "games/ageofwar.swf", "thumb": "thumbs/ageofwar.png" },
+  { "id": "papasmochiaria", "name": "Papa's Mochiaria", "file": "games/papasmochiaria.swf", "thumb": "thumbs/papasmochiaria.png" },
   { "id": "angrygran2", "name": "Angry Gran 2", "file": "games/angrygran2.swf", "thumb": "thumbs/angrygran2.png" },
 
   { "id": "bakeria", "name": "Papa's Bakeria", "file": "games/papasbakeria.swf", "thumb": "thumbs/papasbakeria.png" },
