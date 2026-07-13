@@ -27,6 +27,12 @@
   { "id": "html_minesweeper", "name": "Minesweeper", "thumb": "thumbs/minesweeper.png", "html": "games/minesweeper/index.html" },
   { "id": "html_nonogram", "name": "Nonogram", "thumb": "thumbs/nonogram.png", "html": "games/nonogram/index.html" },
   { "id": "html_wallsmash", "name": "Wallsmash", "thumb": "thumbs/wallsmash.png", "html": "games/wallsmash/index.html" },
+  {
+  "id": "monkeymart",
+  "name": "Monkey Mart",
+  "thumb": "thumbs/monkeymart.png",
+  "html": "games/monkeymart/index.html"
+},
 
   { "id": "jacksmith", "name": "Jacksmith", "file": "games/jacksmith.swf", "thumb": "thumbs/jacksmith.png" },
 
