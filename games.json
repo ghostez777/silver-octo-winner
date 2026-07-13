@@ -20,7 +20,9 @@
   { "id": "freezeria", "name": "Papa's Freezeria", "file": "games/papasfreezeria.swf", "thumb": "thumbs/papasfreezeria.png" },
 
   { "id": "growisland", "name": "Grow Island", "file": "games/growisland.swf", "thumb": "thumbs/growisland.png" },
-
+  { "id": "html_breaklock", "name": "Breaklock", "thumb": "thumbs/breaklock.png", "html": "games/breaklock/breaklock/index.html" },
+  { "id": "html_simon", "name": "Simon", "thumb": "thumbs/simon.png", "html": "games/simon/simon/index.html" },
+  { "id": "html_hextris", "name": "Hextris", "thumb": "thumbs/hextris.png", "html": "games/hextris/hextris/index.html" },
   { "id": "happywheels", "name": "HappyWheels", "file": "games/happywheels.swf", "thumb": "thumbs/happywheels.png" },
   { "id": "hotdoggeria", "name": "Papa's Hot Doggeria", "file": "games/papashotdoggeria.swf", "thumb": "thumbs/papashotdoggeria.png" },
   { "id": "html_2048", "name": "2048", "thumb": "thumbs/2048.png", "html": "games/2048/2048/index.html" },
