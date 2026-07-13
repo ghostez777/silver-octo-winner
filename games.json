@@ -29,6 +29,7 @@
   { "id": "html_minesweeper", "name": "Minesweeper", "thumb": "thumbs/minesweeper.png", "html": "games/minesweeper/index.html" },
   { "id": "html_nonogram", "name": "Nonogram", "thumb": "thumbs/nonogram.png", "html": "games/nonogram/index.html" },
   { "id": "html_wallsmash", "name": "Wallsmash", "thumb": "thumbs/wallsmash.png", "html": "games/wallsmash/index.html" },
+  { "id": "html_fnf", "name": "Friday Night Funkin'", "thumb": "thumbs/fnf.png", "html": "games/fnf/docs/index.html" },
   {
   "id": "monkeymart",
   "name": "Monkey Mart",
