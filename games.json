@@ -31,7 +31,7 @@
   "id": "monkeymart",
   "name": "Monkey Mart",
   "thumb": "thumbs/monkeymart.png",
-  "html": "games/monkeymart/index.html"
+  "html": "games/monkeymart/MonkeyMart-gh-pages/index.html"
 },
 
   { "id": "jacksmith", "name": "Jacksmith", "file": "games/jacksmith.swf", "thumb": "thumbs/jacksmith.png" },
