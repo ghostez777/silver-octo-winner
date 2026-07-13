@@ -1,177 +1,329 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Minesweeper</title>
+<meta charset="UTF-8" />
+<title>Touch Minesweeper</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>
-    body {
-        margin: 0;
-        font-family: system-ui, sans-serif;
-        background: #0f172a;
-        color: #e5e7eb;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        min-height: 100vh;
-    }
-    h1 {
-        margin: 20px 0 10px;
-    }
-    #board {
-        display: grid;
-        gap: 2px;
-        margin-top: 10px;
-        touch-action: manipulation;
-    }
-    .cell {
-        width: 32px;
-        height: 32px;
-        background: #1f2937;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-        cursor: pointer;
-        user-select: none;
-    }
-    .cell.revealed {
-        background: #374151;
-    }
-    .cell.mine {
-        background: #b91c1c;
-    }
-    #controls {
-        margin-top: 10px;
-    }
-    button {
-        padding: 8px 14px;
-        border-radius: 6px;
-        border: none;
-        background: #3b82f6;
-        color: white;
-        font-size: 14px;
-        cursor: pointer;
-    }
-    button:hover {
-        background: #2563eb;
-    }
+  body {
+    font-family: system-ui, sans-serif;
+    background: #222;
+    color: #fff;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 {
+    margin: 10px 0;
+  }
+  #controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  #controls input {
+    width: 70px;
+    padding: 4px;
+    border-radius: 4px;
+    border: 1px solid #555;
+    background: #111;
+    color: #fff;
+    text-align: center;
+  }
+  #controls button {
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    background: #4caf50;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #controls button:active {
+    transform: scale(0.97);
+  }
+  #modeToggle {
+    background: #2196f3;
+  }
+  #status {
+    margin: 6px 0 10px;
+    font-size: 14px;
+  }
+  #board {
+    display: grid;
+    touch-action: manipulation;
+    max-width: 95vw;
+  }
+  .cell {
+    width: 32px;
+    height: 32px;
+    box-sizing: border-box;
+    border: 1px solid #555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    user-select: none;
+    background: #333;
+  }
+  .cell.revealed {
+    background: #111;
+    border-color: #444;
+  }
+  .cell.mine.revealed {
+    background: #c62828;
+  }
+  .cell.flagged {
+    background: #ff9800;
+  }
+  .cell span {
+    pointer-events: none;
+  }
 </style>
 </head>
 <body>
+<h1>Touch Minesweeper</h1>
 
-<h1>Minesweeper</h1>
 <div id="controls">
-    <button id="resetBtn">New Game</button>
+  <label>Rows: <input type="number" id="rows" value="10" min="5" max="30"></label>
+  <label>Cols: <input type="number" id="cols" value="10" min="5" max="30"></label>
+  <label>Mines: <input type="number" id="mines" value="15" min="1" max="400"></label>
+  <button id="newGame">New Game</button>
+  <button id="modeToggle">Mode: Reveal</button>
 </div>
+
+<div id="status">Tap cells to play. Toggle mode to place flags.</div>
 <div id="board"></div>
 
 <script>
-const rows = 10;
-const cols = 10;
-const minesCount = 15;
-let board = [];
-let minePositions = [];
+  const boardEl = document.getElementById('board');
+  const statusEl = document.getElementById('status');
+  const rowsInput = document.getElementById('rows');
+  const colsInput = document.getElementById('cols');
+  const minesInput = document.getElementById('mines');
+  const newGameBtn = document.getElementById('newGame');
+  const modeToggleBtn = document.getElementById('modeToggle');
 
-function createBoard() {
-    board = [];
-    minePositions = [];
-    const boardEl = document.getElementById('board');
+  let rows = 10, cols = 10, minesCount = 15;
+  let grid = [];
+  let gameOver = false;
+  let revealMode = true; // true = reveal, false = flag
+
+  function createEmptyGrid(r, c) {
+    const g = [];
+    for (let y = 0; y < r; y++) {
+      const row = [];
+      for (let x = 0; x < c; x++) {
+        row.push({
+          y, x,
+          mine: false,
+          revealed: false,
+          flagged: false,
+          adjacent: 0
+        });
+      }
+      g.push(row);
+    }
+    return g;
+  }
+
+  function placeMines(g, totalMines) {
+    const r = g.length;
+    const c = g[0].length;
+    let placed = 0;
+    while (placed < totalMines) {
+      const y = Math.floor(Math.random() * r);
+      const x = Math.floor(Math.random() * c);
+      if (!g[y][x].mine) {
+        g[y][x].mine = true;
+        placed++;
+      }
+    }
+  }
+
+  function countAdjacentMines(g) {
+    const r = g.length;
+    const c = g[0].length;
+    const dirs = [
+      [-1,-1],[-1,0],[-1,1],
+      [0,-1],        [0,1],
+      [1,-1],[1,0],[1,1]
+    ];
+    for (let y = 0; y < r; y++) {
+      for (let x = 0; x < c; x++) {
+        if (g[y][x].mine) {
+          g[y][x].adjacent = -1;
+          continue;
+        }
+        let count = 0;
+        for (const [dy, dx] of dirs) {
+          const ny = y + dy, nx = x + dx;
+          if (ny >= 0 && ny < r && nx >= 0 && nx < c && g[ny][nx].mine) {
+            count++;
+          }
+        }
+        g[y][x].adjacent = count;
+      }
+    }
+  }
+
+  function renderBoard() {
     boardEl.innerHTML = '';
     boardEl.style.gridTemplateColumns = `repeat(${cols}, 32px)`;
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const cellData = grid[y][x];
+        const cellEl = document.createElement('div');
+        cellEl.className = 'cell';
+        cellEl.dataset.y = y;
+        cellEl.dataset.x = x;
 
-    // Place mines
-    while (minePositions.length < minesCount) {
-        const r = Math.floor(Math.random() * rows);
-        const c = Math.floor(Math.random() * cols);
-        const key = `${r},${c}`;
-        if (!minePositions.includes(key)) {
-            minePositions.push(key);
+        if (cellData.revealed) {
+          cellEl.classList.add('revealed');
+          if (cellData.mine) {
+            cellEl.classList.add('mine');
+            cellEl.innerHTML = '<span>💣</span>';
+          } else if (cellData.adjacent > 0) {
+            cellEl.innerHTML = `<span>${cellData.adjacent}</span>`;
+          }
+        } else if (cellData.flagged) {
+          cellEl.classList.add('flagged');
+          cellEl.innerHTML = '<span>🚩</span>';
         }
+
+        cellEl.addEventListener('click', onCellTap);
+        cellEl.addEventListener('touchstart', onCellTap, { passive: true });
+
+        boardEl.appendChild(cellEl);
+      }
     }
+  }
 
-    for (let r = 0; r < rows; r++) {
-        const row = [];
-        for (let c = 0; c < cols; c++) {
-            const cell = {
-                r,
-                c,
-                mine: minePositions.includes(`${r},${c}`),
-                revealed: false,
-                element: null
-            };
-            const div = document.createElement('div');
-            div.className = 'cell';
-            div.dataset.r = r;
-            div.dataset.c = c;
+  function onCellTap(e) {
+    if (gameOver) return;
+    const target = e.currentTarget;
+    const y = parseInt(target.dataset.y, 10);
+    const x = parseInt(target.dataset.x, 10);
+    const cell = grid[y][x];
 
-            const handler = () => revealCell(r, c);
-            div.addEventListener('click', handler);
-            div.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                handler();
-            });
-
-            cell.element = div;
-            row.push(cell);
-            boardEl.appendChild(div);
-        }
-        board.push(row);
+    if (revealMode) {
+      if (cell.flagged || cell.revealed) return;
+      revealCell(y, x);
+    } else {
+      if (cell.revealed) return;
+      cell.flagged = !cell.flagged;
     }
-}
+    renderBoard();
+    checkWin();
+  }
 
-function getNeighbors(r, c) {
-    const neighbors = [];
-    for (let dr = -1; dr <= 1; dr++) {
-        for (let dc = -1; dc <= 1; dc++) {
-            if (dr === 0 && dc === 0) continue;
-            const nr = r + dr;
-            const nc = c + dc;
-            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
-                neighbors.push(board[nr][nc]);
-            }
-        }
-    }
-    return neighbors;
-}
-
-function revealCell(r, c) {
-    const cell = board[r][c];
-    if (cell.revealed) return;
+  function revealCell(y, x) {
+    const cell = grid[y][x];
+    if (cell.revealed || cell.flagged) return;
     cell.revealed = true;
-    cell.element.classList.add('revealed');
 
     if (cell.mine) {
-        cell.element.classList.add('mine');
-        cell.element.textContent = '💣';
-        revealAllMines();
-        alert('Game Over!');
-        return;
+      gameOver = true;
+      statusEl.textContent = 'Game Over 💥';
+      revealAllMines();
+      return;
     }
 
-    const neighbors = getNeighbors(r, c);
-    const minesAround = neighbors.filter(n => n.mine).length;
-    if (minesAround > 0) {
-        cell.element.textContent = minesAround;
-    } else {
-        neighbors.forEach(n => revealCell(n.r, n.c));
+    if (cell.adjacent === 0) {
+      floodReveal(y, x);
     }
-}
+  }
 
-function revealAllMines() {
-    minePositions.forEach(pos => {
-        const [r, c] = pos.split(',').map(Number);
-        const cell = board[r][c];
-        cell.element.classList.add('mine', 'revealed');
-        cell.element.textContent = '💣';
-    });
-}
+  function floodReveal(y, x) {
+    const stack = [[y, x]];
+    const r = grid.length;
+    const c = grid[0].length;
+    const dirs = [
+      [-1,-1],[-1,0],[-1,1],
+      [0,-1],        [0,1],
+      [1,-1],[1,0],[1,1]
+    ];
+    while (stack.length) {
+      const [cy, cx] = stack.pop();
+      const cell = grid[cy][cx];
+      if (!cell.revealed && !cell.mine) {
+        cell.revealed = true;
+      }
+      if (cell.adjacent === 0) {
+        for (const [dy, dx] of dirs) {
+          const ny = cy + dy, nx = cx + dx;
+          if (ny >= 0 && ny < r && nx >= 0 && nx < c) {
+            const neighbor = grid[ny][nx];
+            if (!neighbor.revealed && !neighbor.mine && !neighbor.flagged) {
+              neighbor.revealed = true;
+              if (neighbor.adjacent === 0) {
+                stack.push([ny, nx]);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 
-document.getElementById('resetBtn').addEventListener('click', createBoard);
+  function revealAllMines() {
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        if (grid[y][x].mine) {
+          grid[y][x].revealed = true;
+        }
+      }
+    }
+    renderBoard();
+  }
 
-createBoard();
+  function checkWin() {
+    if (gameOver) return;
+    let unrevealedSafe = 0;
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        const cell = grid[y][x];
+        if (!cell.mine && !cell.revealed) {
+          unrevealedSafe++;
+        }
+      }
+    }
+    if (unrevealedSafe === 0) {
+      gameOver = true;
+      statusEl.textContent = 'You Win 🎉';
+      revealAllMines();
+    }
+  }
+
+  function startGame() {
+    rows = Math.max(5, Math.min(30, parseInt(rowsInput.value || '10', 10)));
+    cols = Math.max(5, Math.min(30, parseInt(colsInput.value || '10', 10)));
+    const maxMines = rows * cols - 1;
+    minesCount = Math.max(1, Math.min(maxMines, parseInt(minesInput.value || '15', 10)));
+
+    grid = createEmptyGrid(rows, cols);
+    placeMines(grid, minesCount);
+    countAdjacentMines(grid);
+    gameOver = false;
+    revealMode = true;
+    modeToggleBtn.textContent = 'Mode: Reveal';
+    statusEl.textContent = 'Tap cells to play. Toggle mode to place flags.';
+    renderBoard();
+  }
+
+  modeToggleBtn.addEventListener('click', () => {
+    revealMode = !revealMode;
+    modeToggleBtn.textContent = revealMode ? 'Mode: Reveal' : 'Mode: Flag';
+  });
+
+  newGameBtn.addEventListener('click', startGame);
+
+  // initial game
+  startGame();
 </script>
-
 </body>
 </html>
