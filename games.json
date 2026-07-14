@@ -6,6 +6,7 @@
   { "id": "bakeria", "name": "Papa's Bakeria", "file": "games/papasbakeria.swf", "thumb": "thumbs/papasbakeria.png" },
   { "id": "bobtherobber", "name": "Bob the Robber", "file": "games/bobtherobber.swf", "thumb": "thumbs/bobtherobber.png" },
   { "id": "bobtherobber2", "name": "Bob the Robber 2", "file": "games/bobtherobber2.swf", "thumb": "thumbs/bobtherobber2.png" },
+
   { "id": "btd1", "name": "Bloons Tower Defense", "file": "games/btd1.swf", "thumb": "thumbs/btd1.png" },
   { "id": "btd2", "name": "Bloons Tower Defense 2", "file": "games/btd2.swf", "thumb": "thumbs/btd2.png" },
   { "id": "btd3", "name": "Bloons Tower Defense 3", "file": "games/btd3.swf", "thumb": "thumbs/btd3.png" },
@@ -14,33 +15,31 @@
 
   { "id": "cheeseria", "name": "Papa's Cheeseria", "file": "games/papascheeseria_102.swf", "thumb": "thumbs/papascheeseria.png" },
   { "id": "cupcakeria", "name": "Papa's Cupcakeria", "file": "games/papascupcakeria.swf", "thumb": "thumbs/papascupcakeria.png" },
-
   { "id": "donuteria", "name": "Papa's Donuteria", "file": "games/papasdonuteria.swf", "thumb": "thumbs/papasdonuteria.png" },
-
   { "id": "freezeria", "name": "Papa's Freezeria", "file": "games/papasfreezeria.swf", "thumb": "thumbs/papasfreezeria.png" },
 
   { "id": "growisland", "name": "Grow Island", "file": "games/growisland.swf", "thumb": "thumbs/growisland.png" },
+
   { "id": "html_breaklock", "name": "Breaklock", "thumb": "thumbs/breaklock.png", "html": "games/breaklock/breaklock/index.html" },
   { "id": "html_simon", "name": "Simon", "thumb": "thumbs/simon.png", "html": "games/simon/simon/index.html" },
   { "id": "html_hextris", "name": "Hextris", "thumb": "thumbs/hextris.png", "html": "games/hextris/hextris/index.html" },
-  { "id": "happywheels", "name": "HappyWheels", "file": "games/happywheels.swf", "thumb": "thumbs/happywheels.png" },
+
+  { "id": "happywheels", "name": "Happy Wheels", "file": "games/happywheels.swf", "thumb": "thumbs/happywheels.png" },
+
   { "id": "hotdoggeria", "name": "Papa's Hot Doggeria", "file": "games/papashotdoggeria.swf", "thumb": "thumbs/papashotdoggeria.png" },
+
   { "id": "html_2048", "name": "2048", "thumb": "thumbs/2048.png", "html": "games/2048/2048/index.html" },
   { "id": "html_minesweeper", "name": "Minesweeper", "thumb": "thumbs/minesweeper.png", "html": "games/minesweeper/index.html" },
   { "id": "html_nonogram", "name": "Nonogram", "thumb": "thumbs/nonogram.png", "html": "games/nonogram/index.html" },
   { "id": "html_wallsmash", "name": "Wallsmash", "thumb": "thumbs/wallsmash.png", "html": "games/wallsmash/index.html" },
+
   { "id": "html_fnf", "name": "Friday Night Funkin'", "thumb": "thumbs/fnf.png", "html": "games/fnf/docs/index.html" },
   { "id": "html_fn", "name": "Fruit Ninja", "thumb": "thumbs/fn.png", "html": "games/fruit/fruit-ninja/source/index.html" },
   { "id": "html_nr", "name": "Ninja Run", "thumb": "thumbs/nr.png", "html": "games/nr/Ninja Run Game/index.html" },
-  {
-  "id": "monkeymart",
-  "name": "Monkey Mart",
-  "thumb": "thumbs/monkeymart.png",
-  "html": "games/monkeymart/MonkeyMart-gh-pages/index.html"
-},
+
+  { "id": "monkeymart", "name": "Monkey Mart", "thumb": "thumbs/monkeymart.png", "html": "games/monkeymart/MonkeyMart-gh-pages/index.html" },
 
   { "id": "jacksmith", "name": "Jacksmith", "file": "games/jacksmith.swf", "thumb": "thumbs/jacksmith.png" },
-
   { "id": "kingdomrush", "name": "Kingdom Rush", "file": "games/kingdomrush.swf", "thumb": "thumbs/kingdomrush.png" },
 
   { "id": "pancakeria", "name": "Papa's Pancakeria", "file": "games/papaspancakeria.swf", "thumb": "thumbs/papaspancakeria.png" },
@@ -55,5 +54,35 @@
 
   { "id": "utopianmining", "name": "Utopian Mining", "file": "games/utopianmining.swf", "thumb": "thumbs/utopianmining.png" },
 
-  { "id": "wingeria", "name": "Papa's Wingeria", "file": "games/papaswingeria.swf", "thumb": "thumbs/papaswingeria.png" }
+  { "id": "wingeria", "name": "Papa's Wingeria", "file": "games/papaswingeria.swf", "thumb": "thumbs/papaswingeria.png" },
+
+  { "id": "stack", "name": "Stack", "html": "games/stack/index.html", "thumb": "thumbs/stack.png" },
+  { "id": "stickman", "name": "Stickman", "html": "games/stickman/index.html", "thumb": "thumbs/stickman.png" },
+  { "id": "swerve", "name": "Swerve", "html": "games/swerve/index.html", "thumb": "thumbs/swerve.png" },
+  { "id": "templerun", "name": "Temple Run", "html": "games/templerun/index.html", "thumb": "thumbs/templerun.png" },
+  { "id": "tetris", "name": "Tetris", "html": "games/tetris/index.html", "thumb": "thumbs/tetris.png" },
+  { "id": "tinyfishing", "name": "Tiny Fishing", "html": "games/tiny-fishing/index.html", "thumb": "thumbs/tinyfishing.png" },
+  { "id": "towermaster", "name": "Tower Master", "html": "games/towermaster/index.html", "thumb": "thumbs/towermaster.png" },
+  { "id": "wallsmash2", "name": "Wall Smash 2", "html": "games/wallsmash/index.html", "thumb": "thumbs/wallsmash2.png" },
+  { "id": "yohoho", "name": "Yohoho.io", "html": "games/yohoho/index.html", "thumb": "thumbs/yohoho.png" },
+
+  { "id": "parkingfury", "name": "Parking Fury", "html": "games/parkingfury.html", "thumb": "thumbs/parkingfury.png" },
+  { "id": "parkingfury2", "name": "Parking Fury 2", "html": "games/parkingfury2.html", "thumb": "thumbs/parkingfury2.png" },
+
+  { "id": "plantsvszombies", "name": "Plants vs Zombies", "html": "games/plantsvszombies.html", "thumb": "thumbs/plantsvszombies.png" },
+
+  { "id": "polytrack", "name": "Polytrack", "html": "games/polytrack.html", "thumb": "thumbs/polytrack.png" },
+
+  { "id": "redball4vol1", "name": "Red Ball 4 Vol. 1", "html": "games/redball4vol1.html", "thumb": "thumbs/redball4vol1.png" },
+  { "id": "redball4vol2", "name": "Red Ball 4 Vol. 2", "html": "games/redball4vol2.html", "thumb": "thumbs/redball4vol2.png" },
+  { "id": "redball4vol3", "name": "Red Ball 4 Vol. 3", "html": "games/redball4vol3.html", "thumb": "thumbs/redball4vol3.png" },
+
+  { "id": "riddleschool", "name": "Riddle School", "html": "games/riddleschool.html", "thumb": "thumbs/riddleschool.png" },
+  { "id": "riddleschool2", "name": "Riddle School 2", "html": "games/riddleschool2.html", "thumb": "thumbs/riddleschool2.png" },
+
+  { "id": "snowballio", "name": "Snowball.io", "html": "games/snowballio.html", "thumb": "thumbs/snowballio.png" },
+
+  { "id": "stacktris", "name": "Stacktris", "html": "games/stacktris.html", "thumb": "thumbs/stacktris.png" },
+
+  { "id": "stateio", "name": "State.io", "html": "games/stateio.html", "thumb": "thumbs/stateio.png" }
 ]
