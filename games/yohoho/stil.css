@@ -1,0 +1,165 @@
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+
+body {font-family: nunito;line-height: 1.6; background: radial-gradient(circle 50vw at 100% 0, #fcff00, transparent), radial-gradient(circle 50vw at 20% 25vw, #f84e00, transparent), linear-gradient(180deg, #ff8a02, #eda60b 25vw, #efaa00 50vw);}
+
+/* ÃƒÅ“st MenÃƒÂ¼ */
+header {background-color: #314151;padding: 10px 0;position: relative;height: 45px;}
+
+header .logo{height: 40px;position: absolute;top: 2px;left: 10px;color: #ffffff;font-size: 20px;font-weight: 800;text-align: center;border-radius: 6px;padding: 0 20px;text-transform: uppercase;line-height: 44px;}
+
+
+header nav ul {display: flex;justify-content: right;list-style-type: none;margin-right: 10px;margin-top: 0;}
+
+header nav ul li {
+margin: 0 3px;
+
+ 
+}
+
+header nav ul li a {color: #294765;text-decoration: none;font-size: 16px;font-weight: 700;letter-spacing: 0px;background: #ffffff;padding: 4px 13px;border-radius: 40px;}
+
+header nav ul li a:hover {text-decoration: none;background: #fff029;color: #000000;}
+
+.axe1 {width: 970px;height: 250px;margin: 20px auto;text-align: center;line-height: 250px;font-size: 24px;color: #fff;display: grid;align-items: center !important;justify-content: center;!i;!;}
+
+
+
+.article-container {width: 96%;margin: 40px auto;background: #ffffff;padding: 20px;color: #2b3947;font-size: 19px;border-radius: 8px;}
+
+button {padding: 10px 20px;font-size: 22px;color: #000000;background-color: #feff23;border: none;cursor: pointer;font-family: 'Nunito';margin: 0 auto;border-radius: 40px;display: grid;justify-content: center;font-weight: 800;box-shadow: inset 0px -6px 0px rgb(0 0 0 / 10%);letter-spacing: 0px;}
+
+button:hover {background-color: #ff2a17;color: #ffffff;}
+
+
+.lessons-grid {display: grid;grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));gap: 15px;padding: 0;width: 96%;margin: 20px auto !important;}
+
+
+
+.lesson-item:hover {
+transition: transform 0.23s;
+transform: scale(1.1);
+transition: .12s all;
+}
+
+.lesson-item img {width: 100%;height: 100%;box-shadow: 0 4px 8px rgb(0 0 0 / 19%);border-radius: 45px;border: 6px solid #1e2833;}
+
+.lesson-item a {
+text-decoration: none;
+color: #333;
+padding: 0;
+display: block;
+font-weight: bold;
+}
+.lesson-item {
+border-radius: 0;
+text-align: center;
+transform: scale(1);
+transition: .2s all;
+}
+.lesson-item {
+opacity: 0;  
+animation: fadeIn 0.5s forwards;  
+}
+
+@keyframes fadeIn {
+to {
+opacity: 1;  
+}
+}
+
+#icons-container{margin: 0 auto;display: grid;width: 100%;grid-auto-flow: column;justify-content: center;grid-gap: 15px;margin-top: 20px;}
+
+
+#settings-btn{background: #fff029;color: #164921;font-weight: 700;letter-spacing: 0px;}
+#settings-btn:hover{background: #ffffff;color: #000000;}
+
+
+#iframeContainer {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+background: #fff;
+width: 100%;
+height: 100%;
+z-index: 1000;
+justify-content: center;
+align-items: center;
+}
+#iframeContainer iframe {
+width: 100%;
+height: 100%;
+border: none;
+}
+#closeButton {position: absolute;top: 10px;right: 10px;padding: 4px 15px !important;background-color: #ff0000;color: #ffffff;cursor: pointer !important;border: none;font-size: 18px;border-radius: 30px !important;height: 40px;line-height: 29px;}
+
+
+
+.axe2{
+     padding: 10px;
+     border-radius: 10px;
+     text-align: center;
+     display: grid;
+     align-items: center;
+     color: #666;
+     width: 300px;
+     height: 280px;
+     margin:  0 auto;
+}
+
+
+.swal2-close{
+    box-shadow: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+
+
+.icon-container:hover{
+    background: #ffe78b;
+}
+.icon-container{
+	display: inline-block;
+	text-align: center;
+	cursor: pointer;
+	background: #ffffff;
+	padding: 15px 10px;
+	min-width: 150px;
+	border-radius: 6px;
+	box-shadow: inset -2px -6px 0px 0px rgb(0 0 0 / 3%);
+}
+.swal2-title{
+    font-weight: 800;
+}
+.icon-title{
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.settin{
+    padding: 0px 0;
+    display: grid;
+    margin: 0 auto;
+    position: relative;
+    margin-top: 0px;
+    margin-bottom: 20px;
+    text-align: center;
+    box-sizing: border-box !important;!i;!;
+}
+.settin h2{
+    color: #000000;
+    font-size: 18px;
+    font-weight: 800;
+    background: #ffffff;
+    width: 210px;
+    margin: 0 auto;
+    border-radius: 29px;
+    height: 36px;
+    line-height: 36px;
+}
