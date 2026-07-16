@@ -7,6 +7,7 @@
   { "id": "bobtherobber", "name": "Bob the Robber", "file": "games/bobtherobber.swf", "thumb": "thumbs/bobtherobber.png" },
   { "id": "bobtherobber2", "name": "Bob the Robber 2", "file": "games/bobtherobber2.swf", "thumb": "thumbs/bobtherobber2.png" },
   { "id": "wsm", "name": "Wallsmash", "html": "games/wallsmash2/index.html", "thumb": "thumbs/wsm.png" },
+  { "id": "cb2", "name": "Crazy Balls 2", "html": "games/crazyballs2/index.html", "thumb": "thumbs/cb2.png" },
   { "id": "btd1", "name": "Bloons Tower Defense", "file": "games/btd1.swf", "thumb": "thumbs/btd1.png" },
   { "id": "btd2", "name": "Bloons Tower Defense 2", "file": "games/btd2.swf", "thumb": "thumbs/btd2.png" },
   { "id": "btd3", "name": "Bloons Tower Defense 3", "file": "games/btd3.swf", "thumb": "thumbs/btd3.png" },
