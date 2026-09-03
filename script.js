@@ -5,7 +5,10 @@ async function loadGames() {
     const favoritesContainer = document.getElementById("favorites");
 
     try {
-        const response = await fetch("games.json");
+        const response = await fetch("/games.json");
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const games = await response.json();
 
         gamesContainer.innerHTML = "";
@@ -23,8 +26,8 @@ async function loadGames() {
         setupSearch(games);
 
     } catch (error) {
-        console.error(error);
-        gamesContainer.innerHTML = "<p>Error loading games.</p>";
+        console.error("Error loading games:", error);
+        gamesContainer.innerHTML = "<p>Error loading games. Please refresh the page.</p>";
     }
 }
 
