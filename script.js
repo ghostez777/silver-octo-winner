@@ -5,7 +5,7 @@ async function loadGames() {
     const favoritesContainer = document.getElementById("favorites");
 
     try {
-        const response = await fetch("/games.json");
+        const response = await fetch("./games.json");
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
