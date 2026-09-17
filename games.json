@@ -1,4 +1,5 @@
 [
+  { "id": "bubbleshooter", "name": "Bubbleshooter", "file": "games/bubble-shooter.swf", "thumb": "thumbs/bubs.png" },
   { "id": "ageofwar", "name": "Age of War", "file": "games/ageofwar.swf", "thumb": "thumbs/ageofwar.png" },
   { "id": "papasmochiaria", "name": "Papa's Mochiaria", "file": "games/papasmochiaria.swf", "thumb": "thumbs/papasmochiaria.png" },
   { "id": "angrygran2", "name": "Angry Gran 2", "file": "games/angrygran2.swf", "thumb": "thumbs/angrygran2.png" },
