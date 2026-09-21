@@ -6,17 +6,15 @@ async function loadGames() {
 
     try {
         const response = await fetch("./games.json");
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        
         allGames = await response.json();
-
         renderGames(allGames);
         setupSearch();
 
     } catch (error) {
-        console.error("Error loading games:", error);
-        gamesContainer.innerHTML = "<div class='empty-state'>Failed to load games. Please refresh the page.</div>";
+        console.error("Failed to load games:", error);
+        gamesContainer.innerHTML = "<div class='empty-state'>Failed to load games catalog.</div>";
     }
 }
 
@@ -30,30 +28,23 @@ function renderGames(gamesToRender) {
 
     const favoriteGames = gamesToRender.filter(game => favorites.includes(game.id));
 
-    // Favorites visibility & render
     if (favoriteGames.length > 0) {
         favoritesSection.classList.remove("hidden");
-        favoriteGames.forEach(game => {
-            favoritesContainer.appendChild(createGameCard(game));
-        });
+        favoriteGames.forEach(game => favoritesContainer.appendChild(createGameCard(game)));
     } else {
         favoritesSection.classList.add("hidden");
     }
 
-    // All Games render
     if (gamesToRender.length === 0) {
-        gamesContainer.innerHTML = "<div class='empty-state'>No games found matching your search.</div>";
+        gamesContainer.innerHTML = "<div class='empty-state'>No matching games found.</div>";
     } else {
-        gamesToRender.forEach(game => {
-            gamesContainer.appendChild(createGameCard(game));
-        });
+        gamesToRender.forEach(game => gamesContainer.appendChild(createGameCard(game)));
     }
 }
 
 function createGameCard(game) {
     const card = document.createElement("div");
     card.className = "game";
-
     const isFav = favorites.includes(game.id);
 
     card.innerHTML = `
@@ -66,16 +57,12 @@ function createGameCard(game) {
         </button>
     `;
 
-    const starBtn = card.querySelector(".favoriteBtn");
-    starBtn.addEventListener("click", e => {
+    card.querySelector(".favoriteBtn").addEventListener("click", e => {
         e.stopPropagation();
         toggleFavorite(game.id);
     });
 
-    card.addEventListener("click", () => {
-        loadGame(game);
-    });
-
+    card.addEventListener("click", () => loadGame(game));
     return card;
 }
 
@@ -87,11 +74,8 @@ function toggleFavorite(id) {
     }
 
     localStorage.setItem("favorites", JSON.stringify(favorites));
-
-    // Re-render based on current search state
-    const searchVal = document.getElementById("search").value.toLowerCase().trim();
-    const filtered = allGames.filter(game => game.name.toLowerCase().includes(searchVal));
-    renderGames(filtered);
+    const searchTerm = document.getElementById("search").value.toLowerCase().trim();
+    renderGames(allGames.filter(game => game.name.toLowerCase().includes(searchTerm)));
 }
 
 async function loadGame(game) {
@@ -102,7 +86,7 @@ async function loadGame(game) {
     player.innerHTML = "";
     title.textContent = game.name;
     modal.classList.add("active");
-    document.body.style.overflow = "hidden"; // Prevent scrolling when open
+    document.body.style.overflow = "hidden";
 
     if (game.html) {
         const iframe = document.createElement("iframe");
@@ -121,7 +105,7 @@ async function loadGame(game) {
             }
 
             if (!window.RufflePlayer) {
-                player.innerHTML = "<div class='empty-state'>Error: Flash player failed to load.</div>";
+                player.innerHTML = "<div class='empty-state'>Error loading Ruffle Flash engine.</div>";
                 return;
             }
 
@@ -131,8 +115,8 @@ async function loadGame(game) {
             playerInstance.load(game.file);
 
         } catch (error) {
-            console.error("Error loading game:", error);
-            player.innerHTML = "<div class='empty-state'>Error launching flash game.</div>";
+            console.error("Error launching game:", error);
+            player.innerHTML = "<div class='empty-state'>Could not load flash file.</div>";
         }
     }
 }
@@ -140,19 +124,15 @@ async function loadGame(game) {
 function closeGame() {
     const modal = document.getElementById("player-modal");
     const player = document.getElementById("player");
-
     modal.classList.remove("active");
     player.innerHTML = "";
     document.body.style.overflow = "";
 }
 
-// Fullscreen capability for the modal player
 function toggleFullscreen() {
     const player = document.getElementById("player");
     if (!document.fullscreenElement) {
-        player.requestFullscreen().catch(err => {
-            console.error(`Fullscreen error: ${err.message}`);
-        });
+        player.requestFullscreen().catch(err => console.error(err));
     } else {
         document.exitFullscreen();
     }
@@ -163,11 +143,9 @@ document.getElementById("fullscreenBtn").addEventListener("click", toggleFullscr
 
 function setupSearch() {
     const search = document.getElementById("search");
-
     search.oninput = () => {
         const term = search.value.toLowerCase().trim();
-        const filteredGames = allGames.filter(game => game.name.toLowerCase().includes(term));
-        renderGames(filteredGames);
+        renderGames(allGames.filter(game => game.name.toLowerCase().includes(term)));
     };
 }
 
