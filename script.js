@@ -47,8 +47,16 @@ function createGameCard(game) {
     card.className = "game";
     const isFav = favorites.includes(game.id);
 
+    // Creates a fallback image URL matching your dark theme if the local file is missing
+    const fallbackUrl = `https://placehold.co/600x400/1c253e/818cf8?text=${encodeURIComponent(game.name)}`;
+
     card.innerHTML = `
-        <img src="${game.thumb}" class="thumb" alt="${game.name}" loading="lazy" decoding="async">
+        <img src="${game.thumb}" 
+             class="thumb" 
+             alt="${game.name}" 
+             loading="lazy" 
+             decoding="async"
+             onerror="this.onerror=null; this.src='${fallbackUrl}'">
         <div class="game-overlay">
             <h3>${game.name}</h3>
         </div>
@@ -86,7 +94,10 @@ async function loadGame(game) {
     player.innerHTML = "";
     title.textContent = game.name;
     modal.classList.add("active");
+    
+    // Nuke the background UI and scrolling to save GPU
     document.body.style.overflow = "hidden";
+    document.body.classList.add("playing"); 
 
     // Standard HTML5 / Embedded Iframe Games
     if (game.html) {
@@ -116,15 +127,17 @@ async function loadGame(game) {
             const playerInstance = ruffle.createPlayer();
             player.appendChild(playerInstance);
 
-            // Hardware Performance Config
+            // Maximum Performance Hardware Config
             playerInstance.config = {
                 autoplay: "on",
                 unmuteOverlay: "hidden",
                 letterbox: "on",
                 forceScale: true,
-                quality: "high",
+                quality: "low",
                 graphicsBackends: ["webgl"],
-                preferredRenderer: "webgl"
+                preferredRenderer: "webgl",
+                maxExecutionDuration: 15,
+                allowScriptAccess: false 
             };
 
             playerInstance.load(game.file);
@@ -139,9 +152,19 @@ async function loadGame(game) {
 function closeGame() {
     const modal = document.getElementById("player-modal");
     const player = document.getElementById("player");
+    
+    // Force iframe memory garbage collection before removing
+    const iframe = player.querySelector('iframe');
+    if (iframe) {
+        iframe.src = "about:blank"; 
+    }
+
     modal.classList.remove("active");
     player.innerHTML = "";
+    
+    // Restore the background UI
     document.body.style.overflow = "";
+    document.body.classList.remove("playing");
 }
 
 function toggleFullscreen() {
