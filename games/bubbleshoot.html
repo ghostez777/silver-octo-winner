@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Bubble Shooter</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; touch-action: none; }
+        body {
+            background: #070913;
+            color: white;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #gameContainer {
+            position: relative;
+            background: #121829;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        canvas { display: block; }
+        .score-board {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #818cf8;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div class="score-board">Score: <span id="score">0</span></div>
+        <canvas id="canvas" width="360" height="500"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const RADIUS = 18;
+        const COLORS = ["#f87171", "#60a5fa", "#4ade80", "#facc15", "#c084fc"];
+        
+        let grid = [];
+        let rows = 6, cols = 10;
+        let score = 0;
+        let currentBubble = null;
+        let aimPos = { x: 180, y: 0 };
+        let isAiming = false;
+
+        class Bubble {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color || COLORS[Math.floor(Math.random() * COLORS.length)];
+                this.dx = 0;
+                this.dy = 0;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, RADIUS - 1, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+
+        function init() {
+            grid = [];
+            for (let r = 0; r < rows; r++) {
+                grid[r] = [];
+                for (let c = 0; c < cols; c++) {
+                    let x = c * (RADIUS * 2) + RADIUS;
+                    let y = r * (RADIUS * 2) + RADIUS;
+                    grid[r][c] = new Bubble(x, y);
+                }
+            }
+            spawnShooter();
+        }
+
+        function spawnShooter() {
+            currentBubble = new Bubble(canvas.width / 2, canvas.height - RADIUS);
+        }
+
+        function updatePosition(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            aimPos = { 
+                x: clientX - rect.left, 
+                y: clientY - rect.top 
+            };
+        }
+
+        function fireBubble() {
+            if (currentBubble && currentBubble.dx === 0 && currentBubble.dy === 0) {
+                let angle = Math.atan2(aimPos.y - currentBubble.y, aimPos.x - currentBubble.x);
+                if (angle < 0) {
+                    currentBubble.dx = Math.cos(angle) * 10;
+                    currentBubble.dy = Math.sin(angle) * 10;
+                }
+            }
+        }
+
+        // Mouse listeners
+        canvas.addEventListener("mousemove", (e) => updatePosition(e.clientX, e.clientY));
+        canvas.addEventListener("click", fireBubble);
+
+        // Touch listeners
+        canvas.addEventListener("touchstart", (e) => {
+            isAiming = true;
+            updatePosition(e.touches[0].clientX, e.touches[0].clientY);
+        });
+
+        canvas.addEventListener("touchmove", (e) => {
+            if (isAiming) updatePosition(e.touches[0].clientX, e.touches[0].clientY);
+        });
+
+        canvas.addEventListener("touchend", () => {
+            if (isAiming) {
+                isAiming = false;
+                fireBubble();
+            }
+        });
+
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid bubbles
+            for (let r = 0; r < grid.length; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (grid[r][c]) grid[r][c].draw();
+                }
+            }
+
+            // Draw trajectory line
+            if (currentBubble && currentBubble.dx === 0) {
+                ctx.beginPath();
+                ctx.moveTo(currentBubble.x, currentBubble.y);
+                ctx.lineTo(aimPos.x, aimPos.y);
+                ctx.strokeStyle = "rgba(255,255,255,0.3)";
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 4]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Move shooting bubble
+            if (currentBubble) {
+                currentBubble.x += currentBubble.dx;
+                currentBubble.y += currentBubble.dy;
+
+                // Wall bounce
+                if (currentBubble.x - RADIUS <= 0 || currentBubble.x + RADIUS >= canvas.width) {
+                    currentBubble.dx *= -1;
+                }
+
+                // Snap to top or grid hit
+                if (currentBubble.y - RADIUS <= 0 || checkCollision()) {
+                    snapToGrid();
+                    spawnShooter();
+                }
+
+                currentBubble.draw();
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        function checkCollision() {
+            for (let r = 0; r < grid.length; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (grid[r][c]) {
+                        let dist = Math.hypot(currentBubble.x - grid[r][c].x, currentBubble.y - grid[r][c].y);
+                        if (dist < RADIUS * 2 - 4) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function snapToGrid() {
+            let col = Math.floor(currentBubble.x / (RADIUS * 2));
+            let row = Math.floor(currentBubble.y / (RADIUS * 2));
+            col = Math.max(0, Math.min(cols - 1, col));
+            row = Math.max(0, row);
+
+            if (!grid[row]) grid[row] = [];
+            let x = col * (RADIUS * 2) + RADIUS;
+            let y = row * (RADIUS * 2) + RADIUS;
+            
+            grid[row][col] = new Bubble(x, y, currentBubble.color);
+            score += 10;
+            document.getElementById("score").textContent = score;
+        }
+
+        init();
+        update();
+    </script>
+</body>
+</html>
