@@ -1,17 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EzPzGhostez - Gaming Portal</title>
-    <!-- Google Fonts -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>EzPzGhostez - Arcade Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
     <nav class="navbar">
@@ -21,7 +18,7 @@
         </div>
 
         <div class="search-wrapper">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
@@ -30,9 +27,9 @@
     </nav>
 
     <header class="hero">
-        <div class="hero-badge">⚡ Instant Play</div>
-        <h2 class="hero-title">Play Flash & HTML5 Games</h2>
-        <p class="hero-subtitle">Discover, save, and play your favorite retro and modern games in one epic portal.</p>
+        <div class="hero-badge">✨ HTML5 & Flash Arcade</div>
+        <h2 class="hero-title">Play Your Favorite Games</h2>
+        <p class="hero-subtitle">Retro classics, HTML5 puzzles, and Flash favorites, playable instantly on desktop or mobile.</p>
     </header>
 
     <main class="container">
@@ -51,22 +48,19 @@
         </section>
     </main>
 
-    <!-- Game Overlay Player -->
+    <!-- Modal Game Overlay -->
     <div id="player-modal" class="player-modal">
         <div class="player-bar">
             <span id="player-title" class="player-title">Playing Game</span>
             <div class="player-controls">
-                <button id="fullscreenBtn" class="control-btn" title="Fullscreen">⛶ Fullscreen</button>
-                <button id="closeGameBtn" class="control-btn close-btn" title="Close Game">✖ Close</button>
+                <button id="fullscreenBtn" class="control-btn">⛶ Fullscreen</button>
+                <button id="closeGameBtn" class="control-btn close-btn">✖ Close</button>
             </div>
         </div>
         <div id="player" class="player-container"></div>
     </div>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle"></script>
     <script src="script.js"></script>
-
 </body>
-
 </html>
