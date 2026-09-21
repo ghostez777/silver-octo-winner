@@ -85,7 +85,7 @@
   { "id": "snowballio", "name": "Snowball.io", "html": "games/snowballio.html", "thumb": "thumbs/snowballio.png" },
 
   { "id": "stacktris", "name": "Stacktris", "html": "games/stacktris.html", "thumb": "thumbs/stacktris.png" },
-
+  { "id": "bubbleshot", "name": "Bubble Shooter 2", "thumb": "thumbs/bubbleshooter.png", "html": "games/bubbleshooter.html" },
   { "id": "s-g", "name": "Sudoku", "html": "games/06-Sudoku-Game/index.html", "thumb": "thumbs/s-g.png" },
   { "id": "f-b", "name": "Flappy Bird", "html": "games/09-Flappy-Bird-Game/index.html", "thumb": "thumbs/f-g.png" },
   { "id": "w-g", "name": "Wordle", "html": "games/11-Wordle-Game/index.html", "thumb": "thumbs/w-g.png" },
