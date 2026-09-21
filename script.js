@@ -48,7 +48,7 @@ function createGameCard(game) {
     const isFav = favorites.includes(game.id);
 
     card.innerHTML = `
-        <img src="${game.thumb}" class="thumb" alt="${game.name}" loading="lazy">
+        <img src="${game.thumb}" class="thumb" alt="${game.name}" loading="lazy" decoding="async">
         <div class="game-overlay">
             <h3>${game.name}</h3>
         </div>
@@ -88,14 +88,17 @@ async function loadGame(game) {
     modal.classList.add("active");
     document.body.style.overflow = "hidden";
 
+    // Standard HTML5 / Embedded Iframe Games
     if (game.html) {
         const iframe = document.createElement("iframe");
         iframe.src = game.html;
-        iframe.allow = "fullscreen";
+        iframe.allow = "autoplay; fullscreen; accelerometer; gyroscope; clipboard-read; clipboard-write";
+        iframe.loading = "eager";
         player.appendChild(iframe);
         return;
     }
 
+    // Flash Games via Ruffle Engine
     if (game.file) {
         try {
             let attempts = 0;
@@ -112,6 +115,18 @@ async function loadGame(game) {
             const ruffle = window.RufflePlayer.newest();
             const playerInstance = ruffle.createPlayer();
             player.appendChild(playerInstance);
+
+            // Hardware Performance Config
+            playerInstance.config = {
+                autoplay: "on",
+                unmuteOverlay: "hidden",
+                letterbox: "on",
+                forceScale: true,
+                quality: "high",
+                graphicsBackends: ["webgl"],
+                preferredRenderer: "webgl"
+            };
+
             playerInstance.load(game.file);
 
         } catch (error) {
