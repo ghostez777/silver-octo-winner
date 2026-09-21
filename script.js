@@ -1,33 +1,52 @@
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+let allGames = [];
 
 async function loadGames() {
     const gamesContainer = document.getElementById("games");
-    const favoritesContainer = document.getElementById("favorites");
 
     try {
         const response = await fetch("./games.json");
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const games = await response.json();
+        allGames = await response.json();
 
-        gamesContainer.innerHTML = "";
-        favoritesContainer.innerHTML = "";
-
-        games.forEach(game => {
-            const card = createGameCard(game);
-            gamesContainer.appendChild(card);
-
-            if (favorites.includes(game.id)) {
-                favoritesContainer.appendChild(createGameCard(game));
-            }
-        });
-
-        setupSearch(games);
+        renderGames(allGames);
+        setupSearch();
 
     } catch (error) {
         console.error("Error loading games:", error);
-        gamesContainer.innerHTML = "<p>Error loading games. Please refresh the page.</p>";
+        gamesContainer.innerHTML = "<div class='empty-state'>Failed to load games. Please refresh the page.</div>";
+    }
+}
+
+function renderGames(gamesToRender) {
+    const gamesContainer = document.getElementById("games");
+    const favoritesContainer = document.getElementById("favorites");
+    const favoritesSection = document.getElementById("favorites-section");
+
+    gamesContainer.innerHTML = "";
+    favoritesContainer.innerHTML = "";
+
+    const favoriteGames = gamesToRender.filter(game => favorites.includes(game.id));
+
+    // Favorites visibility & render
+    if (favoriteGames.length > 0) {
+        favoritesSection.classList.remove("hidden");
+        favoriteGames.forEach(game => {
+            favoritesContainer.appendChild(createGameCard(game));
+        });
+    } else {
+        favoritesSection.classList.add("hidden");
+    }
+
+    // All Games render
+    if (gamesToRender.length === 0) {
+        gamesContainer.innerHTML = "<div class='empty-state'>No games found matching your search.</div>";
+    } else {
+        gamesToRender.forEach(game => {
+            gamesContainer.appendChild(createGameCard(game));
+        });
     }
 }
 
@@ -35,24 +54,23 @@ function createGameCard(game) {
     const card = document.createElement("div");
     card.className = "game";
 
+    const isFav = favorites.includes(game.id);
+
     card.innerHTML = `
-        <img src="${game.thumb}" class="thumb" alt="${game.name}">
-        <h3>${game.name}</h3>
+        <img src="${game.thumb}" class="thumb" alt="${game.name}" loading="lazy">
+        <div class="game-overlay">
+            <h3>${game.name}</h3>
+        </div>
+        <button class="favoriteBtn ${isFav ? '' : 'inactive'}" aria-label="Favorite">
+            ${isFav ? '★' : '☆'}
+        </button>
     `;
 
-    const star = document.createElement("div");
-    star.className = favorites.includes(game.id)
-        ? "favoriteBtn"
-        : "favoriteBtn inactive";
-
-    star.innerHTML = favorites.includes(game.id) ? "⭐" : "☆";
-
-    star.addEventListener("click", e => {
+    const starBtn = card.querySelector(".favoriteBtn");
+    starBtn.addEventListener("click", e => {
         e.stopPropagation();
         toggleFavorite(game.id);
     });
-
-    card.appendChild(star);
 
     card.addEventListener("click", () => {
         loadGame(game);
@@ -63,29 +81,33 @@ function createGameCard(game) {
 
 function toggleFavorite(id) {
     if (favorites.includes(id)) {
-        favorites = favorites.filter(game => game !== id);
+        favorites = favorites.filter(gameId => gameId !== id);
     } else {
         favorites.push(id);
     }
 
     localStorage.setItem("favorites", JSON.stringify(favorites));
-    loadGames();
+
+    // Re-render based on current search state
+    const searchVal = document.getElementById("search").value.toLowerCase().trim();
+    const filtered = allGames.filter(game => game.name.toLowerCase().includes(searchVal));
+    renderGames(filtered);
 }
 
 async function loadGame(game) {
+    const modal = document.getElementById("player-modal");
     const player = document.getElementById("player");
-    const closeButton = document.getElementById("closeGameBtn");
+    const title = document.getElementById("player-title");
 
     player.innerHTML = "";
-    player.style.display = "block";
-    closeButton.style.display = "block";
+    title.textContent = game.name;
+    modal.classList.add("active");
+    document.body.style.overflow = "hidden"; // Prevent scrolling when open
 
     if (game.html) {
         const iframe = document.createElement("iframe");
         iframe.src = game.html;
-        iframe.style.border = "none";
-        iframe.style.width = "100%";
-        iframe.style.height = "100%";
+        iframe.allow = "fullscreen";
         player.appendChild(iframe);
         return;
     }
@@ -99,43 +121,53 @@ async function loadGame(game) {
             }
 
             if (!window.RufflePlayer) {
-                player.innerHTML = "<div style='display:flex;align-items:center;justify-content:center;height:100%;color:white;font-size:18px;'>Error: Flash player not loaded. Please refresh the page.</div>";
+                player.innerHTML = "<div class='empty-state'>Error: Flash player failed to load.</div>";
                 return;
             }
 
             const ruffle = window.RufflePlayer.newest();
             const playerInstance = ruffle.createPlayer();
-
             player.appendChild(playerInstance);
             playerInstance.load(game.file);
 
         } catch (error) {
             console.error("Error loading game:", error);
-            player.innerHTML = "<div style='display:flex;align-items:center;justify-content:center;height:100%;color:white;font-size:18px;'>Error loading game. Please try again.</div>";
+            player.innerHTML = "<div class='empty-state'>Error launching flash game.</div>";
         }
     }
 }
 
-document.getElementById("closeGameBtn").addEventListener("click", () => {
-    document.getElementById("player").style.display = "none";
-    document.getElementById("player").innerHTML = "";
-    document.getElementById("closeGameBtn").style.display = "none";
-});
+function closeGame() {
+    const modal = document.getElementById("player-modal");
+    const player = document.getElementById("player");
 
-function setupSearch(games) {
+    modal.classList.remove("active");
+    player.innerHTML = "";
+    document.body.style.overflow = "";
+}
+
+// Fullscreen capability for the modal player
+function toggleFullscreen() {
+    const player = document.getElementById("player");
+    if (!document.fullscreenElement) {
+        player.requestFullscreen().catch(err => {
+            console.error(`Fullscreen error: ${err.message}`);
+        });
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+document.getElementById("closeGameBtn").addEventListener("click", closeGame);
+document.getElementById("fullscreenBtn").addEventListener("click", toggleFullscreen);
+
+function setupSearch() {
     const search = document.getElementById("search");
 
     search.oninput = () => {
         const term = search.value.toLowerCase().trim();
-        const gamesContainer = document.getElementById("games");
-
-        gamesContainer.innerHTML = "";
-
-        games
-            .filter(game => game.name.toLowerCase().includes(term))
-            .forEach(game => {
-                gamesContainer.appendChild(createGameCard(game));
-            });
+        const filteredGames = allGames.filter(game => game.name.toLowerCase().includes(term));
+        renderGames(filteredGames);
     };
 }
 
