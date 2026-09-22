@@ -4,107 +4,340 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#070b12">
+
     <title>Ghostez Arcade</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <div class="scanlines"></div>
-    <div class="app-shell">
-        <aside class="sidebar">
-            <div class="brand-wrap">
-                <div class="brand-mark">G</div>
-                <div class="brand-copy">
-                    <span class="brand-small">Arcade</span>
-                    <span class="brand-main">Ghostez</span>
-                </div>
-            </div>
 
-            <nav class="side-nav" aria-label="Main menu">
-                <a class="nav-item active" href="#library-section">Game Vault</a>
-                <a class="nav-item" href="#favorites-section">Favorites</a>
-                <a class="nav-item" href="#">Challenges</a>
-                <a class="nav-item" href="#">Leaderboard</a>
-            </nav>
+<div class="scanlines"></div>
 
-            <div class="sidebar-panel">
-                <span class="panel-label">System</span>
-                <strong>Arcade Rush</strong>
-                <p>Instant play. No login. Pure high-score chaos.</p>
-            </div>
-        </aside>
+<div class="app-shell">
 
-        <main class="workspace">
-            <header class="topbar">
-                <div class="topbar-left">
-                    <div class="live-pill"><span class="live-dot"></span> LIVE</div>
-                </div>
+    <aside class="sidebar">
 
-                <div class="search-wrapper">
-                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <input id="search" type="search" placeholder="Search games..." autocomplete="off" aria-label="Search games">
-                </div>
+        <div class="brand-wrap">
+            <div class="brand-mark">G</div>
 
-                <div class="profile-pill" aria-label="Profile">EZ</div>
-            </header>
-
-            <section class="hero">
-                <div class="hero-copy">
-                    <span class="eyebrow">Cabinet ready</span>
-                    <h1>Press Start.</h1>
-                    <p>Retro thrills, instant play, and a library of browser games built for pure arcade energy.</p>
-                </div>
-
-                <div class="hero-side">
-                    <div class="mini-display">
-                        <span>High score</span>
-                        <strong>99,999</strong>
-                    </div>
-                    <button class="hero-button" type="button">Play now</button>
-                </div>
-            </section>
-
-            <main class="content-panel">
-                <section id="favorites-section" class="section-container hidden">
-                    <div class="section-header">
-                        <div>
-                            <span class="section-kicker">Saved</span>
-                            <h2 class="sectionTitle">Favorites</h2>
-                        </div>
-                    </div>
-                    <div id="favorites" class="game-grid"></div>
-                </section>
-
-                <section id="library-section" class="section-container">
-                    <div class="section-header">
-                        <div>
-                            <span class="section-kicker">Game vault</span>
-                            <h2 class="sectionTitle">All games</h2>
-                        </div>
-                    </div>
-                    <div id="games" class="game-grid"></div>
-                </section>
-            </main>
-        </main>
-    </div>
-
-    <div id="player-modal" class="player-modal" role="dialog" aria-modal="true" aria-label="Game player">
-        <div class="player-bar">
-            <span id="player-title" class="player-title">Playing game</span>
-            <div class="player-controls">
-                <button id="fullscreenBtn" class="control-btn">⛶ Fullscreen</button>
-                <button id="closeGameBtn" class="control-btn close-btn">✕ Close</button>
+            <div class="brand-copy">
+                <span class="brand-small">Arcade</span>
+                <span class="brand-main">Ghostez</span>
             </div>
         </div>
-        <div id="player" class="player-container"></div>
+
+        <nav class="side-nav" aria-label="Main menu">
+
+            <a class="nav-item active" href="#library-section">
+                🎮 Game Vault
+            </a>
+
+            <a class="nav-item" href="#favorites-section">
+                ⭐ Favorites
+            </a>
+
+            <a class="nav-item" href="#gba-section">
+                🕹️ GBA
+            </a>
+
+            <a class="nav-item" href="#">
+                🏆 Challenges
+            </a>
+
+            <a class="nav-item" href="#">
+                📊 Leaderboard
+            </a>
+
+        </nav>
+
+        <div class="sidebar-panel">
+            <span class="panel-label">System</span>
+
+            <strong>Arcade Rush</strong>
+
+            <p>
+                Instant play. No login.
+                Pure high-score chaos.
+            </p>
+        </div>
+
+    </aside>
+
+
+    <main class="workspace">
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+                <div class="live-pill">
+                    <span class="live-dot"></span>
+                    LIVE
+                </div>
+            </div>
+
+            <div class="search-wrapper">
+
+                <svg
+                    class="search-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+
+                <input
+                    id="search"
+                    type="search"
+                    placeholder="Search games..."
+                    autocomplete="off"
+                    aria-label="Search games"
+                >
+
+            </div>
+
+            <div class="profile-pill">
+                EZ
+            </div>
+
+        </header>
+
+
+        <section class="hero">
+
+            <div class="hero-copy">
+
+                <span class="eyebrow">
+                    Cabinet ready
+                </span>
+
+                <h1>
+                    Press Start.
+                </h1>
+
+                <p>
+                    Retro thrills, instant play, and a library
+                    of browser games built for pure arcade energy.
+                </p>
+
+            </div>
+
+            <div class="hero-side">
+
+                <div class="mini-display">
+
+                    <span>
+                        High score
+                    </span>
+
+                    <strong>
+                        99,999
+                    </strong>
+
+                </div>
+
+                <button
+                    class="hero-button"
+                    id="playRandomBtn"
+                    type="button"
+                >
+                    Play now
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <main class="content-panel">
+
+            <!-- FAVORITES -->
+
+            <section
+                id="favorites-section"
+                class="section-container hidden"
+            >
+
+                <div class="section-header">
+
+                    <div>
+                        <span class="section-kicker">
+                            Saved
+                        </span>
+
+                        <h2 class="sectionTitle">
+                            Favorites
+                        </h2>
+                    </div>
+
+                </div>
+
+                <div
+                    id="favorites"
+                    class="game-grid"
+                ></div>
+
+            </section>
+
+
+            <!-- ALL GAMES -->
+
+            <section
+                id="library-section"
+                class="section-container"
+            >
+
+                <div class="section-header">
+
+                    <div>
+                        <span class="section-kicker">
+                            Game vault
+                        </span>
+
+                        <h2 class="sectionTitle">
+                            All games
+                        </h2>
+                    </div>
+
+                </div>
+
+                <div
+                    id="games"
+                    class="game-grid"
+                ></div>
+
+            </section>
+
+
+            <!-- GBA -->
+
+            <section
+                id="gba-section"
+                class="section-container gba-section"
+            >
+
+                <div class="section-header">
+
+                    <div>
+
+                        <span class="section-kicker">
+                            Retro hardware
+                        </span>
+
+                        <h2 class="sectionTitle">
+                            Game Boy Advance
+                        </h2>
+
+                    </div>
+
+                </div>
+
+                <div class="gba-info-card">
+
+                    <div class="gba-icon">
+                        🕹️
+                    </div>
+
+                    <div class="gba-info">
+
+                        <h3>
+                            GBA Emulator
+                        </h3>
+
+                        <p>
+                            Play GBA games using the emulator
+                            already included in this repository.
+                        </p>
+
+                        <p class="gba-note">
+                            Only use ROMs you have permission to use.
+                        </p>
+
+                        <button
+                            id="openGbaBtn"
+                            class="hero-button"
+                            type="button"
+                        >
+                            Open GBA Emulator
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </main>
+
+</div>
+
+
+<!-- GAME PLAYER -->
+
+<div
+    id="player-modal"
+    class="player-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Game player"
+>
+
+    <div class="player-bar">
+
+        <span
+            id="player-title"
+            class="player-title"
+        >
+            Playing game
+        </span>
+
+        <div class="player-controls">
+
+            <button
+                id="fullscreenBtn"
+                class="control-btn"
+                type="button"
+            >
+                ⛶ Fullscreen
+            </button>
+
+            <button
+                id="closeGameBtn"
+                class="control-btn close-btn"
+                type="button"
+            >
+                ✕ Close
+            </button>
+
+        </div>
+
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle"></script>
-    <script src="script.js"></script>
+    <div
+        id="player"
+        class="player-container"
+    ></div>
+
+</div>
+
+
+<!-- RUFFLE -->
+
+<script src="https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle"></script>
+
+<!-- MAIN SCRIPT -->
+
+<script src="script.js"></script>
+
 </body>
 </html>
