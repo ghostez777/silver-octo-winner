@@ -354,10 +354,7 @@ function launchGame(game) {
   */
 
   if (game.file) {
-    const ruffleURL =
-      `ruffle/index.html?game=${encodeURIComponent(game.file)}`;
-
-    openPlayer(game, ruffleURL);
+    openRufflePlayer(game);
     return;
   }
 
@@ -373,12 +370,70 @@ function openPlayer(game, url) {
   state.currentGame = game;
 
   $("#playerTitle").textContent = game.name;
+  $("#gameFrame").style.display = "block";
+  $("#ruffleFrame").style.display = "none";
   $("#gameFrame").src = url;
 
   $("#playerModal").classList.add("open");
   document.body.style.overflow = "hidden";
 
-  // Put the game player into the device fullscreen mode after the user\n  // clicks a game. Browsers require fullscreen requests to come from\n  // a user interaction, so this is intentionally called during launch.\n  requestGameFullscreen();
+  requestGameFullscreen();
+}
+
+
+async function openRufflePlayer(game) {
+  state.currentGame = game;
+
+  const iframe = $("#gameFrame");
+  const ruffleFrame = $("#ruffleFrame");
+
+  $("#playerTitle").textContent = game.name;
+
+  iframe.src = "";
+  iframe.style.display = "none";
+
+  ruffleFrame.innerHTML = "";
+  ruffleFrame.style.display = "block";
+
+  $("#playerModal").classList.add("open");
+  document.body.style.overflow = "hidden";
+
+  try {
+    if (!window.RufflePlayer || !window.RufflePlayer.newest) {
+      throw new Error("Ruffle did not initialize.");
+    }
+
+    const ruffle = window.RufflePlayer.newest();
+    const player = ruffle.createPlayer();
+
+    player.style.width = "100%";
+    player.style.height = "100%";
+
+    ruffleFrame.appendChild(player);
+
+    const swfUrl = new URL(game.file, window.location.href).href;
+
+    await player.ruffle().load({
+      url: swfUrl,
+      autoplay: "auto",
+      allowNetworking: "all",
+      allowFullscreen: true,
+      letterbox: "fullscreen"
+    });
+
+    requestGameFullscreen();
+  } catch (error) {
+    console.error("Ruffle failed to load:", error);
+    ruffleFrame.innerHTML = `
+      <div style="height:100%;display:grid;place-items:center;padding:24px;box-sizing:border-box;color:white;background:#080b12;text-align:center;font-family:system-ui,sans-serif">
+        <div>
+          <h2>Ruffle could not load this game</h2>
+          <p>Make sure the SWF file exists in the <code>/games/</code> folder.</p>
+          <p style="opacity:.7">${escapeHTML(error.message || String(error))}</p>
+        </div>
+      </div>
+    `;
+  }
 }
 
 
@@ -406,6 +461,10 @@ function closePlayer() {
   $("#playerModal").classList.remove("open");
 
   $("#gameFrame").src = "";
+  $("#gameFrame").style.display = "block";
+
+  $("#ruffleFrame").innerHTML = "";
+  $("#ruffleFrame").style.display = "none";
 
   document.body.style.overflow = "";
 }
