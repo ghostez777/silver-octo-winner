@@ -382,7 +382,27 @@ function openPlayer(game, url) {
 }
 
 
+async function requestGameFullscreen() {
+  const player = $("#playerModal");
+
+  if (!player || !player.requestFullscreen || !document.fullscreenEnabled) {
+    return;
+  }
+
+  try {
+    await player.requestFullscreen({ navigationUI: "hide" });
+  } catch (error) {
+    // Some browsers or embedded game hosts may not permit fullscreen.
+    console.debug("Fullscreen request was not allowed:", error);
+  }
+}
+
+
 function closePlayer() {
+  if (document.fullscreenElement) {
+    document.exitFullscreen?.().catch(() => {});
+  }
+
   $("#playerModal").classList.remove("open");
 
   $("#gameFrame").src = "";
