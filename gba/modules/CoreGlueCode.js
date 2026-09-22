@@ -246,7 +246,14 @@ function registerBIOS() {
 
 function downloadROM(gamename) {
     writeRedTemporaryText("Downloading \"" + games[gamename] + ".\"");
-    downloadFile("../binaries/" + gamename + ".gba", registerROM);
+
+    // Personal/local ROMs are stored in gba/roms/.
+    // Keep the original bundled games in gba/binaries/.
+    var romPath = (gamename === "pokemonemerald")
+        ? "../roms/" + gamename + ".gba"
+        : "../binaries/" + gamename + ".gba";
+
+    downloadFile(romPath, registerROM);
 }
 
 function registerROM() {
