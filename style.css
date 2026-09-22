@@ -478,3 +478,139 @@ iframe, ruffle-player {
   .game h3::after { display: none; }
   .game { min-height: 74px; }
 }
+/* ========================================
+   GBA
+======================================== */
+
+.gba-section {
+    margin-top: 34px;
+}
+
+.gba-info-card {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+
+    padding: 24px;
+
+    border: 1px solid var(--line);
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(104, 235, 255, 0.08),
+            rgba(127, 107, 255, 0.08)
+        );
+
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.25);
+}
+
+.gba-icon {
+    width: 90px;
+    height: 90px;
+
+    display: grid;
+    place-items: center;
+
+    flex-shrink: 0;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--cyan),
+            var(--purple)
+        );
+
+    font-size: 42px;
+
+    box-shadow:
+        0 0 30px rgba(104, 235, 255, 0.18);
+}
+
+.gba-info {
+    flex: 1;
+}
+
+.gba-info h3 {
+    margin: 0 0 8px;
+
+    font-family: var(--display);
+
+    font-size: 22px;
+}
+
+.gba-info p {
+    margin: 0 0 12px;
+
+    color: var(--muted);
+
+    line-height: 1.6;
+}
+
+.gba-note {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.gba-info .hero-button {
+    margin-top: 8px;
+}
+
+
+.game-type {
+    display: inline-block;
+
+    margin-top: 5px;
+
+    color: var(--cyan);
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.08em;
+}
+
+
+/* ========================================
+   EMULATOR
+======================================== */
+
+#player {
+    background: #000;
+}
+
+#player iframe {
+    display: block;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    border: 0;
+}
+
+
+/* ========================================
+   MOBILE GBA
+======================================== */
+
+@media (max-width: 600px) {
+
+    .gba-info-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .gba-icon {
+        width: 70px;
+        height: 70px;
+        font-size: 32px;
+    }
+
+}
