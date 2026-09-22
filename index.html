@@ -3,61 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#f8fafc">
+    <meta name="theme-color" content="#0b1020">
     <title>Google Classroom</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <nav class="navbar" aria-label="Main navigation">
-        <a class="brand" href="./" aria-label="Google Classroom home">
-            <span class="brand-mark" aria-hidden="true">▰</span>
-            <span>Classroom</span>
-        </a>
-        <div class="search-wrapper">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input id="search" type="search" placeholder="Search games" autocomplete="off" aria-label="Search games">
-        </div>
-        <div class="profile" aria-label="Classroom account">C</div>
+        <a class="brand" href="./" aria-label="Home"><span class="brand-mark">✦</span><span>Playground</span></a>
+        <div class="nav-links"><a class="active" href="#games">Library</a><a href="#favorites-section">Favorites</a></div>
+        <div class="search-wrapper"><svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg><input id="search" type="search" placeholder="Find a game" autocomplete="off" aria-label="Search games"></div>
+        <div class="profile" aria-label="Profile">P</div>
     </nav>
 
-    <header class="hero">
-        <div class="hero-copy">
-            <span class="eyebrow">Your classroom library</span>
-            <h1>Learning break</h1>
-            <p>Take a quick break with puzzles, classics, and fun games.</p>
-        </div>
-        <div class="hero-art" aria-hidden="true"><span>✦</span><span>●</span><span>✚</span></div>
-    </header>
+    <header class="hero"><div class="hero-content"><span class="eyebrow">Game library</span><h1>Pick a game.<br><em>Make it yours.</em></h1><p>A collection of quick challenges, timeless classics, and unexpected adventures.</p><a class="hero-button" href="#games">Browse library <span>↓</span></a></div><div class="hero-orbit" aria-hidden="true"><span class="orbit-dot dot-one">✦</span><span class="orbit-dot dot-two">●</span><span class="orbit-dot dot-three">+</span><div class="orbit-ring"></div></div></header>
 
     <main class="container">
-        <section id="favorites-section" class="section-container hidden">
-            <div class="section-header"><h2 class="sectionTitle">Favorites</h2></div>
-            <div id="favorites" class="game-grid"></div>
-        </section>
-        <section class="section-container">
-            <div class="section-header"><h2 class="sectionTitle">All games</h2><span class="section-count">Explore the collection</span></div>
-            <div id="games" class="game-grid"></div>
-        </section>
+        <section id="favorites-section" class="section-container hidden"><div class="section-header"><div><span class="section-kicker">Saved for later</span><h2 class="sectionTitle">Favorites</h2></div></div><div id="favorites" class="game-grid"></div></section>
+        <section id="library-section" class="section-container"><div class="section-header"><div><span class="section-kicker">Browse everything</span><h2 class="sectionTitle">All games</h2></div><span class="section-count">Tap any title to play</span></div><div id="games" class="game-grid"></div></section>
     </main>
 
-    <div id="player-modal" class="player-modal" role="dialog" aria-modal="true" aria-label="Game player">
-        <div class="player-bar">
-            <span id="player-title" class="player-title">Playing game</span>
-            <div class="player-controls">
-                <button id="fullscreenBtn" class="control-btn">⛶ Fullscreen</button>
-                <button id="closeGameBtn" class="control-btn close-btn">✕ Close</button>
-            </div>
-        </div>
-        <div id="player" class="player-container"></div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle"></script>
-    <script src="script.js"></script>
+    <div id="player-modal" class="player-modal" role="dialog" aria-modal="true" aria-label="Game player"><div class="player-bar"><span id="player-title" class="player-title">Playing game</span><div class="player-controls"><button id="fullscreenBtn" class="control-btn">⛶ Fullscreen</button><button id="closeGameBtn" class="control-btn close-btn">✕ Close</button></div></div><div id="player" class="player-container"></div></div>
+    <script src="https://cdn.jsdelivr.net/npm/@ruffle-rs/ruffle"></script><script src="script.js"></script>
 </body>
 </html>
