@@ -388,8 +388,6 @@ function openPlayer(game, url) {
 
   $("#playerModal").classList.add("open");
   document.body.style.overflow = "hidden";
-
-  requestGameFullscreen();
 }
 
 
@@ -432,8 +430,6 @@ async function openRufflePlayer(game) {
       allowFullscreen: true,
       letterbox: "fullscreen"
     });
-
-    requestGameFullscreen();
   } catch (error) {
     console.error("Ruffle failed to load:", error);
     ruffleFrame.innerHTML = `
@@ -449,27 +445,7 @@ async function openRufflePlayer(game) {
 }
 
 
-async function requestGameFullscreen() {
-  const player = $("#playerModal");
-
-  if (!player || !player.requestFullscreen || !document.fullscreenEnabled) {
-    return;
-  }
-
-  try {
-    await player.requestFullscreen({ navigationUI: "hide" });
-  } catch (error) {
-    // Some browsers or embedded game hosts may not permit fullscreen.
-    console.debug("Fullscreen request was not allowed:", error);
-  }
-}
-
-
 function closePlayer() {
-  if (document.fullscreenElement) {
-    document.exitFullscreen?.().catch(() => {});
-  }
-
   $("#playerModal").classList.remove("open");
 
   $("#gameFrame").src = "";
