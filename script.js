@@ -43,7 +43,14 @@ async function loadGames() {
       throw new Error(`games.json returned ${response.status}`);
     }
 
-    const data = await response.json();
+    const text = await response.text();
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (parseError) {
+      throw new Error("games.json is not valid JSON.");
+    }
 
     /*
       Supports both:
@@ -498,7 +505,7 @@ function setupPlayer() {
 
     if (game.gba) {
       window.open(
-        `gba/player#${encodeURIComponent(game.gba)}`,
+        `jsemu/?rom=${encodeURIComponent(game.gba)}`,
         "_blank"
       );
       return;
