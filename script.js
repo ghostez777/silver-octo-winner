@@ -1,7 +1,9 @@
-let favorites =
-    JSON.parse(localStorage.getItem("favorites")) || [];
+let games = [];
 
-let allGames = [];
+let favorites =
+    JSON.parse(
+        localStorage.getItem("ghostezFavorites")
+    ) || [];
 
 
 // ========================================
@@ -10,204 +12,355 @@ let allGames = [];
 
 async function loadGames() {
 
-    const gamesContainer =
-        document.getElementById("games");
-
     try {
 
         const response =
-            await fetch("./games.json");
+            await fetch("games.json");
 
         if (!response.ok) {
-            throw new Error(
-                `HTTP error: ${response.status}`
-            );
+            throw new Error("Could not load games.json");
         }
 
-        allGames =
+        games =
             await response.json();
 
-        renderGames(allGames);
-
-        setupSearch();
+        renderAll();
 
     } catch (error) {
 
-        console.error(
-            "Failed to load games:",
-            error
-        );
+        console.error(error);
 
-        gamesContainer.innerHTML =
-            "<div class='empty-state'>Failed to load games catalog.</div>";
-    }
-}
-
-
-// ========================================
-// RENDER GAMES
-// ========================================
-
-function renderGames(gamesToRender) {
-
-    const gamesContainer =
-        document.getElementById("games");
-
-    const favoritesContainer =
-        document.getElementById("favorites");
-
-    const favoritesSection =
         document.getElementById(
-            "favorites-section"
-        );
-
-    gamesContainer.innerHTML = "";
-
-    favoritesContainer.innerHTML = "";
-
-
-    const favoriteGames =
-        gamesToRender.filter(game =>
-            favorites.includes(game.id)
-        );
-
-
-    if (favoriteGames.length > 0) {
-
-        favoritesSection.classList.remove(
-            "hidden"
-        );
-
-        favoriteGames.forEach(game => {
-
-            favoritesContainer.appendChild(
-                createGameCard(game)
-            );
-
-        });
-
-    } else {
-
-        favoritesSection.classList.add(
-            "hidden"
-        );
-    }
-
-
-    if (gamesToRender.length === 0) {
-
-        gamesContainer.innerHTML =
-            "<div class='empty-state'>No matching games found.</div>";
-
-    } else {
-
-        gamesToRender.forEach(game => {
-
-            gamesContainer.appendChild(
-                createGameCard(game)
-            );
-
-        });
+            "gamesGrid"
+        ).innerHTML =
+            `
+            <div class="empty-state">
+                Could not load games.json.
+            </div>
+            `;
     }
 }
 
 
 // ========================================
-// CREATE GAME CARD
+// NAVIGATION
+// ========================================
+
+document
+    .querySelectorAll(".nav-item[data-section]")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                showPage(
+                    button.dataset.section
+                );
+
+            }
+        );
+
+    });
+
+
+document
+    .querySelectorAll("[data-goto]")
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                showPage(
+                    button.dataset.goto
+                );
+
+            }
+        );
+
+    });
+
+
+function showPage(pageName) {
+
+    document
+        .querySelectorAll(".page")
+        .forEach(page => {
+
+            page.classList.remove("active");
+
+        });
+
+
+    const page =
+        document.getElementById(
+            pageName
+        );
+
+
+    if (page) {
+
+        page.classList.add("active");
+
+    }
+
+
+    document
+        .querySelectorAll(".nav-item[data-section]")
+        .forEach(button => {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.section === pageName
+            );
+
+        });
+
+}
+
+
+// ========================================
+// GAME CARDS
 // ========================================
 
 function createGameCard(game) {
 
     const card =
-        document.createElement("div");
+        document.createElement("article");
 
-    card.className = "game";
+    card.className =
+        "game";
 
 
-    const isFav =
+    const favorite =
         favorites.includes(game.id);
 
 
-    const fallbackUrl =
-        `https://placehold.co/600x400/1c253e/818cf8?text=${encodeURIComponent(
-            game.name
-        )}`;
-
-
-    let typeLabel = "Play";
+    let type =
+        "GAME";
 
 
     if (game.gba) {
-        typeLabel = "GBA";
+        type = "GBA";
     }
 
     if (game.file) {
-        typeLabel = "Flash";
+        type = "FLASH";
     }
+
+
+    const image =
+        game.thumb ||
+        `https://placehold.co/600x400/181a20/7c5cff?text=${encodeURIComponent(
+            game.name
+        )}`;
 
 
     card.innerHTML = `
 
         <img
-            src="${escapeHtml(game.thumb || "")}"
             class="thumb"
+            src="${escapeHtml(image)}"
             alt="${escapeHtml(game.name)}"
             loading="lazy"
-            decoding="async"
             onerror="
                 this.onerror=null;
-                this.src='${fallbackUrl}'
+                this.src='https://placehold.co/600x400/181a20/7c5cff?text=Game';
             "
         >
 
         <div class="game-overlay">
 
-            <div>
+            <h3>
+                ${escapeHtml(game.name)}
+            </h3>
 
-                <h3>
-                    ${escapeHtml(game.name)}
-                </h3>
-
-                <span class="game-type">
-                    ${typeLabel}
-                </span>
-
-            </div>
+            <span class="game-type">
+                ${type}
+            </span>
 
         </div>
 
         <button
-            class="favoriteBtn ${isFav ? "" : "inactive"}"
-            aria-label="Favorite"
+            class="favoriteBtn ${favorite ? "" : "inactive"}"
             type="button"
+            aria-label="Favorite ${escapeHtml(game.name)}"
         >
-            ${isFav ? "★" : "☆"}
+            ${favorite ? "★" : "☆"}
         </button>
+
     `;
 
 
-    const favoriteButton =
-        card.querySelector(".favoriteBtn");
+    card
+        .querySelector(".favoriteBtn")
+        .addEventListener(
+            "click",
+            event => {
 
+                event.stopPropagation();
 
-    favoriteButton.addEventListener(
-        "click",
-        event => {
+                toggleFavorite(
+                    game.id
+                );
 
-            event.stopPropagation();
-
-            toggleFavorite(game.id);
-        }
-    );
+            }
+        );
 
 
     card.addEventListener(
         "click",
-        () => loadGame(game)
+        () => {
+
+            launchGame(game);
+
+        }
     );
 
 
     return card;
+}
+
+
+// ========================================
+// RENDER
+// ========================================
+
+function renderAll(
+    filteredGames = games
+) {
+
+    const gamesGrid =
+        document.getElementById(
+            "gamesGrid"
+        );
+
+
+    const homeGames =
+        document.getElementById(
+            "homeGames"
+        );
+
+
+    const gbaGrid =
+        document.getElementById(
+            "gbaGrid"
+        );
+
+
+    const favoritesGrid =
+        document.getElementById(
+            "favoritesGrid"
+        );
+
+
+    gamesGrid.innerHTML = "";
+
+    homeGames.innerHTML = "";
+
+    gbaGrid.innerHTML = "";
+
+    favoritesGrid.innerHTML = "";
+
+
+    // All games
+
+    if (filteredGames.length) {
+
+        filteredGames.forEach(game => {
+
+            gamesGrid.appendChild(
+                createGameCard(game)
+            );
+
+        });
+
+    } else {
+
+        gamesGrid.innerHTML =
+            `
+            <div class="empty-state">
+                No games found.
+            </div>
+            `;
+
+    }
+
+
+    // Home
+
+    filteredGames
+        .slice(0, 6)
+        .forEach(game => {
+
+            homeGames.appendChild(
+                createGameCard(game)
+            );
+
+        });
+
+
+    // GBA
+
+    const gbaGames =
+        filteredGames.filter(
+            game => game.gba
+        );
+
+
+    if (gbaGames.length) {
+
+        gbaGames.forEach(game => {
+
+            gbaGrid.appendChild(
+                createGameCard(game)
+            );
+
+        });
+
+    } else {
+
+        gbaGrid.innerHTML =
+            `
+            <div class="empty-state">
+                No GBA games have been added yet.
+            </div>
+            `;
+
+    }
+
+
+    // Favorites
+
+    const favoriteGames =
+        filteredGames.filter(
+            game =>
+                favorites.includes(game.id)
+        );
+
+
+    if (favoriteGames.length) {
+
+        favoriteGames.forEach(game => {
+
+            favoritesGrid.appendChild(
+                createGameCard(game)
+            );
+
+        });
+
+    } else {
+
+        favoritesGrid.innerHTML =
+            `
+            <div class="empty-state">
+                You haven't favorited any games yet.
+            </div>
+            `;
+
+    }
+
 }
 
 
@@ -221,103 +374,140 @@ function toggleFavorite(id) {
 
         favorites =
             favorites.filter(
-                gameId => gameId !== id
+                favoriteId =>
+                    favoriteId !== id
             );
 
     } else {
 
         favorites.push(id);
+
     }
 
 
     localStorage.setItem(
-        "favorites",
+        "ghostezFavorites",
         JSON.stringify(favorites)
     );
 
 
-    const searchTerm =
-        document
-            .getElementById("search")
-            .value
-            .toLowerCase()
-            .trim();
-
-
-    renderGames(
-        allGames.filter(game =>
-            game.name
-                .toLowerCase()
-                .includes(searchTerm)
-        )
+    renderAll(
+        getFilteredGames()
     );
 }
 
 
 // ========================================
-// LOAD GAME
+// SEARCH
 // ========================================
 
-async function loadGame(game) {
+const search =
+    document.getElementById(
+        "search"
+    );
+
+
+search.addEventListener(
+    "input",
+    () => {
+
+        renderAll(
+            getFilteredGames()
+        );
+
+    }
+);
+
+
+function getFilteredGames() {
+
+    const query =
+        search.value
+            .trim()
+            .toLowerCase();
+
+
+    if (!query) {
+        return games;
+    }
+
+
+    return games.filter(
+        game =>
+            game.name
+                .toLowerCase()
+                .includes(query)
+    );
+
+}
+
+
+// ========================================
+// LAUNCH GAME
+// ========================================
+
+function launchGame(game) {
 
     const modal =
         document.getElementById(
-            "player-modal"
+            "playerModal"
         );
+
 
     const player =
         document.getElementById(
             "player"
         );
 
+
     const title =
         document.getElementById(
-            "player-title"
+            "playerTitle"
         );
 
 
     player.innerHTML = "";
 
+
     title.textContent =
         game.name;
 
 
-    modal.classList.add("active");
+    modal.classList.add(
+        "active"
+    );
+
 
     document.body.style.overflow =
         "hidden";
 
-    document.body.classList.add(
-        "playing"
-    );
-
 
     // ====================================
-    // GBA EMULATOR
+    // GBA
     // ====================================
 
     if (game.gba) {
 
         const iframe =
-            document.createElement("iframe");
+            document.createElement(
+                "iframe"
+            );
 
 
         /*
-         * Your repository already contains
-         * EmulatorJS in /jsemu/.
+         * IMPORTANT:
          *
-         * The emulator accepts:
+         * This uses the GBA emulator
+         * already inside your /gba/
+         * directory.
          *
-         * /jsemu/index.html?rom=FILE
+         * Example:
          *
-         * and loads:
-         *
-         * /jsemu/roms/FILE
+         * gba/player#pokemon.gba
          */
 
-
         iframe.src =
-            `jsemu/index.html?rom=${encodeURIComponent(
+            `gba/player#${encodeURIComponent(
                 game.gba
             )}`;
 
@@ -346,13 +536,15 @@ async function loadGame(game) {
 
 
     // ====================================
-    // NORMAL HTML GAME
+    // HTML
     // ====================================
 
     if (game.html) {
 
         const iframe =
-            document.createElement("iframe");
+            document.createElement(
+                "iframe"
+            );
 
 
         iframe.src =
@@ -360,17 +552,13 @@ async function loadGame(game) {
 
 
         iframe.allow =
-            "autoplay; fullscreen; accelerometer; gyroscope; clipboard-read; clipboard-write";
+            "fullscreen; autoplay; gamepad";
 
 
         iframe.setAttribute(
             "allowfullscreen",
             ""
         );
-
-
-        iframe.loading =
-            "eager";
 
 
         player.appendChild(
@@ -383,229 +571,101 @@ async function loadGame(game) {
 
 
     // ====================================
-    // FLASH / RUFFLE
+    // FLASH
     // ====================================
 
     if (game.file) {
 
+        if (
+            !window.RufflePlayer ||
+            !window.RufflePlayer.newest
+        ) {
+
+            player.innerHTML =
+                `
+                <div class="empty-state">
+                    Ruffle could not be loaded.
+                </div>
+                `;
+
+            return;
+        }
+
+
         try {
-
-            let attempts = 0;
-
-
-            while (
-                !window.RufflePlayer &&
-                attempts < 50
-            ) {
-
-                await new Promise(
-                    resolve =>
-                        setTimeout(
-                            resolve,
-                            100
-                        )
-                );
-
-                attempts++;
-            }
-
-
-            if (!window.RufflePlayer) {
-
-                player.innerHTML =
-                    "<div class='empty-state'>Error loading Ruffle Flash engine.</div>";
-
-                return;
-            }
-
 
             const ruffle =
                 window.RufflePlayer.newest();
 
 
-            const playerInstance =
+            const rufflePlayer =
                 ruffle.createPlayer();
 
 
             player.appendChild(
-                playerInstance
+                rufflePlayer
             );
 
 
-            playerInstance.config = {
-
-                autoplay: "on",
-
-                unmuteOverlay:
-                    "hidden",
-
-                letterbox:
-                    "on",
-
-                forceScale:
-                    true,
-
-                quality:
-                    "low",
-
-                graphicsBackends:
-                    ["webgl"],
-
-                preferredRenderer:
-                    "webgl",
-
-                maxExecutionDuration:
-                    15,
-
-                allowScriptAccess:
-                    false
-            };
-
-
-            playerInstance.load(
+            rufflePlayer.load(
                 game.file
             );
 
 
         } catch (error) {
 
-            console.error(
-                "Error launching Flash game:",
-                error
-            );
-
+            console.error(error);
 
             player.innerHTML =
-                "<div class='empty-state'>Could not load Flash game.</div>";
+                `
+                <div class="empty-state">
+                    Could not launch this game.
+                </div>
+                `;
+
         }
 
         return;
     }
 
 
-    // ====================================
-    // UNKNOWN GAME TYPE
-    // ====================================
-
-    player.innerHTML = `
+    player.innerHTML =
+        `
         <div class="empty-state">
-            This game does not have a supported
-            game type.
+            This game doesn't have a supported format.
         </div>
-    `;
+        `;
+
 }
 
 
 // ========================================
-// OPEN GBA EMULATOR
+// CLOSE PLAYER
 // ========================================
 
-function openGbaEmulator() {
+document
+    .getElementById("closePlayer")
+    .addEventListener(
+        "click",
+        closePlayer
+    );
+
+
+function closePlayer() {
 
     const modal =
         document.getElementById(
-            "player-modal"
+            "playerModal"
         );
+
 
     const player =
         document.getElementById(
             "player"
-        );
-
-    const title =
-        document.getElementById(
-            "player-title"
         );
 
 
     player.innerHTML = "";
-
-
-    title.textContent =
-        "Game Boy Advance Emulator";
-
-
-    modal.classList.add(
-        "active"
-    );
-
-
-    document.body.style.overflow =
-        "hidden";
-
-
-    document.body.classList.add(
-        "playing"
-    );
-
-
-    const iframe =
-        document.createElement(
-            "iframe"
-        );
-
-
-    /*
-     * No ROM is specified here.
-     *
-     * This opens your existing
-     * EmulatorJS upload screen,
-     * allowing a user to select
-     * a ROM locally.
-     */
-
-    iframe.src =
-        "jsemu/index.html";
-
-
-    iframe.allow =
-        "autoplay; fullscreen; gamepad";
-
-
-    iframe.setAttribute(
-        "allowfullscreen",
-        ""
-    );
-
-
-    iframe.loading =
-        "eager";
-
-
-    player.appendChild(
-        iframe
-    );
-}
-
-
-// ========================================
-// CLOSE GAME
-// ========================================
-
-function closeGame() {
-
-    const modal =
-        document.getElementById(
-            "player-modal"
-        );
-
-    const player =
-        document.getElementById(
-            "player"
-        );
-
-
-    const iframe =
-        player.querySelector(
-            "iframe"
-        );
-
-
-    if (iframe) {
-
-        iframe.src =
-            "about:blank";
-    }
 
 
     modal.classList.remove(
@@ -613,17 +673,9 @@ function closeGame() {
     );
 
 
-    player.innerHTML =
-        "";
-
-
     document.body.style.overflow =
         "";
 
-
-    document.body.classList.remove(
-        "playing"
-    );
 }
 
 
@@ -631,145 +683,344 @@ function closeGame() {
 // FULLSCREEN
 // ========================================
 
-function toggleFullscreen() {
+document
+    .getElementById("fullscreenButton")
+    .addEventListener(
+        "click",
+        () => {
 
-    const player =
-        document.getElementById(
-            "player"
-        );
+            const player =
+                document.getElementById(
+                    "player"
+                );
 
 
-    if (!document.fullscreenElement) {
+            if (!document.fullscreenElement) {
 
-        player
-            .requestFullscreen()
-            .catch(error =>
-                console.error(
-                    "Fullscreen error:",
-                    error
-                )
-            );
+                player.requestFullscreen();
 
-    } else {
+            } else {
 
-        document.exitFullscreen();
-    }
-}
+                document.exitFullscreen();
+
+            }
+
+        }
+    );
 
 
 // ========================================
 // RANDOM GAME
 // ========================================
 
-function playRandomGame() {
+document
+    .getElementById("randomGameButton")
+    .addEventListener(
+        "click",
+        () => {
 
-    if (!allGames.length) {
-        return;
-    }
-
-
-    const game =
-        allGames[
-            Math.floor(
-                Math.random() *
-                allGames.length
-            )
-        ];
+            if (!games.length) {
+                return;
+            }
 
 
-    loadGame(game);
+            const random =
+                games[
+                    Math.floor(
+                        Math.random() *
+                        games.length
+                    )
+                ];
+
+
+            launchGame(random);
+
+        }
+    );
+
+
+// ========================================
+// SETTINGS
+// ========================================
+
+function openSettings() {
+
+    showPage(
+        "settings"
+    );
+
 }
 
 
+document
+    .getElementById("settingsButton")
+    .addEventListener(
+        "click",
+        openSettings
+    );
+
+
+document
+    .getElementById("settingsTopButton")
+    .addEventListener(
+        "click",
+        openSettings
+    );
+
+
+// Descriptions setting
+
+document
+    .getElementById(
+        "descriptionToggle"
+    )
+    .addEventListener(
+        "change",
+        event => {
+
+            document.body.classList.toggle(
+                "hide-descriptions",
+                !event.target.checked
+            );
+
+        }
+    );
+
+
+// Compact mode
+
+document
+    .getElementById(
+        "compactToggle"
+    )
+    .addEventListener(
+        "change",
+        event => {
+
+            document.body.classList.toggle(
+                "compact",
+                event.target.checked
+            );
+
+        }
+    );
+
+
 // ========================================
-// SEARCH
+// NOTES
 // ========================================
 
-function setupSearch() {
-
-    const search =
-        document.getElementById(
-            "search"
-        );
+const notesModal =
+    document.getElementById(
+        "notesModal"
+    );
 
 
-    search.oninput = () => {
-
-        const term =
-            search.value
-                .toLowerCase()
-                .trim();
+const notes =
+    document.getElementById(
+        "notes"
+    );
 
 
-        renderGames(
-            allGames.filter(game =>
-                game.name
-                    .toLowerCase()
-                    .includes(term)
-            )
-        );
-    };
+notes.value =
+    localStorage.getItem(
+        "ghostezNotes"
+    ) || "";
+
+
+document
+    .getElementById("notesButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            notesModal.classList.add(
+                "active"
+            );
+
+        }
+    );
+
+
+document
+    .getElementById("closeNotes")
+    .addEventListener(
+        "click",
+        () => {
+
+            notesModal.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
+
+document
+    .getElementById("saveNotes")
+    .addEventListener(
+        "click",
+        () => {
+
+            localStorage.setItem(
+                "ghostezNotes",
+                notes.value
+            );
+
+
+            notesModal.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
+
+// ========================================
+// TIMER
+// ========================================
+
+let timerSeconds =
+    25 * 60;
+
+
+let timerInterval =
+    null;
+
+
+const timerDisplay =
+    document.getElementById(
+        "timerDisplay"
+    );
+
+
+function updateTimer() {
+
+    const minutes =
+        Math.floor(
+            timerSeconds / 60
+        )
+        .toString()
+        .padStart(2, "0");
+
+
+    const seconds =
+        (timerSeconds % 60)
+            .toString()
+            .padStart(2, "0");
+
+
+    timerDisplay.textContent =
+        `${minutes}:${seconds}`;
+
 }
 
 
-// ========================================
-// HTML ESCAPING
-// ========================================
-
-function escapeHtml(value) {
-
-    return String(value)
-        .replace(
-            /[&<>"']/g,
-            character => ({
-                "&": "&amp;",
-                "<": "&lt;",
-                ">": "&gt;",
-                '"': "&quot;",
-                "'": "&#039;"
-            }[character])
-        );
-}
-
-
-// ========================================
-// BUTTONS
-// ========================================
-
 document
-    .getElementById("closeGameBtn")
+    .getElementById("timerButton")
     .addEventListener(
         "click",
-        closeGame
+        () => {
+
+            document
+                .getElementById(
+                    "timerModal"
+                )
+                .classList.add(
+                    "active"
+                );
+
+        }
     );
 
 
 document
-    .getElementById("fullscreenBtn")
+    .getElementById("closeTimer")
     .addEventListener(
         "click",
-        toggleFullscreen
+        () => {
+
+            document
+                .getElementById(
+                    "timerModal"
+                )
+                .classList.remove(
+                    "active"
+                );
+
+        }
     );
 
 
 document
-    .getElementById("openGbaBtn")
+    .getElementById("startTimer")
     .addEventListener(
         "click",
-        openGbaEmulator
+        () => {
+
+            if (timerInterval) {
+                return;
+            }
+
+
+            timerInterval =
+                setInterval(
+                    () => {
+
+                        if (
+                            timerSeconds <= 0
+                        ) {
+
+                            clearInterval(
+                                timerInterval
+                            );
+
+                            timerInterval =
+                                null;
+
+                            return;
+                        }
+
+
+                        timerSeconds--;
+
+                        updateTimer();
+
+                    },
+                    1000
+                );
+
+        }
     );
 
 
 document
-    .getElementById("playRandomBtn")
+    .getElementById("resetTimer")
     .addEventListener(
         "click",
-        playRandomGame
+        () => {
+
+            clearInterval(
+                timerInterval
+            );
+
+
+            timerInterval =
+                null;
+
+
+            timerSeconds =
+                25 * 60;
+
+
+            updateTimer();
+
+        }
     );
 
 
 // ========================================
-// ESC KEY
+// ESC
 // ========================================
 
 document.addEventListener(
@@ -777,17 +1028,25 @@ document.addEventListener(
     event => {
 
         if (
-            event.key === "Escape" &&
-            document
-                .getElementById(
-                    "player-modal"
-                )
-                .classList
-                .contains("active")
+            event.key === "Escape"
         ) {
 
-            closeGame();
+            closePlayer();
+
+            document
+                .querySelectorAll(
+                    ".small-modal"
+                )
+                .forEach(modal => {
+
+                    modal.classList.remove(
+                        "active"
+                    );
+
+                });
+
         }
+
     }
 );
 
@@ -795,5 +1054,7 @@ document.addEventListener(
 // ========================================
 // START
 // ========================================
+
+updateTimer();
 
 loadGames();
