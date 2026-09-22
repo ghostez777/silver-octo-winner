@@ -3,58 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>EzPzGhostez - Arcade Portal</title>
+    <meta name="theme-color" content="#f8fafc">
+    <title>Google Classroom</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <nav class="navbar">
-        <div class="logo">
-            <span class="logo-icon">🎮</span>
-            <span class="logo-text">EzPz<span class="highlight">Ghostez</span></span>
-        </div>
-
+    <nav class="navbar" aria-label="Main navigation">
+        <a class="brand" href="./" aria-label="Google Classroom home">
+            <span class="brand-mark" aria-hidden="true">▰</span>
+            <span>Classroom</span>
+        </a>
         <div class="search-wrapper">
-            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
-            <input id="search" type="text" placeholder="Search games..." autocomplete="off">
+            <input id="search" type="search" placeholder="Search games" autocomplete="off" aria-label="Search games">
         </div>
+        <div class="profile" aria-label="Classroom account">C</div>
     </nav>
 
     <header class="hero">
-        <div class="hero-badge">✨ HTML5 & Flash Arcade</div>
-        <h2 class="hero-title">Play Your Favorite Games</h2>
-        <p class="hero-subtitle">Retro classics, HTML5 puzzles, and Flash favorites, playable instantly on desktop or mobile.</p>
+        <div class="hero-copy">
+            <span class="eyebrow">Your classroom library</span>
+            <h1>Learning break</h1>
+            <p>Take a quick break with puzzles, classics, and fun games.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true"><span>✦</span><span>●</span><span>✚</span></div>
     </header>
 
     <main class="container">
         <section id="favorites-section" class="section-container hidden">
-            <div class="section-header">
-                <h2 class="sectionTitle">⭐ Favorites</h2>
-            </div>
+            <div class="section-header"><h2 class="sectionTitle">Favorites</h2></div>
             <div id="favorites" class="game-grid"></div>
         </section>
-
         <section class="section-container">
-            <div class="section-header">
-                <h2 class="sectionTitle">🎮 All Games</h2>
-            </div>
+            <div class="section-header"><h2 class="sectionTitle">All games</h2><span class="section-count">Explore the collection</span></div>
             <div id="games" class="game-grid"></div>
         </section>
     </main>
 
-    <!-- Modal Game Overlay -->
-    <div id="player-modal" class="player-modal">
+    <div id="player-modal" class="player-modal" role="dialog" aria-modal="true" aria-label="Game player">
         <div class="player-bar">
-            <span id="player-title" class="player-title">Playing Game</span>
+            <span id="player-title" class="player-title">Playing game</span>
             <div class="player-controls">
                 <button id="fullscreenBtn" class="control-btn">⛶ Fullscreen</button>
-                <button id="closeGameBtn" class="control-btn close-btn">✖ Close</button>
+                <button id="closeGameBtn" class="control-btn close-btn">✕ Close</button>
             </div>
         </div>
         <div id="player" class="player-container"></div>
