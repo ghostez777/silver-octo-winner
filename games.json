@@ -604,5 +604,25 @@
     "name": "Catfishing",
     "html": "games/catfish.html",
     "thumb": "thumbs/stack.png"
+  },
+  {
+    "id": "geography-little2",
+    "name": "Geography",
+    "html": "games/little2.html"
+  },
+  {
+    "id": "little-alchemy",
+    "name": "Little Alchemy",
+    "html": "games/littlealchemy.html"
+  },
+  {
+    "id": "silk",
+    "name": "Silk",
+    "html": "games/silk.html"
+  },
+  {
+    "id": "newest-hk",
+    "name": "Newest HK",
+    "html": "games/newesthk.html"
   }
 ]
