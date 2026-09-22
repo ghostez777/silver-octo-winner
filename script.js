@@ -333,7 +333,19 @@ function launchGame(game) {
   */
 
   if (game.html) {
-    openPlayer(game, game.html);
+    /*
+      External browser games are often blocked when nested inside
+      another iframe by their hosting site's frame/CSP rules.
+      Open external games directly in a new tab instead.
+
+      Local games stay inside GameHub's player so their relative
+      JS/CSS/assets continue to resolve from their own /games/... folder.
+    */
+    if (/^https?:\\/\\//i.test(game.html)) {
+      window.open(game.html, "_blank", "noopener,noreferrer");
+    } else {
+      openPlayer(game, game.html);
+    }
     return;
   }
 
