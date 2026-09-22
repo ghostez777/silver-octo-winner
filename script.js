@@ -4,7 +4,15 @@ const $$ = (selector) => document.querySelectorAll(selector);
 const state = {
   games: [],
   filter: "all",
-  favorites: JSON.parse(localStorage.getItem("gamehub-favorites") || "[]"),
+  favorites: (() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("gamehub-favorites") || "[]");
+      return Array.isArray(saved) ? saved : [];
+    } catch {
+      localStorage.removeItem("gamehub-favorites");
+      return [];
+    }
+  })(),
   currentGame: null
 };
 
@@ -25,6 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupApps();
   setupSettings();
   setupKeyboard();
+    setupRandomButton();
     loadNotes();
     loadGames();
   } catch (error) {
@@ -320,19 +329,7 @@ function launchGame(game) {
   state.currentGame = game;
 
   /*
-    IMPORTANT:
-
-    Your actual /gba/index.html contains links like:
-
-    ./player#pokemonemerald
-
-    Therefore a GBA game must use:
-
-    gba/player#pokemonemerald
-
-    NOT:
-
-    gba/roms/pokemonem.gba
+    GBA games use the working EmulatorJS launcher in /jsemu/.
   */
 
   if (game.gba) {
@@ -356,7 +353,7 @@ function launchGame(game) {
       Local games stay inside GameHub's player so their relative
       JS/CSS/assets continue to resolve from their own /games/... folder.
     */
-    if (/^https?:\\/\\//i.test(game.html)) {
+    if (/^https?:\/\//i.test(game.html)) {
       window.open(game.html, "_blank", "noopener,noreferrer");
     } else {
       openPlayer(game, game.html);
@@ -764,7 +761,11 @@ function randomGame() {
 }
 
 
-$("#randomBtn").addEventListener("click", randomGame);
+function setupRandomButton() {
+  const randomButton = $("#randomBtn");
+  if (!randomButton) return;
+  randomButton.addEventListener("click", randomGame);
+}
 
 
 /* =========================
