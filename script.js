@@ -1,49 +1,37 @@
-/* =========================================
-   GAMEVAULT
-   ========================================= */
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => document.querySelectorAll(selector);
 
 const state = {
   games: [],
-  favorites: JSON.parse(localStorage.getItem("gamevault-favorites") || "[]"),
-  currentFilter: "all",
-  currentGame: null,
-  timer: null,
-  timerSeconds: 300
+  filter: "all",
+  favorites: JSON.parse(localStorage.getItem("gamehub-favorites") || "[]"),
+  currentGame: null
 };
 
-
-/* =========================================
-   ELEMENTS
-   ========================================= */
-
-const $ = (selector) => document.querySelector(selector);
-const $$ = (selector) => [...document.querySelectorAll(selector)];
+let timerSeconds = 300;
+let timerInterval = null;
 
 
-/* =========================================
-   START
-   ========================================= */
+/* =========================
+   INITIALIZE
+========================= */
 
-document.addEventListener("DOMContentLoaded", init);
-
-async function init() {
-  await loadGames();
-
+document.addEventListener("DOMContentLoaded", () => {
   setupNavigation();
   setupSearch();
-  setupButtons();
+  setupFilters();
+  setupPlayer();
+  setupApps();
   setupSettings();
-  setupModals();
-  setupTimer();
-  setupKeyboardShortcuts();
-
-  renderAll();
-}
+  setupKeyboard();
+  loadNotes();
+  loadGames();
+});
 
 
-/* =========================================
+/* =========================
    LOAD GAMES
-   ========================================= */
+========================= */
 
 async function loadGames() {
   try {
@@ -52,554 +40,422 @@ async function loadGames() {
     });
 
     if (!response.ok) {
-      throw new Error("Could not load games.json");
+      throw new Error(`games.json returned ${response.status}`);
     }
 
     const data = await response.json();
 
-    state.games = Array.isArray(data) ? data : [];
+    /*
+      Supports both:
+
+      [
+        {...},
+        {...}
+      ]
+
+      and:
+
+      {
+        "games": [...]
+      }
+    */
+
+    state.games = Array.isArray(data)
+      ? data
+      : Array.isArray(data.games)
+        ? data.games
+        : [];
+
+    updateGameCount();
+    renderEverything();
 
   } catch (error) {
-    console.error(error);
+    console.error("Could not load games.json:", error);
 
     state.games = [];
 
-    showToast("Could not load games.json");
-  }
+    $("#gameCount").textContent = "Could not load games";
 
-  updateLibraryCount();
+    showLoadError();
+  }
 }
 
 
-/* =========================================
-   RENDER EVERYTHING
-   ========================================= */
+function showLoadError() {
+  const containers = [
+    "#featuredGames",
+    "#gamesGrid",
+    "#gbaGrid",
+    "#gbaPreview",
+    "#favoritesGrid"
+  ];
 
-function renderAll() {
-  renderRecent();
+  containers.forEach(selector => {
+    const element = $(selector);
+
+    if (!element) return;
+
+    element.innerHTML = `
+      <div class="empty-state">
+        <strong>Games could not be loaded</strong>
+        <p>
+          Make sure <b>games.json</b> is in the same folder as
+          <b>index.html</b>.
+        </p>
+        <p>
+          If you opened the site using <b>file://</b>, use GitHub Pages
+          or another web server instead.
+        </p>
+      </div>
+    `;
+  });
+}
+
+
+/* =========================
+   RENDER
+========================= */
+
+function renderEverything() {
+  renderFeatured();
   renderGames();
   renderGBA();
   renderFavorites();
-  updateLibraryInfo();
 }
 
 
-/* =========================================
-   GAME CARD
-   ========================================= */
+function updateGameCount() {
+  const normal = state.games.filter(game => !game.gba).length;
+  const gba = state.games.filter(game => game.gba).length;
+
+  $("#gameCount").textContent =
+    `${state.games.length} games · ${gba} GBA`;
+}
+
+
+/* =========================
+   GAME CARDS
+========================= */
 
 function createGameCard(game) {
+  const favorite = state.favorites.includes(game.id);
 
   const card = document.createElement("article");
   card.className = "game-card";
 
-  const isFavorite = state.favorites.includes(game.id);
-
-  const isGBA = Boolean(game.gba);
-
-  const type = isGBA ? "GBA" : "BROWSER";
-
   const image = game.thumb
     ? `
       <img
+        class="game-thumb"
         src="${escapeAttribute(game.thumb)}"
-        alt=""
+        alt="${escapeAttribute(game.name)}"
         loading="lazy"
-        onerror="this.style.display='none'"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='grid';"
       >
+      <div class="game-thumb-fallback" style="display:none">
+        🎮
+      </div>
     `
     : `
-      <div class="game-placeholder">G</div>
+      <div class="game-thumb-fallback">
+        ${game.gba ? "🕹️" : "🎮"}
+      </div>
     `;
 
   card.innerHTML = `
-    <div class="game-image">
+    ${image}
 
-      ${image}
-
-      <span class="game-type">${type}</span>
-
-      <button
-        class="favorite-button ${isFavorite ? "active" : ""}"
-        title="Favorite"
-        aria-label="Favorite ${escapeAttribute(game.name || "game")}"
-      >
-        ${isFavorite ? "♥" : "♡"}
-      </button>
-
-    </div>
+    <button
+      class="favorite-button ${favorite ? "active" : ""}"
+      title="Favorite"
+      data-favorite="${escapeAttribute(game.id)}"
+    >
+      ${favorite ? "★" : "☆"}
+    </button>
 
     <div class="game-info">
-
-      <div class="game-name">
-        ${escapeHTML(game.name || "Unnamed Game")}
-      </div>
-
-      <div class="game-meta">
-        <span>${type}</span>
-        <span>Play →</span>
-      </div>
-
+      <h3>${escapeHTML(game.name)}</h3>
+      <p>${getGameType(game)}</p>
     </div>
   `;
 
+  card.addEventListener("click", (event) => {
+    if (event.target.closest("[data-favorite]")) return;
 
-  /* Favorite button */
-
-  const favoriteButton = card.querySelector(".favorite-button");
-
-  favoriteButton.addEventListener("click", (event) => {
-    event.stopPropagation();
-
-    toggleFavorite(game.id);
-  });
-
-
-  /* Launch */
-
-  card.addEventListener("click", () => {
     launchGame(game);
   });
 
+  const favoriteButton = card.querySelector("[data-favorite]");
+
+  favoriteButton.addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleFavorite(game.id);
+  });
 
   return card;
 }
 
 
-/* =========================================
-   RENDER RECENT
-   ========================================= */
+function renderFeatured() {
+  const container = $("#featuredGames");
 
-function renderRecent() {
+  if (!container) return;
 
-  const grid = $("#recentGrid");
+  const featured = state.games
+    .filter(game => !game.gba)
+    .slice(0, 8);
 
-  if (!grid) return;
-
-  grid.innerHTML = "";
-
-  const games = state.games.slice(0, 4);
-
-  games.forEach((game) => {
-    grid.appendChild(createGameCard(game));
-  });
+  renderCards(container, featured, "No games found.");
 }
 
-
-/* =========================================
-   RENDER GAMES
-   ========================================= */
 
 function renderGames() {
+  const container = $("#gamesGrid");
 
-  const grid = $("#gamesGrid");
-  const empty = $("#gamesEmpty");
+  if (!container) return;
 
-  if (!grid) return;
+  let games = [...state.games];
 
-  const search = $("#searchInput")?.value
-    .trim()
-    .toLowerCase() || "";
-
-  let games = state.games.filter((game) => {
-
-    const matchesSearch =
-      !search ||
-      String(game.name || "")
-        .toLowerCase()
-        .includes(search);
-
-    let matchesFilter = true;
-
-    if (state.currentFilter === "gba") {
-      matchesFilter = Boolean(game.gba);
-    }
-
-    if (state.currentFilter === "html") {
-      matchesFilter = Boolean(game.html);
-    }
-
-    return matchesSearch && matchesFilter;
-  });
-
-
-  grid.innerHTML = "";
-
-  games.forEach((game) => {
-    grid.appendChild(createGameCard(game));
-  });
-
-
-  if (empty) {
-    empty.classList.toggle("visible", games.length === 0);
+  if (state.filter === "html") {
+    games = games.filter(game => game.html);
   }
+
+  if (state.filter === "swf") {
+    games = games.filter(game => game.file);
+  }
+
+  if (state.filter === "gba") {
+    games = games.filter(game => game.gba);
+  }
+
+  renderCards(container, games, "No games match this filter.");
 }
 
-
-/* =========================================
-   RENDER GBA
-   ========================================= */
 
 function renderGBA() {
+  const gbaGames = state.games.filter(game => game.gba);
 
-  const grid = $("#gbaGrid");
-  const empty = $("#gbaEmpty");
-
-  if (!grid) return;
-
-  const gbaGames = state.games.filter(
-    (game) => Boolean(game.gba)
+  renderCards(
+    $("#gbaGrid"),
+    gbaGames,
+    "No GBA games have been added yet."
   );
 
-  grid.innerHTML = "";
-
-  gbaGames.forEach((game) => {
-    grid.appendChild(createGameCard(game));
-  });
-
-  if (empty) {
-    empty.classList.toggle(
-      "visible",
-      gbaGames.length === 0
-    );
-  }
+  renderCards(
+    $("#gbaPreview"),
+    gbaGames.slice(0, 8),
+    "No GBA games have been added yet."
+  );
 }
 
 
-/* =========================================
-   RENDER FAVORITES
-   ========================================= */
-
 function renderFavorites() {
-
-  const grid = $("#favoritesGrid");
-  const empty = $("#favoritesEmpty");
-
-  if (!grid) return;
-
-  const games = state.games.filter((game) =>
+  const favorites = state.games.filter(game =>
     state.favorites.includes(game.id)
   );
 
-  grid.innerHTML = "";
-
-  games.forEach((game) => {
-    grid.appendChild(createGameCard(game));
-  });
-
-  if (empty) {
-    empty.classList.toggle(
-      "visible",
-      games.length === 0
-    );
-  }
-}
-
-
-/* =========================================
-   FAVORITES
-   ========================================= */
-
-function toggleFavorite(id) {
-
-  if (state.favorites.includes(id)) {
-
-    state.favorites =
-      state.favorites.filter(
-        (favoriteId) => favoriteId !== id
-      );
-
-  } else {
-
-    state.favorites.push(id);
-
-  }
-
-  localStorage.setItem(
-    "gamevault-favorites",
-    JSON.stringify(state.favorites)
+  renderCards(
+    $("#favoritesGrid"),
+    favorites,
+    "You haven't added any favorites yet."
   );
-
-  renderAll();
 }
 
 
-/* =========================================
-   LAUNCH GAME
-   ========================================= */
+function renderCards(container, games, emptyMessage) {
+  if (!container) return;
 
-function launchGame(game) {
+  container.innerHTML = "";
 
-  if (!game) return;
-
-  const overlay = $("#playerOverlay");
-  const player = $("#player");
-  const title = $("#playerTitle");
-
-  if (!overlay || !player) return;
-
-  state.currentGame = game;
-
-  player.innerHTML = "";
-
-  title.textContent = game.name || "Game";
-
-
-  /*
-    HTML GAME
-
-    Example games.json:
-
-    {
-      "id": "2048",
-      "name": "2048",
-      "html": "games/2048/2048/index.html"
-    }
-  */
-
-  if (game.html) {
-
-    const iframe = document.createElement("iframe");
-
-    iframe.src = game.html;
-
-    iframe.allow =
-      "fullscreen; autoplay; gamepad; clipboard-read; clipboard-write";
-
-    iframe.allowFullscreen = true;
-
-    iframe.loading = "eager";
-
-    player.appendChild(iframe);
-
-    openPlayer();
+  if (!games.length) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <strong>${escapeHTML(emptyMessage)}</strong>
+        <p>Try searching for another game.</p>
+      </div>
+    `;
 
     return;
   }
 
+  games.forEach(game => {
+    container.appendChild(createGameCard(game));
+  });
+}
+
+
+/* =========================
+   GAME TYPES
+========================= */
+
+function getGameType(game) {
+  if (game.gba) return "Game Boy Advance";
+  if (game.file) return "Flash / Ruffle";
+  if (game.html) return "Browser Game";
+
+  return "Game";
+}
+
+
+/* =========================
+   GBA + GAME LAUNCHING
+========================= */
+
+function launchGame(game) {
+  state.currentGame = game;
 
   /*
-    GBA GAME
+    IMPORTANT:
 
-    The gba value should point to whatever URL/path
-    your existing gba player expects.
+    Your actual /gba/index.html contains links like:
 
-    Example:
+    ./player#pokemonemerald
 
-    {
-      "id": "my-gba-game",
-      "name": "My GBA Game",
-      "gba": "roms/my-gba-game.gba"
-    }
+    Therefore a GBA game must use:
 
-    If your existing /gba/ player uses a different
-    URL format, only this section needs adjusting.
+    gba/player#pokemonemerald
+
+    NOT:
+
+    gba/roms/pokemonem.gba
   */
 
   if (game.gba) {
+    const emulatorURL =
+      `gba/player#${encodeURIComponent(game.gba)}`;
 
-    const iframe = document.createElement("iframe");
-
-    iframe.src =
-      "gba/player#" +
-      encodeURIComponent(game.gba);
-
-    iframe.allow =
-      "fullscreen; autoplay; gamepad";
-
-    iframe.allowFullscreen = true;
-
-    iframe.loading = "eager";
-
-    player.appendChild(iframe);
-
-    openPlayer();
-
+    window.location.href = emulatorURL;
     return;
   }
 
+  /*
+    HTML games can be loaded into our player.
+  */
+
+  if (game.html) {
+    openPlayer(game, game.html);
+    return;
+  }
 
   /*
-    Optional Flash/Ruffle support.
+    SWF games are sent through the existing Ruffle page.
   */
 
   if (game.file) {
+    const ruffleURL =
+      `ruffle/index.html?game=${encodeURIComponent(game.file)}`;
 
-    if (!window.RufflePlayer) {
-
-      showToast(
-        "Ruffle is not loaded."
-      );
-
-      return;
-    }
-
-    const ruffle =
-      window.RufflePlayer.newest();
-
-    const rufflePlayer =
-      ruffle.createPlayer();
-
-    rufflePlayer.style.width = "100%";
-    rufflePlayer.style.height = "100%";
-
-    player.appendChild(
-      rufflePlayer
-    );
-
-    rufflePlayer.load(
-      game.file
-    );
-
-    openPlayer();
-
+    openPlayer(game, ruffleURL);
     return;
   }
 
-
-  showToast(
-    "This game does not have a playable file."
-  );
+  showToast("This game doesn't have a playable location yet.");
 }
 
 
-/* =========================================
+/* =========================
    PLAYER
-   ========================================= */
+========================= */
 
-function openPlayer() {
+function openPlayer(game, url) {
+  state.currentGame = game;
 
-  const overlay = $("#playerOverlay");
+  $("#playerTitle").textContent = game.name;
+  $("#gameFrame").src = url;
 
-  overlay.classList.add("open");
-
+  $("#playerModal").classList.add("open");
   document.body.style.overflow = "hidden";
 }
 
 
 function closePlayer() {
+  $("#playerModal").classList.remove("open");
 
-  const overlay = $("#playerOverlay");
-  const player = $("#player");
-
-  overlay.classList.remove("open");
-
-  player.innerHTML = "";
+  $("#gameFrame").src = "";
 
   document.body.style.overflow = "";
-
-  state.currentGame = null;
 }
 
 
-function fullscreenPlayer() {
+function setupPlayer() {
+  $("#closePlayer").addEventListener("click", closePlayer);
 
-  const player = $("#player");
-
-  if (!document.fullscreenElement) {
-
-    player.requestFullscreen?.();
-
-  } else {
-
-    document.exitFullscreen?.();
-
-  }
-}
-
-
-/* =========================================
-   NAVIGATION
-   ========================================= */
-
-function setupNavigation() {
-
-  $$(".nav-item").forEach((button) => {
-
-    button.addEventListener("click", () => {
-
-      const page =
-        button.dataset.page;
-
-      navigate(page);
-
-      $("#sidebar")?.classList.remove(
-        "mobile-open"
-      );
-    });
+  $("#playerModal").addEventListener("click", (event) => {
+    if (event.target === $("#playerModal")) {
+      closePlayer();
+    }
   });
 
+  $("#fullscreenBtn").addEventListener("click", async () => {
+    const frame = $("#gameFrame");
 
-  $$("[data-page]").forEach((button) => {
+    try {
+      if (frame.requestFullscreen) {
+        await frame.requestFullscreen();
+      }
+    } catch {
+      showToast("Fullscreen isn't available here.");
+    }
+  });
 
-    if (button.classList.contains("nav-item")) {
+  $("#openNewTab").addEventListener("click", () => {
+    if (!state.currentGame) return;
+
+    const game = state.currentGame;
+
+    if (game.gba) {
+      window.open(
+        `gba/player#${encodeURIComponent(game.gba)}`,
+        "_blank"
+      );
       return;
     }
 
-    button.addEventListener("click", () => {
+    if (game.html) {
+      window.open(game.html, "_blank");
+      return;
+    }
 
-      navigate(
-        button.dataset.page
+    if (game.file) {
+      window.open(
+        `ruffle/index.html?game=${encodeURIComponent(game.file)}`,
+        "_blank"
       );
+    }
+  });
+}
 
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function setupNavigation() {
+  $$("[data-page]").forEach(button => {
+    button.addEventListener("click", () => {
+      showPage(button.dataset.page);
     });
   });
 }
 
 
-function navigate(page) {
-
-  if (!page) return;
-
-  $$(".page").forEach((section) => {
-    section.classList.remove("active");
+function showPage(pageName) {
+  $$(".page").forEach(page => {
+    page.classList.remove("active-page");
   });
 
-  const target =
-    document.querySelector(
-      `#page-${page}`
-    );
+  const target = $(`#page-${pageName}`);
 
   if (target) {
-    target.classList.add("active");
+    target.classList.add("active-page");
   }
 
-
-  $$(".nav-item").forEach((button) => {
-
-    button.classList.toggle(
+  $$(".nav-item").forEach(item => {
+    item.classList.toggle(
       "active",
-      button.dataset.page === page
+      item.dataset.page === pageName
     );
-
   });
-
-
-  const names = {
-    home: "Home",
-    games: "Games",
-    gba: "GBA",
-    favorites: "Favorites",
-    apps: "Apps",
-    settings: "Settings"
-  };
-
-  $("#pageTitle").textContent =
-    names[page] || "Home";
-
-
-  if (page === "games") {
-    renderGames();
-  }
-
-  if (page === "gba") {
-    renderGBA();
-  }
-
-  if (page === "favorites") {
-    renderFavorites();
-  }
-
 
   window.scrollTo({
     top: 0,
@@ -608,556 +464,315 @@ function navigate(page) {
 }
 
 
-/* =========================================
+/* =========================
    SEARCH
-   ========================================= */
+========================= */
 
 function setupSearch() {
+  $("#searchInput").addEventListener("input", () => {
+    const query =
+      $("#searchInput").value
+        .trim()
+        .toLowerCase();
 
-  const input = $("#searchInput");
+    if (!query) {
+      renderGames();
+      return;
+    }
 
-  if (!input) return;
+    showPage("games");
 
-  input.addEventListener("input", () => {
-
-    navigate("games");
-
-    renderGames();
-
-  });
-}
-
-
-/* =========================================
-   FILTERS
-   ========================================= */
-
-$$(".filter").forEach((button) => {
-
-  button.addEventListener("click", () => {
-
-    $$(".filter").forEach((item) => {
-      item.classList.remove("active");
-    });
-
-    button.classList.add("active");
-
-    state.currentFilter =
-      button.dataset.filter;
-
-    renderGames();
-
-  });
-
-});
-
-
-/* =========================================
-   BUTTONS
-   ========================================= */
-
-function setupButtons() {
-
-  $("#browseGames")?.addEventListener(
-    "click",
-    () => navigate("games")
-  );
-
-
-  $("#randomButton")?.addEventListener(
-    "click",
-    randomGame
-  );
-
-
-  $("#randomHero")?.addEventListener(
-    "click",
-    randomGame
-  );
-
-
-  $("#appRandom")?.addEventListener(
-    "click",
-    randomGame
-  );
-
-
-  $("#notesButton")?.addEventListener(
-    "click",
-    () => openModal("notesModal")
-  );
-
-
-  $("#appNotes")?.addEventListener(
-    "click",
-    () => openModal("notesModal")
-  );
-
-
-  $("#timerButton")?.addEventListener(
-    "click",
-    () => openModal("timerModal")
-  );
-
-
-  $("#appTimer")?.addEventListener(
-    "click",
-    () => openModal("timerModal")
-  );
-
-
-  $("#closePlayer")?.addEventListener(
-    "click",
-    closePlayer
-  );
-
-
-  $("#fullscreenButton")?.addEventListener(
-    "click",
-    fullscreenPlayer
-  );
-}
-
-
-/* =========================================
-   RANDOM GAME
-   ========================================= */
-
-function randomGame() {
-
-  if (!state.games.length) {
-
-    showToast(
-      "Your library is empty."
+    const results = state.games.filter(game =>
+      game.name.toLowerCase().includes(query)
     );
 
+    renderCards(
+      $("#gamesGrid"),
+      results,
+      "No games found."
+    );
+  });
+}
+
+
+/* =========================
+   FILTERS
+========================= */
+
+function setupFilters() {
+  $$(".filter").forEach(button => {
+    button.addEventListener("click", () => {
+
+      $$(".filter").forEach(item => {
+        item.classList.remove("active");
+      });
+
+      button.classList.add("active");
+
+      state.filter = button.dataset.filter;
+
+      renderGames();
+    });
+  });
+}
+
+
+/* =========================
+   FAVORITES
+========================= */
+
+function toggleFavorite(id) {
+  if (state.favorites.includes(id)) {
+    state.favorites =
+      state.favorites.filter(item => item !== id);
+
+    showToast("Removed from favorites.");
+  } else {
+    state.favorites.push(id);
+
+    showToast("Added to favorites.");
+  }
+
+  localStorage.setItem(
+    "gamehub-favorites",
+    JSON.stringify(state.favorites)
+  );
+
+  renderEverything();
+}
+
+
+/* =========================
+   APPS
+========================= */
+
+function setupApps() {
+  $("#notesBtn").addEventListener("click", () => {
+    $("#notesModal").classList.add("open");
+  });
+
+  $("#timerBtn").addEventListener("click", () => {
+    $("#timerModal").classList.add("open");
+  });
+
+  $("#randomAppBtn").addEventListener("click", randomGame);
+
+  $$("[data-close]").forEach(button => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.close;
+
+      $(`#${id}`).classList.remove("open");
+    });
+  });
+
+  $("#saveNotes").addEventListener("click", () => {
+    localStorage.setItem(
+      "gamehub-notes",
+      $("#notesArea").value
+    );
+
+    $("#notesModal").classList.remove("open");
+
+    showToast("Notes saved.");
+  });
+
+  $("#timerStart").addEventListener("click", startTimer);
+  $("#timerReset").addEventListener("click", resetTimer);
+}
+
+
+function loadNotes() {
+  $("#notesArea").value =
+    localStorage.getItem("gamehub-notes") || "";
+}
+
+
+/* =========================
+   TIMER
+========================= */
+
+function updateTimerDisplay() {
+  const minutes =
+    Math.floor(timerSeconds / 60)
+      .toString()
+      .padStart(2, "0");
+
+  const seconds =
+    (timerSeconds % 60)
+      .toString()
+      .padStart(2, "0");
+
+  $("#timerDisplay").textContent =
+    `${minutes}:${seconds}`;
+}
+
+
+function startTimer() {
+  if (timerInterval) return;
+
+  timerInterval = setInterval(() => {
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+
+      showToast("Timer finished.");
+
+      return;
+    }
+
+    timerSeconds--;
+
+    updateTimerDisplay();
+  }, 1000);
+}
+
+
+function resetTimer() {
+  clearInterval(timerInterval);
+
+  timerInterval = null;
+  timerSeconds = 300;
+
+  updateTimerDisplay();
+}
+
+
+/* =========================
+   RANDOM GAME
+========================= */
+
+function randomGame() {
+  if (!state.games.length) {
+    showToast("No games are loaded.");
     return;
   }
 
   const game =
     state.games[
-      Math.floor(
-        Math.random() *
-        state.games.length
-      )
+      Math.floor(Math.random() * state.games.length)
     ];
 
   launchGame(game);
 }
 
 
-/* =========================================
-   MODALS
-   ========================================= */
+$("#randomBtn").addEventListener("click", randomGame);
 
-function setupModals() {
 
-  $$("[data-close]").forEach((button) => {
-
-    button.addEventListener("click", () => {
-
-      closeModal(
-        button.dataset.close
-      );
-
-    });
-
-  });
-
-
-  $$(".modal").forEach((modal) => {
-
-    modal.addEventListener("click", (event) => {
-
-      if (event.target === modal) {
-        modal.classList.remove("open");
-      }
-
-    });
-
-  });
-
-
-  const savedNotes =
-    localStorage.getItem(
-      "gamevault-notes"
-    );
-
-  if (savedNotes) {
-    $("#notesArea").value = savedNotes;
-  }
-
-
-  $("#saveNotes")?.addEventListener(
-    "click",
-    () => {
-
-      localStorage.setItem(
-        "gamevault-notes",
-        $("#notesArea").value
-      );
-
-      closeModal("notesModal");
-
-      showToast("Notes saved.");
-
-    }
-  );
-}
-
-
-function openModal(id) {
-
-  document
-    .getElementById(id)
-    ?.classList.add("open");
-
-}
-
-
-function closeModal(id) {
-
-  document
-    .getElementById(id)
-    ?.classList.remove("open");
-
-}
-
-
-/* =========================================
-   TIMER
-   ========================================= */
-
-function setupTimer() {
-
-  updateTimerDisplay();
-
-
-  $("#startTimer")?.addEventListener(
-    "click",
-    startTimer
-  );
-
-
-  $("#resetTimer")?.addEventListener(
-    "click",
-    resetTimer
-  );
-}
-
-
-function startTimer() {
-
-  clearInterval(state.timer);
-
-  const minutes =
-    Math.max(
-      1,
-      Math.min(
-        120,
-        Number(
-          $("#timerMinutes").value
-        ) || 5
-      )
-    );
-
-  state.timerSeconds =
-    minutes * 60;
-
-  updateTimerDisplay();
-
-  state.timer =
-    setInterval(() => {
-
-      state.timerSeconds--;
-
-      updateTimerDisplay();
-
-      if (state.timerSeconds <= 0) {
-
-        clearInterval(
-          state.timer
-        );
-
-        showToast(
-          "Timer finished."
-        );
-
-      }
-
-    }, 1000);
-}
-
-
-function resetTimer() {
-
-  clearInterval(
-    state.timer
-  );
-
-  const minutes =
-    Number(
-      $("#timerMinutes").value
-    ) || 5;
-
-  state.timerSeconds =
-    minutes * 60;
-
-  updateTimerDisplay();
-}
-
-
-function updateTimerDisplay() {
-
-  const display =
-    $("#timerDisplay");
-
-  if (!display) return;
-
-  const minutes =
-    Math.floor(
-      state.timerSeconds / 60
-    );
-
-  const seconds =
-    state.timerSeconds % 60;
-
-  display.textContent =
-    String(minutes).padStart(2, "0") +
-    ":" +
-    String(seconds).padStart(2, "0");
-}
-
-
-/* =========================================
+/* =========================
    SETTINGS
-   ========================================= */
+========================= */
 
 function setupSettings() {
-
   const animations =
-    $("#animationsToggle");
+    localStorage.getItem("gamehub-animations") !== "false";
 
   const compact =
-    $("#compactToggle");
+    localStorage.getItem("gamehub-compact") === "true";
 
+  $("#animationsToggle").checked = animations;
+  $("#compactToggle").checked = compact;
 
-  const savedAnimations =
-    localStorage.getItem(
-      "gamevault-animations"
+  applySettings();
+
+  $("#animationsToggle").addEventListener("change", () => {
+    localStorage.setItem(
+      "gamehub-animations",
+      $("#animationsToggle").checked
     );
 
-  if (savedAnimations === "false") {
+    applySettings();
+  });
 
-    animations.checked = false;
-
-    document.body.classList.add(
-      "no-animations"
+  $("#compactToggle").addEventListener("change", () => {
+    localStorage.setItem(
+      "gamehub-compact",
+      $("#compactToggle").checked
     );
 
-  }
+    applySettings();
+  });
+
+  $("#resetFavorites").addEventListener("click", () => {
+    state.favorites = [];
+
+    localStorage.removeItem("gamehub-favorites");
+
+    renderEverything();
+
+    showToast("Favorites reset.");
+  });
+}
 
 
-  animations?.addEventListener(
-    "change",
-    () => {
+function applySettings() {
+  const animations = $("#animationsToggle").checked;
+  const compact = $("#compactToggle").checked;
 
-      document.body.classList.toggle(
-        "no-animations",
-        !animations.checked
-      );
-
-      localStorage.setItem(
-        "gamevault-animations",
-        animations.checked
-      );
-
-    }
+  document.body.classList.toggle(
+    "no-animations",
+    !animations
   );
 
-
-  compact?.addEventListener(
-    "change",
-    () => {
-
-      document.body.classList.toggle(
-        "compact",
-        compact.checked
-      );
-
-      localStorage.setItem(
-        "gamevault-compact",
-        compact.checked
-      );
-
-    }
-  );
-
-
-  const savedCompact =
-    localStorage.getItem(
-      "gamevault-compact"
-    );
-
-  if (savedCompact === "true") {
-
-    compact.checked = true;
-
-    document.body.classList.add(
-      "compact"
-    );
-
-  }
-}
-
-
-function updateLibraryInfo() {
-
-  const info =
-    $("#libraryInfo");
-
-  if (!info) return;
-
-  const gba =
-    state.games.filter(
-      game => game.gba
-    ).length;
-
-  info.textContent =
-    `${state.games.length} total games • ${gba} GBA games`;
-}
-
-
-function updateLibraryCount() {
-
-  const count =
-    $("#gameCount");
-
-  if (!count) return;
-
-  count.textContent =
-    `${state.games.length} ${
-      state.games.length === 1
-        ? "game"
-        : "games"
-    }`;
-}
-
-
-/* =========================================
-   KEYBOARD
-   ========================================= */
-
-function setupKeyboardShortcuts() {
-
-  document.addEventListener(
-    "keydown",
-    (event) => {
-
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.key.toLowerCase() === "k"
-      ) {
-
-        event.preventDefault();
-
-        $("#searchInput")?.focus();
-
-      }
-
-
-      if (event.key === "Escape") {
-
-        closePlayer();
-
-        $$(".modal.open").forEach(
-          modal =>
-            modal.classList.remove("open")
-        );
-
-      }
-
-    }
+  document.body.classList.toggle(
+    "compact",
+    compact
   );
 }
 
 
-/* =========================================
-   MOBILE SIDEBAR
-   ========================================= */
+/* =========================
+   KEYBOARD SHORTCUTS
+========================= */
 
-$("#mobileMenu")?.addEventListener(
-  "click",
-  () => {
+function setupKeyboard() {
+  document.addEventListener("keydown", event => {
 
-    $(".sidebar")?.classList.toggle(
-      "mobile-open"
-    );
+    if (
+      event.ctrlKey &&
+      event.key.toLowerCase() === "k"
+    ) {
+      event.preventDefault();
 
-  }
-);
+      $("#searchInput").focus();
+    }
+
+    if (event.key === "Escape") {
+      closePlayer();
+
+      $$(".small-modal").forEach(modal => {
+        modal.classList.remove("open");
+      });
+    }
+  });
+}
 
 
-/* =========================================
+/* =========================
    TOAST
-   ========================================= */
+========================= */
+
+let toastTimeout;
 
 function showToast(message) {
+  const toast = $("#toast");
 
-  const existing =
-    document.querySelector(
-      ".gamevault-toast"
-    );
+  toast.textContent = message;
+  toast.classList.add("show");
 
-  existing?.remove();
+  clearTimeout(toastTimeout);
 
-
-  const toast =
-    document.createElement("div");
-
-  toast.className =
-    "gamevault-toast";
-
-  toast.textContent =
-    message;
-
-
-  Object.assign(
-    toast.style,
-    {
-      position: "fixed",
-      left: "50%",
-      bottom: "25px",
-      transform: "translateX(-50%)",
-      zIndex: "3000",
-      padding: "10px 15px",
-      border: "1px solid rgba(255,255,255,.1)",
-      borderRadius: "8px",
-      background: "#171a21",
-      color: "#fff",
-      fontSize: "11px",
-      boxShadow: "0 15px 40px rgba(0,0,0,.4)"
-    }
-  );
-
-
-  document.body.appendChild(
-    toast
-  );
-
-
-  setTimeout(() => {
-    toast.remove();
-  }, 2500);
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2200);
 }
 
 
-/* =========================================
-   SECURITY / TEXT HELPERS
-   ========================================= */
+/* =========================
+   SECURITY / HTML HELPERS
+========================= */
 
 function escapeHTML(value) {
-
   return String(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
