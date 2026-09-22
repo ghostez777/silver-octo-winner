@@ -3,497 +3,378 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b0d12">
-  <title>GameVault</title>
+
+  <title>GameHub</title>
+  <meta name="description" content="GameHub - your personal browser gaming library">
+
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">G</div>
+      <div>
+        <strong>GameHub</strong>
+        <span>Gaming Library</span>
+      </div>
+    </div>
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
+    <nav class="nav">
+      <button class="nav-item active" data-page="home">
+        <span>⌂</span>
+        Home
+      </button>
 
-      <div class="brand">
-        <div class="brand-mark">G</div>
-        <div>
-          <div class="brand-name">GameVault</div>
-          <div class="brand-subtitle">Your library</div>
-        </div>
+      <button class="nav-item" data-page="games">
+        <span>🎮</span>
+        Games
+      </button>
+
+      <button class="nav-item" data-page="gba">
+        <span>🕹️</span>
+        GBA
+      </button>
+
+      <button class="nav-item" data-page="favorites">
+        <span>★</span>
+        Favorites
+      </button>
+
+      <button class="nav-item" data-page="apps">
+        <span>▦</span>
+        Apps
+      </button>
+
+      <button class="nav-item" data-page="settings">
+        <span>⚙</span>
+        Settings
+      </button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="status-dot"></div>
+      <div>
+        <strong>GameHub Online</strong>
+        <small id="gameCount">Loading games...</small>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <header class="topbar">
+      <div class="mobile-brand">
+        <div class="brand-icon">G</div>
+        <strong>GameHub</strong>
       </div>
 
-      <nav class="nav">
-        <div class="nav-label">LIBRARY</div>
+      <div class="search-wrap">
+        <span>⌕</span>
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Search games..."
+          autocomplete="off"
+        >
+        <kbd>CTRL K</kbd>
+      </div>
 
-        <button class="nav-item active" data-page="home">
-          <span>⌂</span>
-          <span>Home</span>
-        </button>
+      <button id="randomBtn" class="top-button">
+        🎲 Random
+      </button>
+    </header>
 
-        <button class="nav-item" data-page="games">
-          <span>▦</span>
-          <span>Games</span>
-        </button>
+    <!-- HOME -->
+    <section id="page-home" class="page active-page">
 
-        <button class="nav-item" data-page="gba">
-          <span>◈</span>
-          <span>GBA</span>
-        </button>
+      <section class="hero">
+        <div class="hero-content">
+          <span class="eyebrow">YOUR GAME LIBRARY</span>
 
-        <button class="nav-item" data-page="favorites">
-          <span>♡</span>
-          <span>Favorites</span>
-        </button>
+          <h1>Play something<br><span>awesome.</span></h1>
 
-        <div class="nav-label">TOOLS</div>
+          <p>
+            Your games, GBA collection, and browser games all in one place.
+          </p>
 
-        <button class="nav-item" data-page="apps">
-          <span>⊞</span>
-          <span>Apps</span>
-        </button>
+          <div class="hero-buttons">
+            <button class="primary-button" data-page="games">
+              Browse Games →
+            </button>
 
-        <button class="nav-item" data-page="settings">
-          <span>⚙</span>
-          <span>Settings</span>
-        </button>
-      </nav>
+            <button class="secondary-button" data-page="gba">
+              🕹️ GBA Games
+            </button>
+          </div>
+        </div>
 
-      <div class="sidebar-bottom">
-        <div class="library-status">
-          <div class="status-dot"></div>
+        <div class="hero-art">
+          <div class="floating-controller">🎮</div>
+          <div class="hero-circle circle-one"></div>
+          <div class="hero-circle circle-two"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
           <div>
-            <strong>Library online</strong>
-            <span id="gameCount">0 games</span>
-          </div>
-        </div>
-      </div>
-
-    </aside>
-
-
-    <!-- MAIN -->
-    <main class="main">
-
-      <!-- TOPBAR -->
-      <header class="topbar">
-
-        <button class="mobile-menu" id="mobileMenu">☰</button>
-
-        <div class="breadcrumb">
-          <span>GameVault</span>
-          <b>/</b>
-          <strong id="pageTitle">Home</strong>
-        </div>
-
-        <div class="top-actions">
-
-          <div class="search">
-            <span>⌕</span>
-            <input
-              type="search"
-              id="searchInput"
-              placeholder="Search games..."
-              autocomplete="off"
-            >
-            <kbd>Ctrl K</kbd>
+            <span class="section-label">COLLECTION</span>
+            <h2>Featured Games</h2>
           </div>
 
-          <button class="icon-button" id="randomButton" title="Random game">
-            ⤨
+          <button class="text-button" data-page="games">
+            View all →
           </button>
-
         </div>
 
-      </header>
+        <div id="featuredGames" class="game-grid"></div>
+      </section>
 
-
-      <!-- CONTENT -->
-      <div class="content">
-
-
-        <!-- HOME -->
-        <section class="page active" id="page-home">
-
-          <section class="hero">
-
-            <div class="hero-content">
-              <span class="eyebrow">WELCOME BACK</span>
-
-              <h1>Your games.<br><span>Your way.</span></h1>
-
-              <p>
-                A clean place for your games, favorites, and browser-based
-                experiences.
-              </p>
-
-              <div class="hero-buttons">
-                <button class="primary-button" id="browseGames">
-                  Browse games
-                  <span>→</span>
-                </button>
-
-                <button class="secondary-button" id="randomHero">
-                  Surprise me
-                </button>
-              </div>
-            </div>
-
-            <div class="hero-decoration">
-              <div class="orb orb-one"></div>
-              <div class="orb orb-two"></div>
-              <div class="grid-pattern"></div>
-              <div class="hero-logo">G</div>
-            </div>
-
-          </section>
-
-
-          <section class="section">
-
-            <div class="section-header">
-              <div>
-                <span class="section-kicker">LIBRARY</span>
-                <h2>Recently added</h2>
-              </div>
-
-              <button class="text-button" data-page="games">
-                View all →
-              </button>
-            </div>
-
-            <div class="game-grid" id="recentGrid"></div>
-
-          </section>
-
-
-          <section class="section">
-
-            <div class="section-header">
-              <div>
-                <span class="section-kicker">QUICK ACCESS</span>
-                <h2>Tools</h2>
-              </div>
-            </div>
-
-            <div class="tool-grid">
-
-              <button class="tool-card" id="notesButton">
-                <div class="tool-icon">✎</div>
-                <div>
-                  <strong>Notes</strong>
-                  <span>Keep a quick note</span>
-                </div>
-                <b>→</b>
-              </button>
-
-              <button class="tool-card" id="timerButton">
-                <div class="tool-icon">◷</div>
-                <div>
-                  <strong>Timer</strong>
-                  <span>Start a simple timer</span>
-                </div>
-                <b>→</b>
-              </button>
-
-              <button class="tool-card" data-page="favorites">
-                <div class="tool-icon">♡</div>
-                <div>
-                  <strong>Favorites</strong>
-                  <span>Your saved games</span>
-                </div>
-                <b>→</b>
-              </button>
-
-            </div>
-
-          </section>
-
-        </section>
-
-
-        <!-- GAMES -->
-        <section class="page" id="page-games">
-
-          <div class="page-heading">
-            <div>
-              <span class="section-kicker">LIBRARY</span>
-              <h1>Games</h1>
-              <p>Everything in your game library.</p>
-            </div>
+      <section class="section">
+        <div class="section-heading">
+          <div>
+            <span class="section-label">RETRO</span>
+            <h2>GBA Collection</h2>
           </div>
 
-          <div class="filter-row">
-            <button class="filter active" data-filter="all">All</button>
-            <button class="filter" data-filter="html">Browser</button>
-            <button class="filter" data-filter="gba">GBA</button>
+          <button class="text-button" data-page="gba">
+            View GBA →
+          </button>
+        </div>
+
+        <div id="gbaPreview" class="game-grid"></div>
+      </section>
+
+    </section>
+
+    <!-- GAMES -->
+    <section id="page-games" class="page">
+
+      <div class="page-title">
+        <div>
+          <span class="section-label">LIBRARY</span>
+          <h1>All Games</h1>
+          <p>Everything currently available in your library.</p>
+        </div>
+      </div>
+
+      <div class="filters">
+        <button class="filter active" data-filter="all">All</button>
+        <button class="filter" data-filter="html">Browser</button>
+        <button class="filter" data-filter="swf">Flash</button>
+        <button class="filter" data-filter="gba">GBA</button>
+      </div>
+
+      <div id="gamesGrid" class="game-grid"></div>
+
+    </section>
+
+    <!-- GBA -->
+    <section id="page-gba" class="page">
+
+      <div class="gba-banner">
+        <div>
+          <span class="section-label">RETRO COLLECTION</span>
+          <h1>Game Boy Advance</h1>
+          <p>
+            Launch GBA games through the emulator already included in your
+            <code>/gba/</code> folder.
+          </p>
+        </div>
+
+        <div class="gba-logo">GBA</div>
+      </div>
+
+      <div class="section-heading">
+        <div>
+          <span class="section-label">EMULATOR</span>
+          <h2>GBA Games</h2>
+        </div>
+      </div>
+
+      <div id="gbaGrid" class="game-grid"></div>
+
+    </section>
+
+    <!-- FAVORITES -->
+    <section id="page-favorites" class="page">
+
+      <div class="page-title">
+        <div>
+          <span class="section-label">YOUR COLLECTION</span>
+          <h1>Favorites</h1>
+          <p>Your saved games appear here.</p>
+        </div>
+      </div>
+
+      <div id="favoritesGrid" class="game-grid"></div>
+
+    </section>
+
+    <!-- APPS -->
+    <section id="page-apps" class="page">
+
+      <div class="page-title">
+        <div>
+          <span class="section-label">TOOLS</span>
+          <h1>Apps</h1>
+          <p>Useful tools for your GameHub.</p>
+        </div>
+      </div>
+
+      <div class="app-grid">
+
+        <button class="app-card" id="notesBtn">
+          <div class="app-icon">📝</div>
+          <div>
+            <h3>Notes</h3>
+            <p>Save quick notes locally.</p>
           </div>
+        </button>
 
-          <div class="game-grid large" id="gamesGrid"></div>
-
-          <div class="empty-state" id="gamesEmpty">
-            <div>⌕</div>
-            <h3>No games found</h3>
-            <p>Try a different search.</p>
+        <button class="app-card" id="timerBtn">
+          <div class="app-icon">⏱️</div>
+          <div>
+            <h3>Timer</h3>
+            <p>Simple gaming timer.</p>
           </div>
+        </button>
 
-        </section>
-
-
-        <!-- GBA -->
-        <section class="page" id="page-gba">
-
-          <div class="gba-banner">
-
-            <div>
-              <span class="section-kicker">EMULATOR</span>
-              <h1>Game Boy Advance</h1>
-              <p>
-                Your GBA collection, all in one place.
-              </p>
-            </div>
-
-            <div class="gba-symbol">GBA</div>
-
+        <button class="app-card" id="randomAppBtn">
+          <div class="app-icon">🎲</div>
+          <div>
+            <h3>Random Game</h3>
+            <p>Pick something random.</p>
           </div>
-
-          <div class="section-header compact">
-            <div>
-              <h2>GBA Library</h2>
-            </div>
-          </div>
-
-          <div class="game-grid large" id="gbaGrid"></div>
-
-          <div class="empty-state" id="gbaEmpty">
-            <div>◈</div>
-            <h3>No GBA games yet</h3>
-            <p>Add a GBA game to your games.json file.</p>
-          </div>
-
-        </section>
-
-
-        <!-- FAVORITES -->
-        <section class="page" id="page-favorites">
-
-          <div class="page-heading">
-            <div>
-              <span class="section-kicker">YOUR PICKS</span>
-              <h1>Favorites</h1>
-              <p>Games you've saved for later.</p>
-            </div>
-          </div>
-
-          <div class="game-grid large" id="favoritesGrid"></div>
-
-          <div class="empty-state" id="favoritesEmpty">
-            <div>♡</div>
-            <h3>No favorites yet</h3>
-            <p>Click the heart on a game to save it here.</p>
-          </div>
-
-        </section>
-
-
-        <!-- APPS -->
-        <section class="page" id="page-apps">
-
-          <div class="page-heading">
-            <div>
-              <span class="section-kicker">UTILITIES</span>
-              <h1>Apps</h1>
-              <p>Useful little tools.</p>
-            </div>
-          </div>
-
-          <div class="app-grid">
-
-            <button class="app-card" id="appNotes">
-              <div class="app-icon">✎</div>
-              <h3>Notes</h3>
-              <p>Write and save a quick note.</p>
-              <span>Open →</span>
-            </button>
-
-            <button class="app-card" id="appTimer">
-              <div class="app-icon">◷</div>
-              <h3>Timer</h3>
-              <p>A simple browser timer.</p>
-              <span>Open →</span>
-            </button>
-
-            <button class="app-card" id="appRandom">
-              <div class="app-icon">⤨</div>
-              <h3>Random Game</h3>
-              <p>Pick something from your library.</p>
-              <span>Launch →</span>
-            </button>
-
-          </div>
-
-        </section>
-
-
-        <!-- SETTINGS -->
-        <section class="page" id="page-settings">
-
-          <div class="page-heading">
-            <div>
-              <span class="section-kicker">PREFERENCES</span>
-              <h1>Settings</h1>
-              <p>Customize your GameVault experience.</p>
-            </div>
-          </div>
-
-          <div class="settings-list">
-
-            <div class="setting">
-              <div>
-                <strong>Animations</strong>
-                <span>Use smooth interface animations.</span>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="animationsToggle" checked>
-                <span></span>
-              </label>
-            </div>
-
-            <div class="setting">
-              <div>
-                <strong>Compact cards</strong>
-                <span>Make the game library more condensed.</span>
-              </div>
-              <label class="switch">
-                <input type="checkbox" id="compactToggle">
-                <span></span>
-              </label>
-            </div>
-
-            <div class="setting">
-              <div>
-                <strong>Library information</strong>
-                <span id="libraryInfo">Loading...</span>
-              </div>
-            </div>
-
-          </div>
-
-        </section>
+        </button>
 
       </div>
 
-    </main>
+    </section>
 
-  </div>
+    <!-- SETTINGS -->
+    <section id="page-settings" class="page">
 
+      <div class="page-title">
+        <div>
+          <span class="section-label">CUSTOMIZE</span>
+          <h1>Settings</h1>
+          <p>Customize your GameHub experience.</p>
+        </div>
+      </div>
+
+      <div class="settings-card">
+
+        <div class="setting-row">
+          <div>
+            <strong>Animations</strong>
+            <p>Enable interface animations.</p>
+          </div>
+
+          <label class="switch">
+            <input type="checkbox" id="animationsToggle" checked>
+            <span></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <strong>Compact Cards</strong>
+            <p>Use smaller game cards.</p>
+          </div>
+
+          <label class="switch">
+            <input type="checkbox" id="compactToggle">
+            <span></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div>
+            <strong>Reset Favorites</strong>
+            <p>Remove all saved favorites.</p>
+          </div>
+
+          <button id="resetFavorites" class="danger-button">
+            Reset
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
 
   <!-- GAME PLAYER -->
-  <div class="player-overlay" id="playerOverlay">
+  <div id="playerModal" class="player-modal">
 
-    <div class="player-topbar">
+    <div class="player-window">
 
-      <div class="player-title">
-        <span>PLAYING</span>
-        <strong id="playerTitle">Game</strong>
-      </div>
-
-      <div class="player-actions">
-
-        <button id="fullscreenButton">
-          ⛶ Fullscreen
-        </button>
-
-        <button id="closePlayer" class="close-player">
-          ✕
-        </button>
-
-      </div>
-
-    </div>
-
-    <div class="player-container">
-      <div id="player"></div>
-    </div>
-
-  </div>
-
-
-  <!-- NOTES MODAL -->
-  <div class="modal" id="notesModal">
-
-    <div class="modal-box">
-
-      <div class="modal-header">
+      <div class="player-topbar">
         <div>
-          <span class="section-kicker">QUICK TOOL</span>
-          <h2>Notes</h2>
+          <span class="player-status"></span>
+          <strong id="playerTitle">Game</strong>
         </div>
 
-        <button class="modal-close" data-close="notesModal">✕</button>
+        <div class="player-actions">
+          <button id="openNewTab">↗</button>
+          <button id="fullscreenBtn">⛶</button>
+          <button id="closePlayer">✕</button>
+        </div>
       </div>
 
-      <textarea id="notesArea" placeholder="Write something..."></textarea>
-
-      <div class="modal-footer">
-        <button class="secondary-button" data-close="notesModal">
-          Close
-        </button>
-
-        <button class="primary-button" id="saveNotes">
-          Save notes
-        </button>
+      <div class="player-content">
+        <iframe
+          id="gameFrame"
+          title="Game Player"
+          allowfullscreen
+          allow="fullscreen; autoplay; gamepad"
+        ></iframe>
       </div>
 
     </div>
 
   </div>
 
+  <!-- NOTES MODAL -->
+  <div id="notesModal" class="small-modal">
+    <div class="small-modal-box">
+      <button class="modal-close" data-close="notesModal">✕</button>
+
+      <h2>Notes</h2>
+
+      <textarea
+        id="notesArea"
+        placeholder="Write something..."
+      ></textarea>
+
+      <button id="saveNotes" class="primary-button full">
+        Save Notes
+      </button>
+    </div>
+  </div>
 
   <!-- TIMER MODAL -->
-  <div class="modal" id="timerModal">
-
-    <div class="modal-box timer-box">
-
+  <div id="timerModal" class="small-modal">
+    <div class="small-modal-box">
       <button class="modal-close" data-close="timerModal">✕</button>
 
-      <span class="section-kicker">QUICK TOOL</span>
       <h2>Timer</h2>
 
-      <div class="timer-display" id="timerDisplay">
-        05:00
+      <div id="timerDisplay" class="timer-display">05:00</div>
+
+      <div class="timer-controls">
+        <button id="timerStart" class="primary-button">Start</button>
+        <button id="timerReset" class="secondary-button">Reset</button>
       </div>
-
-      <div class="timer-inputs">
-
-        <input
-          id="timerMinutes"
-          type="number"
-          min="1"
-          max="120"
-          value="5"
-        >
-
-        <span>minutes</span>
-
-      </div>
-
-      <div class="timer-buttons">
-        <button class="primary-button" id="startTimer">
-          Start
-        </button>
-
-        <button class="secondary-button" id="resetTimer">
-          Reset
-        </button>
-      </div>
-
     </div>
-
   </div>
 
+  <div id="toast"></div>
 
   <script src="script.js"></script>
-
 </body>
 </html>
