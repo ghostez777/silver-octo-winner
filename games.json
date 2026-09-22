@@ -1,4 +1,10 @@
 [
+  {
+    "id": "emerald",
+    "name": "Pokemon Emerald",
+    "gba": "pokemonem.gba",
+    "thumb": "thumbs/pokemonem.png"
+}
   {"id":"arkadium-bubble-shooter","name":"Arkadium Bubble Shooter","html":"https://arenacloud.cdn.arkadiumhosted.com/arkadiummodulesstorage-blob/game-rendering-iframe/0.1.179/iframe-rendering-grm.html?gameId=23&env=prod","thumb":"thumbs/bubbleshooter.png"},
   {"id":"crazyballs-gamesnacks","name":"Crazy Balls (GameSnacks)","html":"https://05hi0oufvrcro.h5games.usercontent.goog/v/0qeok5765gar8/?origin=https%3A%2F%2Fgamesnacks.com&gameCenterId=gamesnacks&userActivityMetrics=true&eids=95322736%2C95336219&features=GameRendering__enforce_csp%2CGameRendering__support_offline_feature%2CInterstitialFreqCap__freq_cap_60s%2CMonetization__run_slotcar_ads_in_game_center#pc=1903646286652333&enable-backend-update-score=true&is1on1=false&language=en-GB&gameData=eyJTcGxhc2hTYXZlZCI6IjEiLCJoYW5kdXQiOiIyIiwiU0NPUkUiOiIxIiwic3VwZXJiYWxsIjoiMSJ9","thumb":"thumbs/crazyballs.png"},
   {"id":"bubbleshooter","name":"Bubbleshooter","file":"games/bubble-shooter.swf","thumb":"thumbs/bubs.png"},
