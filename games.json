@@ -624,5 +624,60 @@
     "id": "newest-hk",
     "name": "Newest HK",
     "html": "games/newesthk.html"
+  },
+  {
+    "id": "fnafs",
+    "name": "FNAF (fnafs)",
+    "html": "games/fnafs.html"
+  },
+  {
+    "id": "fnaf4-upload",
+    "name": "Five Nights at Freddy's 4",
+    "html": "games/fnaf4.html"
+  },
+  {
+    "id": "game-3",
+    "name": "Game 3",
+    "html": "games/3.html"
+  },
+  {
+    "id": "game-2",
+    "name": "Game 2",
+    "html": "games/2.html"
+  },
+  {
+    "id": "fnafu",
+    "name": "Ultimate Custom Night",
+    "html": "games/fnafu.html"
+  },
+  {
+    "id": "fnaf-upload",
+    "name": "Five Nights at Freddy's",
+    "html": "games/fnaf.html"
+  },
+  {
+    "id": "survivor-upload",
+    "name": "Survivor",
+    "html": "games/survivor.html"
+  },
+  {
+    "id": "thkill",
+    "name": "TH Kill",
+    "html": "games/thkill.html"
+  },
+  {
+    "id": "pvzge",
+    "name": "Plants vs Zombies (pvzge)",
+    "html": "games/pvzge.html"
+  },
+  {
+    "id": "pvs",
+    "name": "Plants vs Zombies",
+    "html": "games/pvs.html"
+  },
+  {
+    "id": "jetpackjoyride-upload",
+    "name": "Jetpack Joyride",
+    "html": "games/jetpackjoyride.html"
   }
 ]
