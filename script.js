@@ -17,15 +17,20 @@ let timerInterval = null;
 ========================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-  setupNavigation();
+  try {
+    setupNavigation();
   setupSearch();
   setupFilters();
   setupPlayer();
   setupApps();
   setupSettings();
   setupKeyboard();
-  loadNotes();
-  loadGames();
+    loadNotes();
+    loadGames();
+  } catch (error) {
+    console.error("GameHub startup error:", error);
+    showLoadError();
+  }
 });
 
 
@@ -35,8 +40,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function loadGames() {
   try {
-    const response = await fetch("games.json", {
-      cache: "no-store"
+    const gamesURL = new URL("games.json", document.baseURI);
+
+    const response = await fetch(gamesURL.href, {
+      cache: "no-store",
+      headers: { "Accept": "application/json" }
     });
 
     if (!response.ok) {
