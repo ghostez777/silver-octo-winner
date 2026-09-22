@@ -334,7 +334,7 @@ function launchGame(game) {
 
   if (game.gba) {
     const emulatorURL =
-      `gba/player#${encodeURIComponent(game.gba)}`;
+      `jsemu/?rom=${encodeURIComponent(game.gba)}`;
 
     window.location.href = emulatorURL;
     return;
