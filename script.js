@@ -377,6 +377,8 @@ function openPlayer(game, url) {
 
   $("#playerModal").classList.add("open");
   document.body.style.overflow = "hidden";
+
+  // Put the game player into the device fullscreen mode after the user\n  // clicks a game. Browsers require fullscreen requests to come from\n  // a user interaction, so this is intentionally called during launch.\n  requestGameFullscreen();
 }
 
 
