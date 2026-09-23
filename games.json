@@ -608,72 +608,72 @@
   {
     "id": "geography-little2",
     "name": "Geography",
-    "html": "games/little2.html"
+    "html": "https://truffled.lol/gamefile/little2.html"
   },
   {
     "id": "little-alchemy",
     "name": "Little Alchemy",
-    "html": "games/littlealchemy.html"
+    "html": "https://truffled.lol/games/littlealchemy/index.html"
   },
   {
     "id": "silk",
     "name": "Silk",
-    "html": "games/silk.html"
+    "html": "https://truffled.lol/games/silk/index.html"
   },
   {
     "id": "newest-hk",
     "name": "Newest HK",
-    "html": "games/newesthk.html"
+    "html": "https://truffled.lol/games/newesthk/index.html"
   },
   {
     "id": "fnafs",
     "name": "FNAF (fnafs)",
-    "html": "games/fnafs.html"
+    "html": "https://truffled.lol/gamefile/fnafs.html"
   },
   {
     "id": "fnaf4-upload",
     "name": "Five Nights at Freddy's 4",
-    "html": "games/fnaf4.html"
+    "html": "https://truffled.lol/games/fnaf4/index.html"
   },
   {
     "id": "game-3",
     "name": "Game 3",
-    "html": "games/3.html"
+    "html": "https://truffled.lol/games/3/index.html"
   },
   {
     "id": "game-2",
     "name": "Game 2",
-    "html": "games/2.html"
+    "html": "https://truffled.lol/games/2/index.html"
   },
   {
     "id": "fnafu",
     "name": "Ultimate Custom Night",
-    "html": "games/fnafu.html"
+    "html": "https://truffled.lol/gamefile/fnafu.html"
   },
   {
     "id": "fnaf-upload",
     "name": "Five Nights at Freddy's",
-    "html": "games/fnaf.html"
+    "html": "https://truffled.lol/games/fnaf/index.html"
   },
   {
     "id": "survivor-upload",
     "name": "Survivor",
-    "html": "games/survivor.html"
+    "html": "https://truffled.lol/gamefile/survivor.html"
   },
   {
     "id": "thkill",
     "name": "TH Kill",
-    "html": "games/thkill.html"
+    "html": "https://truffled.lol/games/thkill/index.html"
   },
   {
     "id": "pvzge",
     "name": "Plants vs Zombies (pvzge)",
-    "html": "games/pvzge.html"
+    "html": "https://truffled.lol/games/pvzge/index.html"
   },
   {
     "id": "pvs",
     "name": "Plants vs Zombies",
-    "html": "games/pvs.html"
+    "html": "https://truffled.lol/gamefile/pvs.html"
   },
   {
     "id": "jetpackjoyride-upload",
