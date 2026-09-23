@@ -7,25 +7,12 @@
   const nativeFetch = window.fetch.bind(window);
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  // Older versions of the catalog contained an unterminated html URL. Repair
-  // that record at the edge so one bad entry cannot prevent every game card
-  // from loading.
-  function repairCatalog(text) {
+  function hasValidCatalog(data) {
     try {
-      JSON.parse(text);
-      return text;
+      const parsed = typeof data === "string" ? JSON.parse(data) : data;
+      return Array.isArray(parsed);
     } catch (_) {
-      const repaired = text.replace(
-        /(\"html\"\s*:\s*\"[^\"\r\n]*)\r?\n(\s*\"thumb\"\s*:)/g,
-        '$1\",\n$2'
-      );
-      try {
-        JSON.parse(repaired);
-        return repaired;
-      } catch (error) {
-        console.error("The game catalog is invalid:", error);
-        return text;
-      }
+      return false;
     }
   }
 
@@ -47,15 +34,21 @@
         clearTimeout(timeout);
         if (result.ok || attempt === attempts - 1) {
           if (isCatalog && result.ok) {
-            const catalog = repairCatalog(await result.clone().text());
+            const catalogText = await result.clone().text();
+            if (hasValidCatalog(catalogText)) {
+              try {
+                localStorage.setItem("gamehub-games-cache", catalogText);
+              } catch (_) { /* Storage may be disabled. */ }
+              return new Response(catalogText, {
+                status: result.status,
+                statusText: result.statusText,
+                headers: { "Content-Type": "application/json" },
+              });
+            }
             try {
-              localStorage.setItem("gamehub-games-cache", catalog);
-            } catch (_) { /* Storage may be disabled. */ }
-            return new Response(catalog, {
-              status: result.status,
-              statusText: result.statusText,
-              headers: { "Content-Type": "application/json" },
-            });
+              localStorage.removeItem("gamehub-games-cache");
+            } catch (_) { /* Ignore storage issues. */ }
+            console.warn("Game catalog was malformed; ignoring the response.");
           }
           return result;
         }
@@ -70,12 +63,13 @@
     if (isCatalog) {
       try {
         const cached = localStorage.getItem("gamehub-games-cache");
-        if (cached) {
+        if (cached && hasValidCatalog(cached)) {
           return new Response(cached, {
             status: 200,
             headers: { "Content-Type": "application/json" },
           });
         }
+        localStorage.removeItem("gamehub-games-cache");
       } catch (_) { /* Continue to the original error. */ }
     }
     throw lastError || new Error("Request failed");
