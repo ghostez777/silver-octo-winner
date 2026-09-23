@@ -2,382 +2,90 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GameHub</title>
-  <meta name="description" content="GameHub - your personal browser gaming library">
-
+  <meta name="description" content="A simple grid of browser games">
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-icon">G</div>
-      <div>
-        <strong>GameHub</strong>
-        <span>Gaming Library</span>
-      </div>
-    </div>
-
-    <nav class="nav">
-      <button class="nav-item active" data-page="home">
-        <span>⌂</span>
-        Home
-      </button>
-
-      <button class="nav-item" data-page="games">
-        <span>🎮</span>
-        Games
-      </button>
-
-      <button class="nav-item" data-page="gba">
-        <span>🕹️</span>
-        GBA
-      </button>
-
-      <button class="nav-item" data-page="favorites">
-        <span>★</span>
-        Favorites
-      </button>
-
-      <button class="nav-item" data-page="apps">
-        <span>▦</span>
-        Apps
-      </button>
-
-      <button class="nav-item" data-page="settings">
-        <span>⚙</span>
-        Settings
-      </button>
-    </nav>
-
-    <div class="sidebar-bottom">
-      <div class="status-dot"></div>
-      <div>
-        <strong>GameHub Online</strong>
-        <small id="gameCount">Loading games...</small>
-      </div>
-    </div>
-  </aside>
-
   <main class="main">
-
     <header class="topbar">
-      <div class="mobile-brand">
-        <div class="brand-icon">G</div>
-        <strong>GameHub</strong>
-      </div>
-
-      <div class="search-wrap">
-        <span>⌕</span>
-        <input
-          id="searchInput"
-          type="search"
-          placeholder="Search games..."
-          autocomplete="off"
-        >
+      <a class="brand" href="#top" aria-label="GameHub home">
+        <span class="brand-icon">G</span>
+        <span><strong>GameHub</strong><small>Gaming Library</small></span>
+      </a>
+      <label class="search-wrap" for="searchInput">
+        <span aria-hidden="true">⌕</span>
+        <input id="searchInput" type="search" placeholder="Search games..." autocomplete="off">
         <kbd>CTRL K</kbd>
-      </div>
-
-      <button id="randomBtn" class="top-button">
-        🎲 Random
-      </button>
+      </label>
+      <button id="randomBtn" class="top-button">🎲 Random</button>
     </header>
 
-    <!-- HOME -->
-    <section id="page-home" class="page active-page">
-
-      <section class="hero">
-        <div class="hero-content">
-          <span class="eyebrow">YOUR GAME LIBRARY</span>
-
-          <h1>Play something<br><span>awesome.</span></h1>
-
-          <p>
-            Your games, GBA collection, and browser games all in one place.
-          </p>
-
-          <div class="hero-buttons">
-            <button class="primary-button" data-page="games">
-              Browse Games →
-            </button>
-
-            <button class="secondary-button" data-page="gba">
-              🕹️ GBA Games
-            </button>
-          </div>
-        </div>
-
-        <div class="hero-art">
-          <div class="floating-controller">🎮</div>
-          <div class="hero-circle circle-one"></div>
-          <div class="hero-circle circle-two"></div>
-        </div>
-      </section>
-
-      <section class="section">
-        <div class="section-heading">
-          <div>
-            <span class="section-label">COLLECTION</span>
-            <h2>Featured Games</h2>
-          </div>
-
-          <button class="text-button" data-page="games">
-            View all →
-          </button>
-        </div>
-
-        <div id="featuredGames" class="game-grid"></div>
-      </section>
-
-      <section class="section">
-        <div class="section-heading">
-          <div>
-            <span class="section-label">RETRO</span>
-            <h2>GBA Collection</h2>
-          </div>
-
-          <button class="text-button" data-page="gba">
-            View GBA →
-          </button>
-        </div>
-
-        <div id="gbaPreview" class="game-grid"></div>
-      </section>
-
-    </section>
-
-    <!-- GAMES -->
-    <section id="page-games" class="page">
-
-      <div class="page-title">
-        <div>
-          <span class="section-label">LIBRARY</span>
-          <h1>All Games</h1>
-          <p>Everything currently available in your library.</p>
+    <section id="top" class="hero panel">
+      <div>
+        <span class="eyebrow">YOUR GAME LIBRARY</span>
+        <h1>Play something <span>awesome.</span></h1>
+        <p>Everything in one simple place. Search the collection or pick a game from the grids below.</p>
+        <div class="hero-buttons">
+          <button class="primary-button" data-page="gamesSection">Browse games ↓</button>
+          <button class="secondary-button" data-page="gbaSection">🕹️ GBA collection ↓</button>
         </div>
       </div>
+      <div class="hero-art" aria-hidden="true">🎮</div>
+    </section>
 
-      <div class="filters">
+    <section id="gamesSection" class="content-section">
+      <div class="section-heading">
+        <div><span class="section-label">COLLECTION</span><h2>All Games</h2></div>
+        <span id="gameCount" class="count">Loading games...</span>
+      </div>
+      <div class="filters" aria-label="Game filters">
         <button class="filter active" data-filter="all">All</button>
         <button class="filter" data-filter="html">Browser</button>
         <button class="filter" data-filter="swf">Flash</button>
         <button class="filter" data-filter="gba">GBA</button>
       </div>
-
       <div id="gamesGrid" class="game-grid"></div>
-
     </section>
 
-    <!-- GBA -->
-    <section id="page-gba" class="page">
-
-      <div class="gba-banner">
-        <div>
-          <span class="section-label">RETRO COLLECTION</span>
-          <h1>Game Boy Advance</h1>
-          <p>
-            Launch GBA games through the emulator already included in your
-            <code>/gba/</code> folder.
-          </p>
-        </div>
-
-        <div class="gba-logo">GBA</div>
-      </div>
-
-      <div class="section-heading">
-        <div>
-          <span class="section-label">EMULATOR</span>
-          <h2>GBA Games</h2>
-        </div>
-      </div>
-
+    <section id="gbaSection" class="content-section">
+      <div class="section-heading"><div><span class="section-label">RETRO</span><h2>GBA Collection</h2></div><span class="section-note">Runs in the included emulator</span></div>
       <div id="gbaGrid" class="game-grid"></div>
-
     </section>
 
-    <!-- FAVORITES -->
-    <section id="page-favorites" class="page">
-
-      <div class="page-title">
-        <div>
-          <span class="section-label">YOUR COLLECTION</span>
-          <h1>Favorites</h1>
-          <p>Your saved games appear here.</p>
-        </div>
-      </div>
-
+    <section id="favoritesSection" class="content-section">
+      <div class="section-heading"><div><span class="section-label">YOUR PICKS</span><h2>Favorites</h2></div><span class="section-note">Click ★ on any game to save it</span></div>
       <div id="favoritesGrid" class="game-grid"></div>
-
     </section>
 
-    <!-- APPS -->
-    <section id="page-apps" class="page">
-
-      <div class="page-title">
-        <div>
-          <span class="section-label">TOOLS</span>
-          <h1>Apps</h1>
-          <p>Useful tools for your GameHub.</p>
-        </div>
-      </div>
-
+    <section id="toolsSection" class="content-section">
+      <div class="section-heading"><div><span class="section-label">TOOLS</span><h2>Quick Tools</h2></div></div>
       <div class="app-grid">
-
-        <button class="app-card" id="notesBtn">
-          <div class="app-icon">📝</div>
-          <div>
-            <h3>Notes</h3>
-            <p>Save quick notes locally.</p>
-          </div>
-        </button>
-
-        <button class="app-card" id="timerBtn">
-          <div class="app-icon">⏱️</div>
-          <div>
-            <h3>Timer</h3>
-            <p>Simple gaming timer.</p>
-          </div>
-        </button>
-
-        <button class="app-card" id="randomAppBtn">
-          <div class="app-icon">🎲</div>
-          <div>
-            <h3>Random Game</h3>
-            <p>Pick something random.</p>
-          </div>
-        </button>
-
+        <button class="app-card" id="notesBtn"><span class="app-icon">📝</span><span><strong>Notes</strong><small>Save quick notes locally</small></span></button>
+        <button class="app-card" id="timerBtn"><span class="app-icon">⏱️</span><span><strong>Timer</strong><small>Start a simple gaming timer</small></span></button>
+        <button class="app-card" id="randomAppBtn"><span class="app-icon">🎲</span><span><strong>Random Game</strong><small>Pick something to play</small></span></button>
       </div>
-
     </section>
 
-    <!-- SETTINGS -->
-    <section id="page-settings" class="page">
-
-      <div class="page-title">
-        <div>
-          <span class="section-label">CUSTOMIZE</span>
-          <h1>Settings</h1>
-          <p>Customize your GameHub experience.</p>
-        </div>
+    <section id="settingsSection" class="content-section">
+      <div class="section-heading"><div><span class="section-label">PREFERENCES</span><h2>Settings</h2></div></div>
+      <div class="settings-grid">
+        <label class="setting-card"><span><strong>Animations</strong><small>Enable interface animations</small></span><span class="switch"><input type="checkbox" id="animationsToggle" checked><i></i></span></label>
+        <label class="setting-card"><span><strong>Compact cards</strong><small>Fit more games on screen</small></span><span class="switch"><input type="checkbox" id="compactToggle"><i></i></span></label>
+        <div class="setting-card"><span><strong>Reset favorites</strong><small>Remove every saved favorite</small></span><button id="resetFavorites" class="danger-button">Reset</button></div>
       </div>
-
-      <div class="settings-card">
-
-        <div class="setting-row">
-          <div>
-            <strong>Animations</strong>
-            <p>Enable interface animations.</p>
-          </div>
-
-          <label class="switch">
-            <input type="checkbox" id="animationsToggle" checked>
-            <span></span>
-          </label>
-        </div>
-
-        <div class="setting-row">
-          <div>
-            <strong>Compact Cards</strong>
-            <p>Use smaller game cards.</p>
-          </div>
-
-          <label class="switch">
-            <input type="checkbox" id="compactToggle">
-            <span></span>
-          </label>
-        </div>
-
-        <div class="setting-row">
-          <div>
-            <strong>Reset Favorites</strong>
-            <p>Remove all saved favorites.</p>
-          </div>
-
-          <button id="resetFavorites" class="danger-button">
-            Reset
-          </button>
-        </div>
-
-      </div>
-
     </section>
-
   </main>
 
-  <!-- GAME PLAYER -->
-  <div id="playerModal" class="player-modal">
-
-    <div class="player-window">
-
-      <div class="player-topbar">
-        <div>
-          <span class="player-status"></span>
-          <strong id="playerTitle">Game</strong>
-        </div>
-
-        <div class="player-actions">
-          <button id="openNewTab">↗</button>
-          <button id="fullscreenBtn">⛶</button>
-          <button id="closePlayer">✕</button>
-        </div>
-      </div>
-
-      <div class="player-content">
-        <iframe
-          id="gameFrame"
-          title="Game Player"
-          allowfullscreen
-          allow="fullscreen; autoplay; gamepad"
-        ></iframe>
-
-        <div id="ruffleFrame" aria-label="Ruffle Flash Player"></div>
-      </div>
-
-    </div>
-
+  <div id="playerModal" class="player-modal" role="dialog" aria-modal="true" aria-label="Game player">
+    <div class="player-window"><div class="player-topbar"><strong><span class="player-status"></span><span id="playerTitle">Game</span></strong><div class="player-actions"><button id="openNewTab" title="Open in new tab">↗</button><button id="fullscreenBtn" title="Fullscreen">⛶</button><button id="closePlayer" title="Close">✕</button></div></div><div class="player-content"><iframe id="gameFrame" title="Game Player" allowfullscreen allow="fullscreen; autoplay; gamepad"></iframe><div id="ruffleFrame"></div></div></div>
   </div>
 
-  <!-- NOTES MODAL -->
-  <div id="notesModal" class="small-modal">
-    <div class="small-modal-box">
-      <button class="modal-close" data-close="notesModal">✕</button>
-
-      <h2>Notes</h2>
-
-      <textarea
-        id="notesArea"
-        placeholder="Write something..."
-      ></textarea>
-
-      <button id="saveNotes" class="primary-button full">
-        Save Notes
-      </button>
-    </div>
-  </div>
-
-  <!-- TIMER MODAL -->
-  <div id="timerModal" class="small-modal">
-    <div class="small-modal-box">
-      <button class="modal-close" data-close="timerModal">✕</button>
-
-      <h2>Timer</h2>
-
-      <div id="timerDisplay" class="timer-display">05:00</div>
-
-      <div class="timer-controls">
-        <button id="timerStart" class="primary-button">Start</button>
-        <button id="timerReset" class="secondary-button">Reset</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="toast"></div>
-
+  <div id="notesModal" class="small-modal"><div class="small-modal-box"><button class="modal-close" data-close="notesModal">✕</button><h2>Notes</h2><textarea id="notesArea" placeholder="Write something..."></textarea><button id="saveNotes" class="primary-button full">Save Notes</button></div></div>
+  <div id="timerModal" class="small-modal"><div class="small-modal-box"><button class="modal-close" data-close="timerModal">✕</button><h2>Timer</h2><div id="timerDisplay" class="timer-display">05:00</div><div class="timer-controls"><button id="timerStart" class="primary-button">Start</button><button id="timerReset" class="secondary-button">Reset</button></div></div></div>
+  <div id="toast" role="status"></div>
   <script src="ruffle/ruffle.js"></script>
-  <script src="script.js?v=20260922-2"></script>
+  <script src="script.js?v=20260923-1"></script>
 </body>
 </html>
