@@ -148,7 +148,7 @@ function renderCards(container, games, emptyMessage) {
 function launchGame(game) {
   state.currentGame = game;
   if (game.gba) return void (window.location.href = `jsemu/?rom=${encodeURIComponent(game.gba)}`);
-  if (game.html) return /^https?:\/\//i.test(game.html) ? window.open(game.html, "_blank", "noopener,noreferrer") : openPlayer(game, game.html);
+  if (game.html) return openPlayer(game, game.html);
   if (game.file) return openRufflePlayer(game);
   showToast("This game does not have a playable location yet.");
 }
