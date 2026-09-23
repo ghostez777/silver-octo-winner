@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GameHub</title>
   <meta name="description" content="A simple grid of browser games">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20260923-4">
   <script>
     // Ruffle's worker and WASM files live beside ruffle.js. Resolve this from
     // the current site URL so both custom domains and GitHub Pages subpaths work.
@@ -58,12 +58,18 @@
       try {
         const api = window.RufflePlayer && window.RufflePlayer.newest && window.RufflePlayer.newest();
         if (!api) throw new Error("Ruffle did not initialize");
+        const exit = document.createElement("button");
+        exit.className = "ruffle-exit";
+        exit.type = "button";
+        exit.textContent = "✕ Exit";
+        exit.addEventListener("click", () => window.closePlayer());
+        container.appendChild(exit);
         const player = api.createPlayer();
         player.style.width = "100%";
         player.style.height = "100%";
         container.appendChild(player);
         const url = new URL(game.file, document.baseURI).href;
-        await player.ruffle().load({ url, autoplay: "auto", allowNetworking: "all" });
+        await player.ruffle().load({ url, autoplay: "auto", allowNetworking: "all", allowFullscreen: true, letterbox: "fullscreen" });
       } catch (error) {
         console.error("Could not load Flash game:", error);
         container.textContent = "This Flash game could not be loaded. Check the SWF file and refresh the page.";
