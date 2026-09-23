@@ -7,6 +7,28 @@
   const nativeFetch = window.fetch.bind(window);
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+  // Older versions of the catalog contained an unterminated html URL. Repair
+  // that record at the edge so one bad entry cannot prevent every game card
+  // from loading.
+  function repairCatalog(text) {
+    try {
+      JSON.parse(text);
+      return text;
+    } catch (_) {
+      const repaired = text.replace(
+        /(\"html\"\s*:\s*\"[^\"\r\n]*)\r?\n(\s*\"thumb\"\s*:)/g,
+        '$1\",\n$2'
+      );
+      try {
+        JSON.parse(repaired);
+        return repaired;
+      } catch (error) {
+        console.error("The game catalog is invalid:", error);
+        return text;
+      }
+    }
+  }
+
   async function fetchWithRetry(input, options) {
     const request = typeof input === "string" ? input : input.url;
     const isCatalog = /(?:^|\/)games\.json(?:[?#]|$)/i.test(request);
@@ -25,9 +47,15 @@
         clearTimeout(timeout);
         if (result.ok || attempt === attempts - 1) {
           if (isCatalog && result.ok) {
+            const catalog = repairCatalog(await result.clone().text());
             try {
-              localStorage.setItem("gamehub-games-cache", await result.clone().text());
+              localStorage.setItem("gamehub-games-cache", catalog);
             } catch (_) { /* Storage may be disabled. */ }
+            return new Response(catalog, {
+              status: result.status,
+              statusText: result.statusText,
+              headers: { "Content-Type": "application/json" },
+            });
           }
           return result;
         }
