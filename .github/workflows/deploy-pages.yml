@@ -55,6 +55,10 @@ jobs:
           rsync -a --exclude='.git' --exclude='games/pokerouge' ./ _site/
           mkdir -p _site/games/pokerouge
           rsync -a games/pokerouge/dist/ _site/games/pokerouge/
+          # PokéRogue keeps its runtime sprites/audio/fonts and locale JSON in git submodules.
+          # Vite does not copy these because production publicDir is disabled.
+          rsync -a games/pokerouge/assets/ _site/games/pokerouge/assets/
+          rsync -a games/pokerouge/locales/ _site/games/pokerouge/locales/
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
