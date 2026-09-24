@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ghostez Arcade Player</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05070b}
+#game{position:fixed;inset:0;width:100%;height:100%;border:0;background:#000}
+#close{position:fixed;top:10px;right:10px;z-index:20;width:36px;height:36px;border:2px solid #111;border-radius:10px;background:#ffb000;color:#111;font:bold 20px/1 Arial;cursor:pointer;box-shadow:0 3px 0 #111}
+#close:hover{transform:translateY(-1px)}
+#ruffle{position:fixed;inset:0;width:100%;height:100%}
+#ruffle ruffle-player{width:100%!important;height:100%!important;display:block}
+#error{position:fixed;inset:0;display:grid;place-items:center;color:#fff;font:16px Arial;text-align:center}
+</style>
+<script>
+window.RufflePlayer=window.RufflePlayer||{};
+window.RufflePlayer.config={publicPath:new URL("ruffle/",document.baseURI).href,autoplay:"auto",letterbox:"off",allowNetworking:"all",allowFullscreen:true};
+</script>
+</head>
+<body>
+<button id="close" type="button" aria-label="Close game" title="Close game">×</button>
+<iframe id="game" allow="fullscreen; autoplay; gamepad" allowfullscreen></iframe>
+<div id="ruffle"></div>
+<div id="error" hidden></div>
+<script src="ruffle/ruffle.js"></script>
+<script>
+const q=new URLSearchParams(location.search);
+const type=q.get("type");
+const src=q.get("src");
+const title=q.get("title")||"Ghostez Arcade";
+document.title=title+" — Ghostez Arcade";
+document.getElementById("close").addEventListener("click",()=>window.close());
+if(type==="html"&&src){
+  const f=document.getElementById("game");
+  f.src=new URL(src,document.baseURI).href;
+}else if(type==="gba"&&src){
+  document.getElementById("game").src=new URL("jsemu/?rom="+encodeURIComponent(src),document.baseURI).href;
+}else if(type==="swf"&&src){
+  (async()=>{
+    try{
+      const api=window.RufflePlayer&&typeof window.RufflePlayer.newest==="function"?window.RufflePlayer.newest():null;
+      if(!api) throw new Error("Ruffle did not initialize.");
+      const p=api.createPlayer();
+      p.style.cssText="display:block;width:100%;height:100%;min-width:0;min-height:0";
+      document.getElementById("game").style.display="none";
+      document.getElementById("ruffle").appendChild(p);
+      await p.ruffle().load({url:new URL(src,document.baseURI).href,autoplay:"auto",allowNetworking:"all",allowFullscreen:true,letterbox:"off"});
+    }catch(e){
+      console.error(e);
+      const err=document.getElementById("error");
+      err.hidden=false;
+      err.textContent="This game could not be loaded. Refresh the tab and try again.";
+    }
+  })();
+}else{
+  const err=document.getElementById("error");
+  err.hidden=false;
+  err.textContent="No game was specified.";
+}
+</script>
+</body>
+</html>
