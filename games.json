@@ -2,7 +2,7 @@
   {
     "id": "pokerouge",
     "name": "Pokerouge",
-    "file":"games/pokeorouge",
+    "file":"games/pokeorouge/node.js",
     "thumb": "thumbs/pokerouge.png"
   },
   {
