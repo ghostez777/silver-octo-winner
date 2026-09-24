@@ -1590,3 +1590,48 @@ body {
     left: 8px;
   }
 }
+
+
+/* Transparent game controls with fullscreen support */
+.player-window {
+  position: relative;
+}
+
+.player-topbar {
+  background: transparent !important;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  pointer-events: none;
+}
+
+.player-actions {
+  gap: 7px;
+}
+
+.player-button {
+  background: rgba(0, 0, 0, .18);
+  border-color: rgba(255, 255, 255, .24);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.player-button:hover {
+  background: rgba(0, 0, 0, .28);
+  border-color: rgba(255, 255, 255, .5);
+}
+
+.player-close-button {
+  background: rgba(255, 36, 36, .32);
+  border-color: rgba(255, 80, 80, .5);
+}
+
+.player-close-button:hover {
+  background: rgba(255, 36, 36, .48);
+  border-color: rgba(255, 120, 120, .72);
+}
+
+.player-window:fullscreen .player-topbar {
+  background: transparent !important;
+}
