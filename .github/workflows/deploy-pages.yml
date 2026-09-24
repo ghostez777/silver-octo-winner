@@ -22,8 +22,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          submodules: recursive
           fetch-depth: 0
+
+      - name: Fetch PokéRogue runtime submodules
+        working-directory: games/pokerouge
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf assets locales
+          git clone --depth 1 --branch beta --single-branch https://github.com/pagefaultgames/pokerogue-assets.git assets
+          git clone --depth 1 --branch main --single-branch https://github.com/pagefaultgames/pokerogue-locales.git locales
+          rm -rf assets/.git locales/.git
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -55,10 +64,9 @@ jobs:
           rsync -a --exclude='.git' --exclude='games/pokerouge' ./ _site/
           mkdir -p _site/games/pokerouge
           rsync -a games/pokerouge/dist/ _site/games/pokerouge/
-          # PokéRogue keeps its runtime sprites/audio/fonts and locale JSON in git submodules.
-          # Vite does not copy these because production publicDir is disabled.
-          rsync -a games/pokerouge/assets/ _site/games/pokerouge/assets/
-          rsync -a games/pokerouge/locales/ _site/games/pokerouge/locales/
+          # PokéRogue keeps its runtime sprites/audio/fonts and locale JSON outside the Vite bundle.
+          rsync -a --exclude='.git' games/pokerouge/assets/ _site/games/pokerouge/assets/
+          rsync -a --exclude='.git' games/pokerouge/locales/ _site/games/pokerouge/locales/
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
