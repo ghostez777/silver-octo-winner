@@ -413,10 +413,49 @@ async function openRufflePlayer(game) {
    CLOSE PLAYER
    ========================================================= */
 
-function closePlayer() {
+async function togglePlayerFullscreen() {
+  const windowEl = $("#playerWindow");
+  const button = $("#fullscreenPlayer");
+
+  if (!document.fullscreenElement) {
+    try {
+      await windowEl.requestFullscreen();
+    } catch (error) {
+      showToast("Fullscreen is not available in this browser.");
+    }
+  } else {
+    try {
+      await document.exitFullscreen();
+    } catch (error) {
+      console.warn("Could not exit fullscreen:", error);
+    }
+  }
+
+  syncFullscreenButton();
+}
+
+function syncFullscreenButton() {
+  const button = $("#fullscreenPlayer");
+  if (!button) return;
+
+  const active = Boolean(document.fullscreenElement);
+  button.textContent = active ? "×" : "⛶";
+  button.title = active ? "Exit fullscreen" : "Fullscreen";
+  button.setAttribute("aria-label", active ? "Exit fullscreen" : "Enter fullscreen");
+}
+
+async function closePlayer() {
   const modal = $("#playerModal");
   const frame = $("#gameFrame");
   const ruffleFrame = $("#ruffleFrame");
+
+  if (document.fullscreenElement) {
+    try {
+      await document.exitFullscreen();
+    } catch (error) {
+      console.warn("Could not exit fullscreen:", error);
+    }
+  }
 
   // Close modal.
   modal.classList.remove("open");
@@ -445,6 +484,16 @@ function setupPlayer() {
   $("#closePlayer").addEventListener(
     "click",
     closePlayer
+  );
+
+  $("#fullscreenPlayer").addEventListener(
+    "click",
+    togglePlayerFullscreen
+  );
+
+  document.addEventListener(
+    "fullscreenchange",
+    syncFullscreenButton
   );
 
   /*
