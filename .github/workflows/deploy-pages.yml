@@ -72,6 +72,52 @@ jobs:
           cp /tmp/pokerogue/assets/manifest.webmanifest _site/games/pokerouge/manifest.webmanifest
           cp /tmp/pokerogue/assets/service-worker.js _site/games/pokerouge/service-worker.js
 
+          # PokéRogue is embedded inside GameHub, so its PWA service worker can
+          # otherwise cache an older broken build. Unregister any old worker and
+          # clear its caches before the game starts.
+          python3 - <<'PY'
+from pathlib import Path
+p = Path("_site/games/pokerouge/index.html")
+s = p.read_text()
+marker = "<head>"
+patch = """<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", async () => {
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+      if ("caches" in window) {
+        const names = await caches.keys();
+        await Promise.all(names.map(n => caches.delete(n)));
+      }
+    } catch (e) {
+      console.warn("Service worker cleanup failed:", e);
+    }
+  });
+}
+</script>
+"""
+s = s.replace(marker, marker + "\n" + patch, 1)
+p.write_text(s)
+PY
+
+          # Phaser normally uses WebGL here. AUTO lets mobile browsers fall
+          # back to Canvas if WebGL creation fails.
+          python3 - <<'PY'
+from pathlib import Path
+for p in Path("/tmp/pokerogue").rglob("main.ts"):
+    if p.as_posix().endswith("/src/main.ts"):
+        s = p.read_text()
+        old = "type: Phaser.WEBGL,"
+        if old not in s:
+            raise SystemExit("Expected Phaser.WEBGL line was not found")
+        p.write_text(s.replace(old, "type: Phaser.AUTO,", 1))
+        break
+else:
+    raise SystemExit("PokéRogue src/main.ts not found")
+
+PY
+
           # Print the final shell and its referenced files so broken relative
           # paths fail the build instead of silently producing a blank iframe.
           test -s _site/games/pokerouge/index.html
