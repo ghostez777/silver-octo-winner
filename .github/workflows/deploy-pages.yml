@@ -115,8 +115,6 @@ s = s.replace(marker, marker + "\n" + patch, 1)
 p.write_text(s)
 PY
 
-PY
-
           # Print the final shell and its referenced files so broken relative
           # paths fail the build instead of silently producing a blank iframe.
           test -s _site/games/pokerouge/index.html
