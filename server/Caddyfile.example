@@ -1,0 +1,6 @@
+# Example reverse proxy for the self-hosted PokéRogue API.
+# Replace the hostname with a domain you control.
+
+api.YOUR-DOMAIN.example {
+    reverse_proxy 127.0.0.1:8001
+}
