@@ -144,7 +144,7 @@ export function staticShellPlugin(): VitePlugin {
     configResolved(resolvedConfig): void {
       logger = resolvedConfig.logger;
     },
-    closeBundle(): void {
+    writeBundle(): void {
       const logSuffix = gray(` [${NAME}]`);
       const error = (message: string) => logger.error(red(`${message}${logSuffix}`));
       logger.info(cyan(`\t→ Plugin: ${NAME} v${VERSION}`));
