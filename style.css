@@ -1519,3 +1519,74 @@ body {
     font-size: 34px;
   }
 }
+
+/* Full-screen in-page game player */
+.player-modal {
+  padding: 0;
+  place-items: stretch;
+  background: #000;
+}
+
+.player-window {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  grid-template-rows: 0 minmax(0, 1fr);
+}
+
+.player-topbar {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  left: 10px;
+  z-index: 10;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(23,23,23,.82);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
+.player-topbar > strong {
+  display: none;
+}
+
+.player-actions {
+  margin-left: auto;
+  pointer-events: auto;
+}
+
+#gameFrame,
+#ruffleFrame {
+  width: 100vw;
+  height: 100vh;
+  min-width: 100%;
+  min-height: 100%;
+}
+
+#gameFrame {
+  display: block;
+}
+
+#ruffleFrame {
+  position: absolute;
+  inset: 0;
+}
+
+#ruffleFrame ruffle-player {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+@media (max-width: 520px) {
+  .player-topbar {
+    top: 8px;
+    right: 8px;
+    left: 8px;
+  }
+}
