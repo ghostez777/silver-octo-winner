@@ -883,7 +883,6 @@ body {
 
 .primary-button:hover { background: #c8ff83; transform: translateY(-1px); }
 .secondary-button { padding: 12px 16px; color: var(--text); }
-.hero-art { display: none; }
 
 .content-section { padding-top: 66px; scroll-margin-top: 112px; }
 
