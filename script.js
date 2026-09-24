@@ -608,11 +608,6 @@ function setupApps() {
     }
   );
 
-  $("#randomBtn").addEventListener(
-    "click",
-    randomGame
-  );
-
   $("#randomAppBtn").addEventListener(
     "click",
     randomGame
