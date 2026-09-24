@@ -108,15 +108,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Set the GitHub Pages custom domain
-        uses: actions/github-script@v7
-        with:
-          script: |
-            await github.rest.repos.updateInformationAboutPagesSite({
-              ...context.repo,
-              cname: "ghostez.org"
-            });
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
