@@ -59,12 +59,26 @@ jobs:
           rsync -a --exclude='.git' --exclude='games/pokerouge' ./ _site/
           mkdir -p _site/games/pokerouge
           rsync -a /tmp/pokerogue/dist/ _site/games/pokerouge/
-          # Runtime sprites, audio, fonts, and locale JSON are separate upstream submodules.
+
+          # PokéRogue keeps runtime sprites/audio/etc. in the assets submodule.
           rsync -a --exclude='.git' /tmp/pokerogue/assets/ _site/games/pokerouge/assets/
           rsync -a --exclude='.git' /tmp/pokerogue/locales/ _site/games/pokerouge/locales/
-          # Production CSS references fonts at ./fonts/.
+
+          # The production HTML/CSS references these files from the game root.
           mkdir -p _site/games/pokerouge/fonts
           rsync -a /tmp/pokerogue/assets/fonts/ _site/games/pokerouge/fonts/
+          cp /tmp/pokerogue/assets/logo128.png _site/games/pokerouge/logo128.png
+          cp /tmp/pokerogue/assets/logo512.png _site/games/pokerouge/logo512.png
+          cp /tmp/pokerogue/assets/manifest.webmanifest _site/games/pokerouge/manifest.webmanifest
+          cp /tmp/pokerogue/assets/service-worker.js _site/games/pokerouge/service-worker.js
+
+          # Print the final shell and its referenced files so broken relative
+          # paths fail the build instead of silently producing a blank iframe.
+          test -s _site/games/pokerouge/index.html
+          grep -E 'src=|href=' _site/games/pokerouge/index.html || true
+          test -f _site/games/pokerouge/logo512.png
+          test -f _site/games/pokerouge/manifest.webmanifest
+          test -f _site/games/pokerouge/service-worker.js
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
