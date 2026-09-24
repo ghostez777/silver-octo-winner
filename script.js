@@ -273,25 +273,30 @@ function renderCards(container, games, emptyMessage) {
 function launchGame(game) {
   state.currentGame = game;
 
+  const params = new URLSearchParams();
+
   if (game.gba) {
-    window.location.href =
-      `jsemu/?rom=${encodeURIComponent(game.gba)}`;
+    params.set("type", "gba");
+    params.set("src", game.gba);
+  } else if (game.html) {
+    params.set("type", "html");
+    params.set("src", game.html);
+  } else if (game.file) {
+    params.set("type", "swf");
+    params.set("src", game.file);
+  } else {
+    showToast("This game does not have a playable location yet.");
     return;
   }
 
-  if (game.html) {
-    openPlayer(game, game.html);
-    return;
-  }
+  params.set("title", game.name || "Game");
+  const playerUrl = new URL("player.html", document.baseURI);
+  playerUrl.search = params.toString();
 
-  if (game.file) {
-    openRufflePlayer(game);
-    return;
+  const tab = window.open(playerUrl.href, "_blank");
+  if (!tab) {
+    showToast("Allow pop-ups for this site to open games in a new tab.");
   }
-
-  showToast(
-    "This game does not have a playable location yet."
-  );
 }
 
 /* =========================================================
