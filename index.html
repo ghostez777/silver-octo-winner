@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GameHub</title>
-  <meta name="description" content="A simple grid of browser games">
+  <title>Ghostez Arcade — Play something great</title>
+  <meta name="description" content="Browse and play the Ghostez Arcade collection of browser games and retro classics.">
+  <meta name="theme-color" content="#080b12">
 
-  <link rel="stylesheet" href="style.css?v=20260924-1">
+  <link rel="stylesheet" href="style.css?v=20260924-2">
 
   <script>
     // Ruffle's worker and WASM files live beside ruffle.js.
@@ -26,13 +27,19 @@
 <body>
   <main class="main">
     <header class="topbar">
-      <a class="brand" href="#top" aria-label="GameHub home">
+      <a class="brand" href="#top" aria-label="Ghostez Arcade home">
         <span class="brand-icon">G</span>
         <span>
-          <strong>GameHub</strong>
-          <small>Gaming Library</small>
+          <strong>GHOSTEZ</strong>
+          <small>ARCADE</small>
         </span>
       </a>
+
+      <nav class="top-nav" aria-label="Main navigation">
+        <a href="#gamesSection">Discover</a>
+        <a href="#gbaSection">Retro</a>
+        <a href="#favoritesSection">Favorites</a>
+      </nav>
 
       <label class="search-wrap" for="searchInput">
         <span aria-hidden="true">⌕</span>
@@ -51,19 +58,19 @@
 
     <section id="top" class="hero panel">
       <div>
-        <span class="eyebrow">YOUR GAME LIBRARY</span>
-        <h1>Play something <span>awesome.</span></h1>
+        <span class="eyebrow">THE GHOSTEZ ARCADE</span>
+        <h1>Your next favorite<br>game is <span>waiting.</span></h1>
         <p>
-          Everything in one simple place. Search the collection or pick a game
-          from the grids below.
+          Pick up and play. Discover quick browser games, retro classics, and
+          the community’s most-loved picks.
         </p>
 
         <div class="hero-buttons">
           <button class="primary-button" data-page="gamesSection" type="button">
-            Browse games ↓
+            Explore the library <span aria-hidden="true">↘</span>
           </button>
           <button class="secondary-button" data-page="gbaSection" type="button">
-            🕹️ GBA collection ↓
+            <span aria-hidden="true">✳</span> Play retro
           </button>
         </div>
       </div>
@@ -281,6 +288,6 @@
   <script src="reliability.js"></script>
   <script src="ruffle/ruffle.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="script.js?v=20260924-1"></script>
+  <script src="script.js?v=20260924-2"></script>
 </body>
 </html>
