@@ -46,6 +46,7 @@
       </label>
 
       <button id="randomBtn" class="top-button" type="button">🎲 Random</button>
+      <button id="authButton" class="top-button auth-button" type="button">Login</button>
     </header>
 
     <section id="top" class="hero panel">
@@ -247,10 +248,39 @@
     </div>
   </div>
 
+  <div id="authModal" class="small-modal" aria-hidden="true">
+    <div class="small-modal-box auth-box">
+      <button class="modal-close" data-close="authModal" type="button">✕</button>
+      <div class="auth-heading">
+        <span class="section-label">GAMEHUB ACCOUNT</span>
+        <h2 id="authTitle">Log in</h2>
+        <p id="authStatus">Use your GameHub account to save your session.</p>
+      </div>
+
+      <form id="authForm">
+        <label class="auth-field">
+          <span>Email</span>
+          <input id="authEmail" type="email" autocomplete="email" required>
+        </label>
+
+        <label class="auth-field">
+          <span>Password</span>
+          <input id="authPassword" type="password" autocomplete="current-password" minlength="6" required>
+        </label>
+
+        <button id="authSubmit" class="primary-button full" type="submit">Log in</button>
+      </form>
+
+      <button id="authSwitch" class="auth-switch" type="button">Need an account? Sign up</button>
+      <button id="authLogout" class="danger-button full" type="button" hidden>Log out</button>
+    </div>
+  </div>
+
   <div id="toast" role="status"></div>
 
   <script src="reliability.js"></script>
   <script src="ruffle/ruffle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="script.js?v=20260924-1"></script>
 </body>
 </html>
