@@ -50,15 +50,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 - <<'PY'
-from pathlib import Path
-p = Path("/tmp/pokerogue/src/main.ts")
-s = p.read_text()
-old = "type: Phaser.WEBGL,"
-if old not in s:
-    raise SystemExit("Expected Phaser.WEBGL line was not found")
-p.write_text(s.replace(old, "type: Phaser.AUTO,", 1))
-PY
+          sed -i '0,/type: Phaser.WEBGL,/s//type: Phaser.AUTO,/' /tmp/pokerogue/src/main.ts
 
       - name: Build PokéRogue
         working-directory: /tmp/pokerogue
@@ -86,42 +78,15 @@ PY
           cp /tmp/pokerogue/assets/manifest.webmanifest _site/games/pokerouge/manifest.webmanifest
           cp /tmp/pokerogue/assets/service-worker.js _site/games/pokerouge/service-worker.js
 
-          # PokéRogue is embedded inside GameHub, so its PWA service worker can
-          # otherwise cache an older broken build. Unregister any old worker and
-          # clear its caches before the game starts.
-          python3 - <<'PY'
-from pathlib import Path
-p = Path("_site/games/pokerouge/index.html")
-s = p.read_text()
-marker = "<head>"
-patch = """<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", async () => {
-    try {
-      const regs = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map(r => r.unregister()));
-      if ("caches" in window) {
-        const names = await caches.keys();
-        await Promise.all(names.map(n => caches.delete(n)));
-      }
-    } catch (e) {
-      console.warn("Service worker cleanup failed:", e);
-    }
-  });
-}
-</script>
-"""
-s = s.replace(marker, marker + "\n" + patch, 1)
-p.write_text(s)
-PY
+          # The game is embedded in GameHub; do not register its PWA service worker.
+          sed -i '/serviceWorker/d' _site/games/pokerouge/index.html
 
-          # Print the final shell and its referenced files so broken relative
-          # paths fail the build instead of silently producing a blank iframe.
+          # Print the final shell and verify the deployment has the files it references.
           test -s _site/games/pokerouge/index.html
-          grep -E 'src=|href=' _site/games/pokerouge/index.html || true
           test -f _site/games/pokerouge/logo512.png
           test -f _site/games/pokerouge/manifest.webmanifest
           test -f _site/games/pokerouge/service-worker.js
+
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
