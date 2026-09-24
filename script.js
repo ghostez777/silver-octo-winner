@@ -12,6 +12,15 @@ let timerSeconds = 300;
 let timerInterval = null;
 let toastTimeout = null;
 
+const SUPABASE_URL = "https://abmrhhqubpxmzrjvsqay.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_oNPl0ont-81TGySbqG1roA_RX02JTFh";
+const supabase = window.supabase?.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
+let authMode = "login";
+
+
 function loadFavorites() {
   try {
     const value = JSON.parse(localStorage.getItem("gamehub-favorites") || "[]");
@@ -29,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupApps();
   setupSettings();
   setupKeyboard();
+  setupAuth();
   loadNotes();
   setupNotes();
   loadGames();
@@ -878,4 +888,167 @@ function escapeHTML(value) {
 
 function escapeAttribute(value) {
   return escapeHTML(value);
+}
+
+
+/* =========================================================
+   GAMEHUB AUTH
+   ========================================================= */
+
+function setupAuth() {
+  const authButton = $("#authButton");
+  const authForm = $("#authForm");
+  const authSwitch = $("#authSwitch");
+  const authLogout = $("#authLogout");
+  const authModal = $("#authModal");
+
+  if (!supabase || !authButton || !authForm) {
+    console.warn("GameHub authentication could not initialize.");
+    return;
+  }
+
+  authButton.addEventListener("click", async () => {
+    const { data } = await supabase.auth.getSession();
+    if (data.session) {
+      updateAuthUI(data.session);
+      authModal.classList.add("open");
+      authModal.setAttribute("aria-hidden", "false");
+    } else {
+      authMode = "login";
+      updateAuthForm();
+      authModal.classList.add("open");
+      authModal.setAttribute("aria-hidden", "false");
+    }
+  });
+
+  authForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const email = $("#authEmail").value.trim();
+    const password = $("#authPassword").value;
+    const submit = $("#authSubmit");
+    const status = $("#authStatus");
+
+    submit.disabled = true;
+    status.textContent = authMode === "login"
+      ? "Logging in..."
+      : "Creating your account...";
+
+    try {
+      const result = authMode === "login"
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signUp({ email, password });
+
+      if (result.error) throw result.error;
+
+      if (authMode === "signup" && !result.data.session) {
+        status.textContent = "Account created. Check your email to confirm it, then log in.";
+        showToast("Check your email to finish signup.");
+      } else {
+        status.textContent = "You're logged in.";
+        showToast("Logged in to GameHub.");
+        authModal.classList.remove("open");
+        authModal.setAttribute("aria-hidden", "true");
+      }
+    } catch (error) {
+      console.error("GameHub auth error:", error);
+      status.textContent = error?.message || "Could not complete that request.";
+    } finally {
+      submit.disabled = false;
+    }
+  });
+
+  authSwitch.addEventListener("click", () => {
+    authMode = authMode === "login" ? "signup" : "login";
+    updateAuthForm();
+  });
+
+  authLogout.addEventListener("click", async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      $("#authStatus").textContent = error.message;
+      return;
+    }
+
+    authModal.classList.remove("open");
+    authModal.setAttribute("aria-hidden", "true");
+    updateAuthUI(null);
+    showToast("Logged out of GameHub.");
+  });
+
+  document.addEventListener("click", (event) => {
+    const close = event.target.closest("[data-close='authModal']");
+    if (close) {
+      authModal.classList.remove("open");
+      authModal.setAttribute("aria-hidden", "true");
+    }
+  });
+
+  supabase.auth.onAuthStateChange((_event, session) => {
+    updateAuthUI(session);
+  });
+
+  supabase.auth.getSession().then(({ data }) => {
+    updateAuthUI(data.session);
+  });
+}
+
+function updateAuthForm() {
+  const title = $("#authTitle");
+  const status = $("#authStatus");
+  const submit = $("#authSubmit");
+  const switchButton = $("#authSwitch");
+  const logout = $("#authLogout");
+  const form = $("#authForm");
+
+  if (!title || !form) return;
+
+  const loggedIn = Boolean(
+    supabase && document.body.dataset.gamehubLoggedIn === "true"
+  );
+
+  form.hidden = loggedIn;
+  logout.hidden = !loggedIn;
+
+  if (loggedIn) {
+    title.textContent = "You're logged in";
+    switchButton.hidden = true;
+    return;
+  }
+
+  title.textContent = authMode === "login" ? "Log in" : "Create account";
+  submit.textContent = authMode === "login" ? "Log in" : "Sign up";
+  switchButton.textContent = authMode === "login"
+    ? "Need an account? Sign up"
+    : "Already have an account? Log in";
+  switchButton.hidden = false;
+
+  if (authMode === "login") {
+    status.textContent = "Use your GameHub account to save your session.";
+    $("#authPassword").autocomplete = "current-password";
+  } else {
+    status.textContent = "Create a GameHub account with your email and a password.";
+    $("#authPassword").autocomplete = "new-password";
+  }
+}
+
+function updateAuthUI(session) {
+  const button = $("#authButton");
+  const status = $("#authStatus");
+
+  document.body.dataset.gamehubLoggedIn = session ? "true" : "false";
+
+  if (!session) {
+    button.textContent = "Login";
+    if ($("#authForm")) $("#authForm").hidden = false;
+    if ($("#authLogout")) $("#authLogout").hidden = true;
+    if ($("#authSwitch")) $("#authSwitch").hidden = false;
+    updateAuthForm();
+    return;
+  }
+
+  button.textContent = "Account";
+  if (status) status.textContent = session.user.email || "Signed in";
+  updateAuthForm();
+  updateAuthForm();
 }
