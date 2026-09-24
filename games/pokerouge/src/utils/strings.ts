@@ -33,3 +33,15 @@ export function toKebabCase(str: string): string {
     .map(word => word.toLowerCase())
     .join("-");
 }
+
+export function toPascalCase(str: string): string {
+  return splitWords(str)
+    .map(capitalizeFirstLetterOnly)
+    .join("");
+}
+
+export function toTitleCase(str: string): string {
+  return splitWords(str)
+    .map(capitalizeFirstLetterOnly)
+    .join(" ");
+}
