@@ -78,8 +78,11 @@ jobs:
           cp /tmp/pokerogue/assets/manifest.webmanifest _site/games/pokerouge/manifest.webmanifest
           cp /tmp/pokerogue/assets/service-worker.js _site/games/pokerouge/service-worker.js
 
-          # The game is embedded in GameHub; do not register its PWA service worker.
-          sed -i '/serviceWorker/d' _site/games/pokerouge/index.html
+          # The game is embedded in GameHub; remove the entire PWA registration block.
+          sed -i '/^[[:space:]]*<script>$/,/^[[:space:]]*<\/script>$/d' _site/games/pokerouge/index.html
+
+          # Add a visible runtime-error panel so a JavaScript/module failure cannot look like a blank game.
+          sed -i '/<script type="module"/i\  <script>window.addEventListener("error",e=>{document.body.innerHTML="<pre style=\"white-space:pre-wrap;padding:20px;color:white;background:#222;font:16px monospace\">PokéRogue error: "+(e.error?.stack||e.message||e.type)+"</pre>"});window.addEventListener("unhandledrejection",e=>{document.body.innerHTML="<pre style=\"white-space:pre-wrap;padding:20px;color:white;background:#222;font:16px monospace\">PokéRogue error: "+(e.reason?.stack||e.reason||"Unhandled promise rejection")+"</pre>"});</script>' _site/games/pokerouge/index.html
 
           # Print the final shell and verify the deployment has the files it references.
           test -s _site/games/pokerouge/index.html
