@@ -12,9 +12,9 @@ let timerSeconds = 300;
 let timerInterval = null;
 let toastTimeout = null;
 
-const SUPABASE_URL = "https://abmrhhqubpxmzrjvsqay.supabaseClient.co";
+const SUPABASE_URL = "https://abmrhhqubpxmzrjvsqay.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_oNPl0ont-81TGySbqG1roA_RX02JTFh";
-const supabaseClient = window.supabaseClient?.createClient(
+const supabaseClient = window.supabase?.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
 );
@@ -63,32 +63,47 @@ function parseCatalog(text) {
 
 async function loadGames() {
   const catalogUrls = [
-    "games.json",
+    new URL("games.json", document.baseURI).href,
     "https://raw.githubusercontent.com/ghostez777/silver-octo-winner/main/games.json"
   ];
 
   let lastError = null;
 
+  // Use a previously cached catalog immediately when available.
+  try {
+    const cached = localStorage.getItem("gamehub-games-cache");
+    if (cached) {
+      const parsed = parseCatalog(cached);
+      const games = Array.isArray(parsed)
+        ? parsed
+        : Array.isArray(parsed.games) ? parsed.games : [];
+      if (games.length) {
+        state.games = games.filter((game) => game && typeof game === "object");
+        updateGameCount();
+        renderEverything();
+      }
+    }
+  } catch (error) {
+    console.warn("Could not use cached game catalog:", error);
+  }
+
   for (const url of catalogUrls) {
     try {
       const response = await fetch(url, { cache: "no-store" });
-
-      if (!response.ok) {
-        throw new Error(`Request failed: ${response.status}`);
-      }
+      if (!response.ok) throw new Error(`Request failed: ${response.status}`);
 
       const text = await response.text();
       const parsed = parseCatalog(text);
-
       const games = Array.isArray(parsed)
         ? parsed
-        : Array.isArray(parsed.games)
-          ? parsed.games
-          : [];
+        : Array.isArray(parsed.games) ? parsed.games : [];
 
-      state.games = games.filter(
-        (game) => game && typeof game === "object"
-      );
+      if (!games.length) throw new Error("Game catalog is empty.");
+
+      state.games = games.filter((game) => game && typeof game === "object");
+      try {
+        localStorage.setItem("gamehub-games-cache", JSON.stringify(state.games));
+      } catch (_) {}
 
       updateGameCount();
       renderEverything();
@@ -99,11 +114,11 @@ async function loadGames() {
     }
   }
 
-  console.error(lastError);
-
-  $("#gameCount").textContent = "Games could not load";
-
-  showLoadError();
+  if (!state.games.length) {
+    console.error(lastError);
+    $("#gameCount").textContent = "Games could not load";
+    showLoadError();
+  }
 }
 
 function showLoadError() {
