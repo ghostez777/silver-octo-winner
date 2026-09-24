@@ -1,0 +1,76 @@
+name: Deploy GameHub to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.9.0"
+          cache: pnpm
+          cache-dependency-path: games/pokerouge/pnpm-lock.yaml
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
+          run_install: false
+
+      - name: Install PokéRogue dependencies
+        working-directory: games/pokerouge
+        run: pnpm install --frozen-lockfile
+
+      - name: Build PokéRogue
+        working-directory: games/pokerouge
+        run: pnpm build
+
+      - name: Assemble GitHub Pages site
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site
+          rsync -a --exclude='.git' --exclude='games/pokerouge' ./ _site/
+          mkdir -p _site/games/pokerouge
+          rsync -a games/pokerouge/dist/ _site/games/pokerouge/
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
