@@ -35,8 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSearch();
   setupFilters();
   setupPlayer();
-  setupApps();
-  setupSettings();
   setupKeyboard();
   setupAuth();
   loadNotes();
@@ -130,8 +128,6 @@ function updateGameCount() {
 
 function renderEverything() {
   renderGames();
-  renderGBA();
-  renderFavorites();
 }
 
 function getGameType(game) {
