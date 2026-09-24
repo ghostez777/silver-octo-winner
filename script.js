@@ -273,30 +273,37 @@ function renderCards(container, games, emptyMessage) {
 function launchGame(game) {
   state.currentGame = game;
 
-  const params = new URLSearchParams();
-
   if (game.gba) {
-    params.set("type", "gba");
-    params.set("src", game.gba);
-  } else if (game.html) {
-    params.set("type", "html");
-    params.set("src", game.html);
-  } else if (game.file) {
-    params.set("type", "swf");
-    params.set("src", game.file);
-  } else {
-    showToast("This game does not have a playable location yet.");
+    const modal = $("#playerModal");
+    const frame = $("#gameFrame");
+    const ruffleFrame = $("#ruffleFrame");
+
+    $("#playerTitle").textContent = game.name || "Game";
+    ruffleFrame.replaceChildren();
+    ruffleFrame.style.display = "none";
+    frame.src = new URL(
+      "jsemu/?rom=" + encodeURIComponent(game.gba),
+      document.baseURI
+    ).href;
+    frame.style.display = "block";
+    modal.classList.add("open");
+    document.body.classList.add("player-open");
+    document.body.style.overflow = "hidden";
+    requestAnimationFrame(() => frame.focus());
     return;
   }
 
-  params.set("title", game.name || "Game");
-  const playerUrl = new URL("player.html", document.baseURI);
-  playerUrl.search = params.toString();
-
-  const tab = window.open(playerUrl.href, "_blank");
-  if (!tab) {
-    showToast("Allow pop-ups for this site to open games in a new tab.");
+  if (game.html) {
+    openPlayer(game, game.html);
+    return;
   }
+
+  if (game.file) {
+    openRufflePlayer(game);
+    return;
+  }
+
+  showToast("This game does not have a playable location yet.");
 }
 
 /* =========================================================
