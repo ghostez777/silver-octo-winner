@@ -5,76 +5,252 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>GameHub</title>
   <meta name="description" content="A simple grid of browser games">
-  <link rel="stylesheet" href="style.css?v=20260923-5">
+
+  <link rel="stylesheet" href="style.css?v=20260924-1">
+
   <script>
-    // Ruffle's worker and WASM files live beside ruffle.js. Resolve this from
-    // the current site URL so both custom domains and GitHub Pages subpaths work.
+    // Ruffle's worker and WASM files live beside ruffle.js.
+    // Resolve this from the current site URL so both custom domains
+    // and GitHub Pages subpaths work.
     window.RufflePlayer = window.RufflePlayer || {};
     window.RufflePlayer.config = {
       publicPath: new URL("ruffle/", document.baseURI).href,
       autoplay: "auto",
-      letterbox: "fullscreen",
-      allowNetworking: "all"
+      letterbox: "off",
+      allowNetworking: "all",
+      allowFullscreen: true
     };
   </script>
 </head>
+
 <body>
   <main class="main">
     <header class="topbar">
-      <a class="brand" href="#top" aria-label="GameHub home"><span class="brand-icon">G</span><span><strong>GameHub</strong><small>Gaming Library</small></span></a>
-      <label class="search-wrap" for="searchInput"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Search games..." autocomplete="off"><kbd>CTRL K</kbd></label>
-      <button id="randomBtn" class="top-button">🎲 Random</button>
+      <a class="brand" href="#top" aria-label="GameHub home">
+        <span class="brand-icon">G</span>
+        <span>
+          <strong>GameHub</strong>
+          <small>Gaming Library</small>
+        </span>
+      </a>
+
+      <label class="search-wrap" for="searchInput">
+        <span aria-hidden="true">⌕</span>
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Search games..."
+          autocomplete="off"
+        >
+        <kbd>CTRL K</kbd>
+      </label>
+
+      <button id="randomBtn" class="top-button" type="button">🎲 Random</button>
     </header>
+
     <section id="top" class="hero panel">
-      <div><span class="eyebrow">YOUR GAME LIBRARY</span><h1>Play something <span>awesome.</span></h1><p>Everything in one simple place. Search the collection or pick a game from the grids below.</p><div class="hero-buttons"><button class="primary-button" data-page="gamesSection">Browse games ↓</button><button class="secondary-button" data-page="gbaSection">🕹️ GBA collection ↓</button></div></div>
+      <div>
+        <span class="eyebrow">YOUR GAME LIBRARY</span>
+        <h1>Play something <span>awesome.</span></h1>
+        <p>
+          Everything in one simple place. Search the collection or pick a game
+          from the grids below.
+        </p>
+
+        <div class="hero-buttons">
+          <button class="primary-button" data-page="gamesSection" type="button">
+            Browse games ↓
+          </button>
+          <button class="secondary-button" data-page="gbaSection" type="button">
+            🕹️ GBA collection ↓
+          </button>
+        </div>
+      </div>
+
       <div class="hero-art" aria-hidden="true">🎮</div>
     </section>
-    <section id="gamesSection" class="content-section"><div class="section-heading"><div><span class="section-label">COLLECTION</span><h2>All Games</h2></div><span id="gameCount" class="count">Loading games...</span></div><div class="filters" aria-label="Game filters"><button class="filter active" data-filter="all">All</button><button class="filter" data-filter="html">Browser</button><button class="filter" data-filter="swf">Flash</button><button class="filter" data-filter="gba">GBA</button></div><div id="gamesGrid" class="game-grid"></div></section>
-    <section id="gbaSection" class="content-section"><div class="section-heading"><div><span class="section-label">RETRO</span><h2>GBA Collection</h2></div><span class="section-note">Runs in the included emulator</span></div><div id="gbaGrid" class="game-grid"></div></section>
-    <section id="favoritesSection" class="content-section"><div class="section-heading"><div><span class="section-label">YOUR PICKS</span><h2>Favorites</h2></div><span class="section-note">Click ★ on any game to save it</span></div><div id="favoritesGrid" class="game-grid"></div></section>
-    <section id="toolsSection" class="content-section"><div class="section-heading"><div><span class="section-label">TOOLS</span><h2>Quick Tools</h2></div></div><div class="app-grid"><button class="app-card" id="notesBtn"><span class="app-icon">📝</span><span><strong>Notes</strong><small>Save quick notes locally</small></span></button><button class="app-card" id="timerBtn"><span class="app-icon">⏱️</span><span><strong>Timer</strong><small>Start a simple gaming timer</small></span></button><button class="app-card" id="randomAppBtn"><span class="app-icon">🎲</span><span><strong>Random Game</strong><small>Pick something to play</small></span></button></div></section>
-    <section id="settingsSection" class="content-section"><div class="section-heading"><div><span class="section-label">PREFERENCES</span><h2>Settings</h2></div></div><div class="settings-grid"><label class="setting-card"><span><strong>Animations</strong><small>Enable interface animations</small></span><span class="switch"><input type="checkbox" id="animationsToggle" checked><i></i></span></label><label class="setting-card"><span><strong>Compact cards</strong><small>Fit more games on screen</small></span><span class="switch"><input type="checkbox" id="compactToggle"><i></i></span></label><div class="setting-card"><span><strong>Reset favorites</strong><small>Remove every saved favorite</small></span><button id="resetFavorites" class="danger-button">Reset</button></div></div></section>
+
+    <section id="gamesSection" class="content-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-label">COLLECTION</span>
+          <h2>All Games</h2>
+        </div>
+        <span id="gameCount" class="count">Loading games...</span>
+      </div>
+
+      <div class="filters" aria-label="Game filters">
+        <button class="filter active" data-filter="all" type="button">All</button>
+        <button class="filter" data-filter="html" type="button">Browser</button>
+        <button class="filter" data-filter="swf" type="button">Flash</button>
+        <button class="filter" data-filter="gba" type="button">GBA</button>
+      </div>
+
+      <div id="gamesGrid" class="game-grid"></div>
+    </section>
+
+    <section id="gbaSection" class="content-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-label">RETRO</span>
+          <h2>GBA Collection</h2>
+        </div>
+        <span class="section-note">Runs in the included emulator</span>
+      </div>
+
+      <div id="gbaGrid" class="game-grid"></div>
+    </section>
+
+    <section id="favoritesSection" class="content-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-label">YOUR PICKS</span>
+          <h2>Favorites</h2>
+        </div>
+        <span class="section-note">Click ★ on any game to save it</span>
+      </div>
+
+      <div id="favoritesGrid" class="game-grid"></div>
+    </section>
+
+    <section id="toolsSection" class="content-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-label">TOOLS</span>
+          <h2>Quick Tools</h2>
+        </div>
+      </div>
+
+      <div class="app-grid">
+        <button class="app-card" id="notesBtn" type="button">
+          <span class="app-icon">📝</span>
+          <span>
+            <strong>Notes</strong>
+            <small>Save quick notes locally</small>
+          </span>
+        </button>
+
+        <button class="app-card" id="timerBtn" type="button">
+          <span class="app-icon">⏱️</span>
+          <span>
+            <strong>Timer</strong>
+            <small>Start a simple gaming timer</small>
+          </span>
+        </button>
+
+        <button class="app-card" id="randomAppBtn" type="button">
+          <span class="app-icon">🎲</span>
+          <span>
+            <strong>Random Game</strong>
+            <small>Pick something to play</small>
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <section id="settingsSection" class="content-section">
+      <div class="section-heading">
+        <div>
+          <span class="section-label">PREFERENCES</span>
+          <h2>Settings</h2>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <label class="setting-card">
+          <span>
+            <strong>Animations</strong>
+            <small>Enable interface animations</small>
+          </span>
+
+          <span class="switch">
+            <input type="checkbox" id="animationsToggle" checked>
+            <i></i>
+          </span>
+        </label>
+
+        <label class="setting-card">
+          <span>
+            <strong>Compact cards</strong>
+            <small>Fit more games on screen</small>
+          </span>
+
+          <span class="switch">
+            <input type="checkbox" id="compactToggle">
+            <i></i>
+          </span>
+        </label>
+
+        <div class="setting-card">
+          <span>
+            <strong>Reset favorites</strong>
+            <small>Remove every saved favorite</small>
+          </span>
+          <button id="resetFavorites" class="danger-button" type="button">Reset</button>
+        </div>
+      </div>
+    </section>
   </main>
-  <div id="playerModal" class="player-modal" role="dialog" aria-modal="true" aria-label="Game player"><div class="player-window"><div class="player-topbar"><strong><span class="player-status"></span><span id="playerTitle">Game</span></strong><div class="player-actions"><button id="openNewTab" class="player-button">↗</button><button id="closePlayer" class="player-button">✕</button></div></div><iframe id="gameFrame" src="about:blank" title="Game frame" allow="fullscreen; autoplay; gamepad" allowfullscreen></iframe><div id="ruffleFrame" aria-live="polite"></div></div></div>
-  <div id="notesModal" class="small-modal"><div class="small-modal-box"><button class="modal-close" data-close="notesModal">✕</button><h2>Notes</h2><textarea id="notesArea" placeholder="Write something..."></textarea><button class="primary-button" data-close="notesModal">Save</button></div></div>
-  <div id="timerModal" class="small-modal"><div class="small-modal-box"><button class="modal-close" data-close="timerModal">✕</button><h2>Timer</h2><div id="timerDisplay" class="timer-display">05:00</div><div class="timer-controls"><button id="timerStart" class="secondary-button">Start</button><button id="timerReset" class="danger-button">Reset</button></div></div></div>
+
+  <div
+    id="playerModal"
+    class="player-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Game player"
+  >
+    <div class="player-window" id="playerWindow">
+      <div class="player-topbar">
+        <strong>
+          <span class="player-status"></span>
+          <span id="playerTitle">Game</span>
+        </strong>
+
+        <div class="player-actions">
+          <button id="openNewTab" class="player-button" type="button" title="Open in new tab" aria-label="Open in new tab">↗</button>
+          <button id="closePlayer" class="player-button" type="button" title="Close game" aria-label="Close game">✕</button>
+        </div>
+      </div>
+
+      <iframe
+        id="gameFrame"
+        src="about:blank"
+        title="Game frame"
+        allow="fullscreen; autoplay; gamepad"
+        allowfullscreen
+      ></iframe>
+
+      <div id="ruffleFrame" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div id="notesModal" class="small-modal">
+    <div class="small-modal-box">
+      <button class="modal-close" data-close="notesModal" type="button">✕</button>
+      <h2>Notes</h2>
+      <textarea id="notesArea" placeholder="Write something..."></textarea>
+      <button class="primary-button" id="saveNotes" data-close="notesModal" type="button">Save</button>
+    </div>
+  </div>
+
+  <div id="timerModal" class="small-modal">
+    <div class="small-modal-box">
+      <button class="modal-close" data-close="timerModal" type="button">✕</button>
+      <h2>Timer</h2>
+
+      <div id="timerDisplay" class="timer-display">05:00</div>
+
+      <div class="timer-controls">
+        <button id="timerStart" class="secondary-button" type="button">Start</button>
+        <button id="timerReset" class="danger-button" type="button">Reset</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" role="status"></div>
+
   <script src="reliability.js"></script>
   <script src="ruffle/ruffle.js"></script>
-  <script src="script.js?v=20260923-3"></script>
-  <script>
-    // Use the current Ruffle player API. Older code called player.load(), which
-    // is not available on newer self-hosted builds.
-    window.openRufflePlayer = async function (game) {
-      const frame = document.querySelector("#gameFrame");
-      const container = document.querySelector("#ruffleFrame");
-      document.querySelector("#playerTitle").textContent = game.name;
-      frame.src = "about:blank";
-      frame.style.display = "none";
-      container.replaceChildren();
-      container.style.display = "block";
-      document.querySelector("#playerModal").classList.add("open");
-      document.body.style.overflow = "hidden";
-      try {
-        const api = window.RufflePlayer && window.RufflePlayer.newest && window.RufflePlayer.newest();
-        if (!api) throw new Error("Ruffle did not initialize");
-        const exit = document.createElement("button");
-        exit.className = "ruffle-exit";
-        exit.type = "button";
-        exit.textContent = "✕ Exit";
-        exit.addEventListener("click", () => window.closePlayer());
-        container.appendChild(exit);
-        const player = api.createPlayer();
-        player.style.width = "100%";
-        player.style.height = "100%";
-        container.appendChild(player);
-        const url = new URL(game.file, document.baseURI).href;
-        await player.ruffle().load({ url, autoplay: "auto", allowNetworking: "all", allowFullscreen: true, letterbox: "fullscreen" });
-      } catch (error) {
-        console.error("Could not load Flash game:", error);
-        container.textContent = "This Flash game could not be loaded. Check the SWF file and refresh the page.";
-      }
-    };
-  </script>
+  <script src="script.js?v=20260924-1"></script>
 </body>
 </html>
