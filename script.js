@@ -477,12 +477,12 @@ async function closePlayer() {
    ========================================================= */
 
 function setupPlayer() {
-  $("#closePlayer").addEventListener(
+  $("#closePlayer")?.addEventListener(
     "click",
     closePlayer
   );
 
-  $("#fullscreenPlayer").addEventListener(
+  $("#fullscreenPlayer")?.addEventListener(
     "click",
     togglePlayerFullscreen
   );
@@ -495,7 +495,7 @@ function setupPlayer() {
   /*
    * Open the current game in a new browser tab.
    */
-  $("#openNewTab").addEventListener("click", () => {
+  $("#openNewTab")?.addEventListener("click", () => {
     if (!state.currentGame) return;
 
     const game = state.currentGame;
@@ -527,7 +527,7 @@ function setupPlayer() {
    * Close the player if the dark background itself
    * is clicked.
    */
-  $("#playerModal").addEventListener("click", (event) => {
+  $("#playerModal")?.addEventListener("click", (event) => {
     if (event.target === $("#playerModal")) {
       closePlayer();
     }
