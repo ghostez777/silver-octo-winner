@@ -62,6 +62,9 @@ jobs:
           # Runtime sprites, audio, fonts, and locale JSON are separate upstream submodules.
           rsync -a --exclude='.git' /tmp/pokerogue/assets/ _site/games/pokerouge/assets/
           rsync -a --exclude='.git' /tmp/pokerogue/locales/ _site/games/pokerouge/locales/
+          # Production CSS references fonts at ./fonts/.
+          mkdir -p _site/games/pokerouge/fonts
+          rsync -a /tmp/pokerogue/assets/fonts/ _site/games/pokerouge/fonts/
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
