@@ -12,9 +12,9 @@ let timerSeconds = 300;
 let timerInterval = null;
 let toastTimeout = null;
 
-const SUPABASE_URL = "https://abmrhhqubpxmzrjvsqay.supabase.co";
+const SUPABASE_URL = "https://abmrhhqubpxmzrjvsqay.supabaseClient.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_oNPl0ont-81TGySbqG1roA_RX02JTFh";
-const supabase = window.supabase?.createClient(
+const supabaseClient = window.supabaseClient?.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
 );
@@ -942,13 +942,13 @@ function setupAuth() {
   const authLogout = $("#authLogout");
   const authModal = $("#authModal");
 
-  if (!supabase || !authButton || !authForm) {
+  if (!supabaseClient || !authButton || !authForm) {
     console.warn("GameHub authentication could not initialize.");
     return;
   }
 
   authButton.addEventListener("click", async () => {
-    const { data } = await supabase.auth.getSession();
+    const { data } = await supabaseClient.auth.getSession();
     if (data.session) {
       updateAuthUI(data.session);
       authModal.classList.add("open");
@@ -976,8 +976,8 @@ function setupAuth() {
 
     try {
       const result = authMode === "login"
-        ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password });
+        ? await supabaseClient.auth.signInWithPassword({ email, password })
+        : await supabaseClient.auth.signUp({ email, password });
 
       if (result.error) throw result.error;
 
@@ -1004,7 +1004,7 @@ function setupAuth() {
   });
 
   authLogout.addEventListener("click", async () => {
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabaseClient.auth.signOut();
     if (error) {
       $("#authStatus").textContent = error.message;
       return;
@@ -1024,11 +1024,11 @@ function setupAuth() {
     }
   });
 
-  supabase.auth.onAuthStateChange((_event, session) => {
+  supabaseClient.auth.onAuthStateChange((_event, session) => {
     updateAuthUI(session);
   });
 
-  supabase.auth.getSession().then(({ data }) => {
+  supabaseClient.auth.getSession().then(({ data }) => {
     updateAuthUI(data.session);
   });
 }
@@ -1044,7 +1044,7 @@ function updateAuthForm() {
   if (!title || !form) return;
 
   const loggedIn = Boolean(
-    supabase && document.body.dataset.gamehubLoggedIn === "true"
+    supabaseClient && document.body.dataset.gamehubLoggedIn === "true"
   );
 
   form.hidden = loggedIn;
