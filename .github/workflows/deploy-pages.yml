@@ -46,6 +46,20 @@ jobs:
         working-directory: /tmp/pokerogue
         run: pnpm install --frozen-lockfile
 
+      - name: Patch PokéRogue for mobile rendering
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+from pathlib import Path
+p = Path("/tmp/pokerogue/src/main.ts")
+s = p.read_text()
+old = "type: Phaser.WEBGL,"
+if old not in s:
+    raise SystemExit("Expected Phaser.WEBGL line was not found")
+p.write_text(s.replace(old, "type: Phaser.AUTO,", 1))
+PY
+
       - name: Build PokéRogue
         working-directory: /tmp/pokerogue
         run: pnpm build
@@ -100,21 +114,6 @@ if ("serviceWorker" in navigator) {
 s = s.replace(marker, marker + "\n" + patch, 1)
 p.write_text(s)
 PY
-
-          # Phaser normally uses WebGL here. AUTO lets mobile browsers fall
-          # back to Canvas if WebGL creation fails.
-          python3 - <<'PY'
-from pathlib import Path
-for p in Path("/tmp/pokerogue").rglob("main.ts"):
-    if p.as_posix().endswith("/src/main.ts"):
-        s = p.read_text()
-        old = "type: Phaser.WEBGL,"
-        if old not in s:
-            raise SystemExit("Expected Phaser.WEBGL line was not found")
-        p.write_text(s.replace(old, "type: Phaser.AUTO,", 1))
-        break
-else:
-    raise SystemExit("PokéRogue src/main.ts not found")
 
 PY
 
