@@ -50,55 +50,13 @@
       <button id="authButton" class="top-button auth-button" type="button">Login</button>
     </header>
 
-    <section id="top" aria-label="Ghostez Arcade">
-      <div class="simple-intro">
-        <span class="section-label">GHOSTEZ ARCADE</span>
-        <h1>Games</h1>
-        <p>Pick a game and start playing.</p>
-      </div>
-    </section>
-
-    <section id="gamesSection" class="content-section">
-      <div class="section-heading">
-        <div>
-          <span class="section-label">COLLECTION</span>
-          <h2>All Games</h2>
-        </div>
+    <section id="gamesSection" class="content-section" aria-label="All games">
+      <div class="games-toolbar">
+        <h1>All Games</h1>
         <span id="gameCount" class="count">Loading games...</span>
       </div>
 
-      <div class="filters" aria-label="Game filters">
-        <button class="filter active" data-filter="all" type="button">All</button>
-        <button class="filter" data-filter="html" type="button">Browser</button>
-        <button class="filter" data-filter="swf" type="button">Flash</button>
-        <button class="filter" data-filter="gba" type="button">GBA</button>
-      </div>
-
       <div id="gamesGrid" class="game-grid"></div>
-    </section>
-
-    <section id="gbaSection" class="content-section">
-      <div class="section-heading">
-        <div>
-          <span class="section-label">RETRO</span>
-          <h2>GBA Collection</h2>
-        </div>
-        <span class="section-note">Runs in the included emulator</span>
-      </div>
-
-      <div id="gbaGrid" class="game-grid"></div>
-    </section>
-
-    <section id="favoritesSection" class="content-section">
-      <div class="section-heading">
-        <div>
-          <span class="section-label">YOUR PICKS</span>
-          <h2>Favorites</h2>
-        </div>
-        <span class="section-note">Click ★ on any game to save it</span>
-      </div>
-
-      <div id="favoritesGrid" class="game-grid"></div>
     </section>
 
     <section id="toolsSection" class="content-section">
