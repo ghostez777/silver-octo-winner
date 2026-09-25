@@ -2,11 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PokéRogue</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="./index.css">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="shortcut icon" type="image/png" href="./logo512.png">
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("./service-worker.js").catch(function (err) {
+          console.warn("PokéRogue service worker registration failed:", err);
+        });
+      });
+    }
+  </script>
 </head>
 <body>
   <div id="app"></div>
-  <script type="module" src="/games/pokerouge/src/main.ts"></script>
+  <div id="touchControls"></div>
+  <script type="module" src="./src/main.ts"></script>
 </body>
 </html>
