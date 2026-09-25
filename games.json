@@ -8,7 +8,7 @@
   {
     "id": "unbound",
     "name": "Pokemon Unbound",
-    "gba": "pokemonu.gba",
+    "gba": "games/pokemonu.gba",
     "thumb": "thumbs/pokemonu.png"
   },
   {
