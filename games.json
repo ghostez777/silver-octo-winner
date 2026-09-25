@@ -2,13 +2,13 @@
   {
     "id": "pokerouge",
     "name": "Pokerouge",
-    "html":"games/pokerouge/index.html",
+    "html": "games/pokerouge/index.html",
     "thumb": "thumbs/pokerouge.png"
   },
   {
     "id": "unbound",
     "name": "Pokemon Unbound",
-    "gba": "gba/roms/pokemonu.gba",
+    "html": "games/pokemon-unbound.html",
     "thumb": "thumbs/pokemonu.png"
   },
   {
