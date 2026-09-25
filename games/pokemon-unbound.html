@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Pokémon Unbound</title>
+  <style>
+    html,body,#game{width:100%;height:100%;margin:0;background:#111;overflow:hidden}
+    #picker{position:fixed;z-index:10;inset:0;display:grid;place-items:center;background:#111;color:#fff;font:16px system-ui,sans-serif}
+    #picker>div{max-width:520px;padding:28px;text-align:center}
+    input{margin-top:16px}
+    #message{margin-top:14px;color:#bbb}
+  </style>
+</head>
+<body>
+  <div id="game"></div>
+  <div id="picker">
+    <div>
+      <h1>Pokémon Unbound</h1>
+      <p>This copy is not bundled with the site. Select your own legally obtained GBA ROM to play it in the browser.</p>
+      <input id="rom" type="file" accept=".gba,application/octet-stream">
+      <div id="message">Choose a .gba file to start.</div>
+    </div>
+  </div>
+  <script>
+    const picker = document.getElementById("picker");
+    const input = document.getElementById("rom");
+    const message = document.getElementById("message");
+    input.addEventListener("change", () => {
+      const file = input.files && input.files[0];
+      if (!file) return;
+      if (!/\.gba$/i.test(file.name)) {
+        message.textContent = "Please choose a .gba file.";
+        return;
+      }
+      window.EJS_player = "#game";
+      window.EJS_gameName = file.name.replace(/\.gba$/i, "");
+      window.EJS_gameUrl = URL.createObjectURL(file);
+      window.EJS_core = "gba";
+      window.EJS_pathtodata = "https://cdn.emulatorjs.org/stable/data/";
+      window.EJS_startOnLoaded = true;
+      window.EJS_threads = false;
+      window.EJS_disableDatabases = true;
+      picker.style.display = "none";
+      const script = document.createElement("script");
+      script.src = "https://cdn.emulatorjs.org/stable/data/loader.js";
+      script.onerror = () => {
+        picker.style.display = "grid";
+        message.textContent = "EmulatorJS could not be loaded. Check your connection and reload.";
+      };
+      document.body.appendChild(script);
+    });
+  </script>
+</body>
+</html>
