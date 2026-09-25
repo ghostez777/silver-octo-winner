@@ -24,12 +24,12 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Fetch upstream PokéRogue beta
+      - name: Fetch PokéRogue runtime assets
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf /tmp/pokerogue
-          git clone --depth 1 --branch beta --single-branch --recurse-submodules --shallow-submodules https://github.com/pagefaultgames/pokerogue.git /tmp/pokerogue
+          rm -rf /tmp/pokerogue-assets
+          git clone --depth 1 --branch beta --single-branch --recurse-submodules --shallow-submodules https://github.com/pagefaultgames/pokerogue.git /tmp/pokerogue-assets
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -42,18 +42,12 @@ jobs:
         with:
           node-version: "24.9.0"
 
-      - name: Install PokéRogue dependencies
-        working-directory: /tmp/pokerogue
+      - name: Install local PokéRogue dependencies
+        working-directory: games/pokerouge
         run: pnpm install --frozen-lockfile
 
-      - name: Patch PokéRogue for mobile rendering
-        shell: bash
-        run: |
-          set -euo pipefail
-          sed -i '0,/type: Phaser.WEBGL,/s//type: Phaser.AUTO,/' /tmp/pokerogue/src/main.ts
-
-      - name: Build PokéRogue
-        working-directory: /tmp/pokerogue
+      - name: Build local PokéRogue source
+        working-directory: games/pokerouge
         run: pnpm build
 
       - name: Assemble GitHub Pages site
@@ -64,32 +58,29 @@ jobs:
           mkdir -p _site
           rsync -a --exclude='.git' --exclude='games/pokerouge' ./ _site/
           mkdir -p _site/games/pokerouge
-          rsync -a /tmp/pokerogue/dist/ _site/games/pokerouge/
+          rsync -a games/pokerouge/dist/ _site/games/pokerouge/
 
-          # PokéRogue keeps runtime sprites/audio/etc. in the assets submodule.
-          rsync -a --exclude='.git' /tmp/pokerogue/assets/ _site/games/pokerouge/assets/
-          rsync -a --exclude='.git' /tmp/pokerogue/locales/ _site/games/pokerouge/locales/
+          # The local source tree does not contain the upstream asset/locales
+          # submodules, so copy only those runtime resources from the pinned
+          # upstream checkout. The game JavaScript itself comes from this repo.
+          rsync -a --exclude='.git' /tmp/pokerogue-assets/assets/ _site/games/pokerouge/assets/
+          rsync -a --exclude='.git' /tmp/pokerogue-assets/locales/ _site/games/pokerouge/locales/
 
-          # The production HTML/CSS references these files from the game root.
           mkdir -p _site/games/pokerouge/fonts
-          rsync -a /tmp/pokerogue/assets/fonts/ _site/games/pokerouge/fonts/
-          cp /tmp/pokerogue/assets/logo128.png _site/games/pokerouge/logo128.png
-          cp /tmp/pokerogue/assets/logo512.png _site/games/pokerouge/logo512.png
-          cp /tmp/pokerogue/assets/manifest.webmanifest _site/games/pokerouge/manifest.webmanifest
-          cp /tmp/pokerogue/assets/service-worker.js _site/games/pokerouge/service-worker.js
+          rsync -a /tmp/pokerogue-assets/assets/fonts/ _site/games/pokerouge/fonts/
+          cp /tmp/pokerogue-assets/assets/logo128.png _site/games/pokerouge/logo128.png
+          cp /tmp/pokerogue-assets/assets/logo512.png _site/games/pokerouge/logo512.png
+          cp /tmp/pokerogue-assets/assets/manifest.webmanifest _site/games/pokerouge/manifest.webmanifest
+          cp /tmp/pokerogue-assets/assets/service-worker.js _site/games/pokerouge/service-worker.js
 
-          # The game is embedded in GameHub; remove the entire PWA registration block.
-          sed -i '/^[[:space:]]*<script>$/,/^[[:space:]]*<\/script>$/d' _site/games/pokerouge/index.html
-
-          # Add a visible runtime-error panel so a JavaScript/module failure cannot look like a blank game.
-          sed -i '/<script type="module"/i\  <script>window.addEventListener("error",e=>{document.body.innerHTML="<pre style=\"white-space:pre-wrap;padding:20px;color:white;background:#222;font:16px monospace\">PokéRogue error: "+(e.error?.stack||e.message||e.type)+"</pre>"});window.addEventListener("unhandledrejection",e=>{document.body.innerHTML="<pre style=\"white-space:pre-wrap;padding:20px;color:white;background:#222;font:16px monospace\">PokéRogue error: "+(e.reason?.stack||e.reason||"Unhandled promise rejection")+"</pre>"});</script>' _site/games/pokerouge/index.html
-
-          # Print the final shell and verify the deployment has the files it references.
           test -s _site/games/pokerouge/index.html
-          test -f _site/games/pokerouge/logo512.png
-          test -f _site/games/pokerouge/manifest.webmanifest
-          test -f _site/games/pokerouge/service-worker.js
+          test -s _site/games/pokerouge/asset-manifest.json
 
+          # Verify the deployed HTML uses the built bundle, never raw TypeScript.
+          if grep -q 'src/main.ts' _site/games/pokerouge/index.html; then
+            echo "ERROR: raw TypeScript entry leaked into Pages output"
+            exit 1
+          fi
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
