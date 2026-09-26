@@ -72,6 +72,7 @@ jobs:
           cp /tmp/pokerogue-assets/assets/logo512.png _site/games/pokerouge/logo512.png
           cp /tmp/pokerogue-assets/assets/manifest.webmanifest _site/games/pokerouge/manifest.webmanifest
           cp /tmp/pokerogue-assets/assets/service-worker.js _site/games/pokerouge/service-worker.js
+          cp /tmp/pokerogue-assets/manifest.json _site/games/pokerouge/manifest.json
 
           test -s _site/games/pokerouge/index.html
           test -s _site/games/pokerouge/asset-manifest.json
