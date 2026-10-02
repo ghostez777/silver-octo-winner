@@ -1,4 +1,16 @@
 [
+ {
+    "id": "badpig",
+    "name": "Bad Piggies",
+    "html": "games/bad-piggies.html",
+    "thumb": "thumbs/padpig.png"
+  },
+  {
+    "id": "balatro",
+    "name": "Balatro",
+    "html": "games/balatro.html",
+    "thumb": "thumbs/balatro.png"
+  },
   {
     "id": "pokerouge",
     "name": "Pokerouge",
