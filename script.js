@@ -273,7 +273,21 @@ function renderCards(container, games, emptyMessage) {
 function launchGame(game) {
   state.currentGame = game;
 
+  // iPad/iPhone Safari restricts or wipes localStorage inside iframes, which
+  // breaks save progress for embedded HTML games (e.g. Pokerouge). Load those
+  // in the top-level page instead so saves persist.
+  const isIOSLike =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
   if (game.gba) {
+    if (isIOSLike) {
+      window.location.href = new URL(
+        "jsemu/?rom=" + encodeURIComponent(game.gba),
+        document.baseURI
+      ).href;
+      return;
+    }
     const modal = $("#playerModal");
     const frame = $("#gameFrame");
     const ruffleFrame = $("#ruffleFrame");
@@ -323,8 +337,17 @@ function openPlayer(game, url) {
   ruffleFrame.replaceChildren();
   ruffleFrame.style.display = "none";
 
+  const isIOSLike =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
   // Load the HTML game.
-  frame.src = new URL(url, document.baseURI).href;
+  const gameUrl = new URL(url, document.baseURI).href;
+  if (isIOSLike) {
+    window.location.href = gameUrl;
+    return;
+  }
+  frame.src = gameUrl;
   frame.style.display = "block";
 
   // Open the fullscreen player modal.
