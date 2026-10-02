@@ -25,7 +25,6 @@ import { SpeciesId } from "#enums/species-id";
 import { BATTLE_STATS, type PermanentStat, Stat, TEMP_BATTLE_STATS, type TempBattleStat } from "#enums/stat";
 import { StatusEffect } from "#enums/status-effect";
 import { TextStyle } from "#enums/text-style";
-import type { VoucherType } from "#enums/voucher-type";
 import type { PlayerPokemon, Pokemon } from "#field/pokemon";
 import type {
   DoubleBattleChanceBoosterModifierType,
@@ -41,6 +40,7 @@ import type {
   TerastallizeModifierType,
   TmModifierType,
 } from "#modifiers/modifier-type";
+import type { VoucherType } from "#system/voucher";
 import type { ModifierInstanceMap, ModifierString } from "#types/modifier-types";
 import { addTextObject } from "#ui/text";
 import { hslToHex } from "#utils/color-utils";
@@ -190,7 +190,7 @@ export abstract class PersistentModifier extends Modifier {
   /** This field does not exist at runtime and must not be used.
    * Its sole purpose is to ensure that typescript is able to properly narrow when the `is` method is called.
    */
-  declare private _: never;
+  private declare _: never;
 
   constructor(type: ModifierType, stackCount = 1) {
     super(type);
@@ -459,7 +459,7 @@ export abstract class LapsingPersistentModifier extends PersistentModifier {
  * temporarily increases the chance of a double battle.
  */
 export class DoubleBattleChanceBoosterModifier extends LapsingPersistentModifier {
-  declare public type: DoubleBattleChanceBoosterModifierType;
+  public declare type: DoubleBattleChanceBoosterModifierType;
 
   match(modifier: Modifier): boolean {
     return modifier instanceof DoubleBattleChanceBoosterModifier && modifier.getMaxBattles() === this.getMaxBattles();
@@ -927,7 +927,7 @@ export class EvoTrackerModifier extends PokemonHeldItemModifier {
  * Currently used by Shuckle Juice item
  */
 export class PokemonBaseStatTotalModifier extends PokemonHeldItemModifier {
-  declare public type: PokemonBaseStatTotalModifierType;
+  public declare type: PokemonBaseStatTotalModifierType;
   public isTransferable = false;
   public statModifier: 10 | -15;
 
@@ -1460,7 +1460,7 @@ export class AttackTypeBoosterModifier extends PokemonHeldItemModifier {
     return (
       super.shouldApply(pokemon, moveType, movePower)
       && typeof moveType === "number"
-      && movePower != null
+      && movePower instanceof NumberHolder
       && this.moveType === moveType
     );
   }
@@ -1647,12 +1647,11 @@ export class TurnHealModifier extends PokemonHeldItemModifier {
         "PokemonHealPhase",
         pokemon.getBattlerIndex(),
         toDmgValue(pokemon.getMaxHp() / 16) * this.stackCount,
-        {
-          message: i18next.t("modifier:turnHealApply", {
-            pokemonNameWithAffix: getPokemonNameWithAffix(pokemon),
-            typeName: this.type.name,
-          }),
-        },
+        i18next.t("modifier:turnHealApply", {
+          pokemonNameWithAffix: getPokemonNameWithAffix(pokemon),
+          typeName: this.type.name,
+        }),
+        true,
       );
       return true;
     }
@@ -1738,16 +1737,16 @@ export class HitHealModifier extends PokemonHeldItemModifier {
    */
   override apply(pokemon: Pokemon): boolean {
     if (pokemon.turnData.totalDamageDealt && !pokemon.isFullHp()) {
+      // TODO: this shouldn't be undefined AFAIK
       globalScene.phaseManager.unshiftNew(
         "PokemonHealPhase",
         pokemon.getBattlerIndex(),
-        toDmgValue((pokemon.turnData.totalDamageDealt * this.stackCount) / 8),
-        {
-          message: i18next.t("modifier:hitHealApply", {
-            pokemonNameWithAffix: getPokemonNameWithAffix(pokemon),
-            typeName: this.type.name,
-          }),
-        },
+        toDmgValue(pokemon.turnData.totalDamageDealt / 8) * this.stackCount,
+        i18next.t("modifier:hitHealApply", {
+          pokemonNameWithAffix: getPokemonNameWithAffix(pokemon),
+          typeName: this.type.name,
+        }),
+        true,
       );
     }
 
@@ -1906,22 +1905,20 @@ export class PokemonInstantReviveModifier extends PokemonHeldItemModifier {
    */
   override apply(pokemon: Pokemon): boolean {
     // Restore the Pokemon to half HP
-    // TODO: This should not use a phase to revive pokemon
     globalScene.phaseManager.unshiftNew(
       "PokemonHealPhase",
       pokemon.getBattlerIndex(),
       toDmgValue(pokemon.getMaxHp() / 2),
-      {
-        message: i18next.t("modifier:pokemonInstantReviveApply", {
-          pokemonNameWithAffix: getPokemonNameWithAffix(pokemon),
-          typeName: this.type.name,
-        }),
-        revive: true,
-      },
+      i18next.t("modifier:pokemonInstantReviveApply", {
+        pokemonNameWithAffix: getPokemonNameWithAffix(pokemon),
+        typeName: this.type.name,
+      }),
+      false,
+      false,
+      true,
     );
 
     // Remove the Pokemon's FAINT status
-    // TODO: Remove call to `resetStatus` once StatusEffect.FAINT is canned
     pokemon.resetStatus(true, false, true, false);
 
     for (const p of pokemon.getAlliesGenerator()) {
@@ -2042,7 +2039,7 @@ export abstract class ConsumablePokemonModifier extends ConsumableModifier {
 }
 
 export class TerastallizeModifier extends ConsumablePokemonModifier {
-  declare public type: TerastallizeModifierType;
+  public declare type: TerastallizeModifierType;
   public teraType: PokemonType;
 
   constructor(type: TerastallizeModifierType, pokemonId: number, teraType: PokemonType) {
@@ -2285,7 +2282,7 @@ export class PokemonLevelIncrementModifier extends ConsumablePokemonModifier {
 }
 
 export class TmModifier extends ConsumablePokemonModifier {
-  declare public type: TmModifierType;
+  public declare type: TmModifierType;
 
   /**
    * Applies {@linkcode TmModifier}
@@ -2332,7 +2329,7 @@ export class RememberMoveModifier extends ConsumablePokemonModifier {
 }
 
 export class EvolutionItemModifier extends ConsumablePokemonModifier {
-  declare public type: EvolutionItemModifierType;
+  public declare type: EvolutionItemModifierType;
   /**
    * Applies {@linkcode EvolutionItemModifier}
    * @param playerPokemon The {@linkcode PlayerPokemon} that should evolve via item
@@ -2342,13 +2339,13 @@ export class EvolutionItemModifier extends ConsumablePokemonModifier {
     let matchingEvolution = speciesDataRegistry.hasEvolutions(playerPokemon.species.speciesId)
       ? speciesDataRegistry
           .getEvolutions(playerPokemon.species.speciesId)
-          .find(e => e.item === this.type.evolutionItem && e.validate(playerPokemon, false, e.item))
+          .find(e => e.evoItem === this.type.evolutionItem && e.validate(playerPokemon, false, e.item!))
       : null;
 
     if (!matchingEvolution && playerPokemon.isFusion()) {
       matchingEvolution = speciesDataRegistry
         .getEvolutions(playerPokemon.fusionSpecies!.speciesId)
-        .find(e => e.item === this.type.evolutionItem && e.validate(playerPokemon, true, e.item));
+        .find(e => e.evoItem === this.type.evolutionItem && e.validate(playerPokemon, true, e.item!));
       if (matchingEvolution) {
         matchingEvolution = new FusionSpeciesFormEvolution(playerPokemon.species.speciesId, matchingEvolution);
       }
@@ -2497,7 +2494,7 @@ export class ExpBoosterModifier extends PersistentModifier {
 }
 
 export class PokemonExpBoosterModifier extends PokemonHeldItemModifier {
-  declare public type: PokemonExpBoosterModifierType;
+  public declare type: PokemonExpBoosterModifierType;
 
   private boostMultiplier: number;
 
@@ -2594,7 +2591,7 @@ export class ExpBalanceModifier extends PersistentModifier {
 }
 
 export class PokemonFriendshipBoosterModifier extends PokemonHeldItemModifier {
-  declare public type: PokemonFriendshipBoosterModifierType;
+  public declare type: PokemonFriendshipBoosterModifierType;
 
   matchType(modifier: Modifier): boolean {
     return modifier instanceof PokemonFriendshipBoosterModifier;
@@ -2651,7 +2648,7 @@ export class PokemonNatureWeightModifier extends PokemonHeldItemModifier {
 }
 
 export class PokemonMoveAccuracyBoosterModifier extends PokemonHeldItemModifier {
-  declare public type: PokemonMoveAccuracyBoosterModifierType;
+  public declare type: PokemonMoveAccuracyBoosterModifierType;
   private accuracyAmount: number;
 
   constructor(type: PokemonMoveAccuracyBoosterModifierType, pokemonId: number, accuracy: number, stackCount?: number) {
@@ -2703,7 +2700,7 @@ export class PokemonMoveAccuracyBoosterModifier extends PokemonHeldItemModifier 
 }
 
 export class PokemonMultiHitModifier extends PokemonHeldItemModifier {
-  declare public type: PokemonMultiHitModifierType;
+  public declare type: PokemonMultiHitModifierType;
 
   matchType(modifier: Modifier): boolean {
     return modifier instanceof PokemonMultiHitModifier;
@@ -2784,7 +2781,7 @@ export class PokemonMultiHitModifier extends PokemonHeldItemModifier {
 }
 
 export class PokemonFormChangeItemModifier extends PokemonHeldItemModifier {
-  declare public type: FormChangeItemModifierType;
+  public declare type: FormChangeItemModifierType;
   public formChangeItem: FormChangeItem;
   public active: boolean;
   public isTransferable = false;
@@ -3168,16 +3165,6 @@ export abstract class HeldItemTransferModifier extends PokemonHeldItemModifier {
   }
 
   /**
-   * Checks if this item can steal and if the holder has not fainted.
-   * @param pokemon The {@linkcode Pokemon} holding this item
-   * @param target The {@linkcode Pokemon} to steal from (optional)
-   * @returns `true` if an item can be stolen; false otherwise.
-   */
-  override shouldApply(pokemon: Pokemon, target?: Pokemon): boolean {
-    return super.shouldApply(pokemon, target) && !pokemon.isFainted();
-  }
-
-  /**
    * Steals an item, chosen randomly, from a set of target Pokemon.
    * @param pokemon The {@linkcode Pokemon} holding this item
    * @param target The {@linkcode Pokemon} to steal from (optional)
@@ -3263,6 +3250,13 @@ export class TurnHeldItemTransferModifier extends HeldItemTransferModifier {
 
   setTransferrableFalse(): void {
     this.isTransferable = false;
+  }
+
+  public override apply(pokemon: Pokemon, target?: Pokemon, ...args: unknown[]): boolean {
+    if (pokemon.isFainted()) {
+      return false;
+    }
+    return super.apply(pokemon, target, ...args);
   }
 }
 
@@ -3524,24 +3518,24 @@ export class EnemyTurnHealModifier extends EnemyPersistentModifier {
    * @returns `true` if the {@linkcode Pokemon} was healed
    */
   override apply(enemyPokemon: Pokemon): boolean {
-    if (enemyPokemon.isFullHp()) {
-      return false;
-    }
-
-    // Prevent healing to full from healing tokens
-    globalScene.phaseManager.unshiftNew(
-      "PokemonHealPhase",
-      enemyPokemon.getBattlerIndex(),
-      (enemyPokemon.getMaxHp() * this.stackCount * this.healPercent) / 100,
-      {
-        message: i18next.t("modifier:enemyTurnHealApply", {
+    if (!enemyPokemon.isFullHp()) {
+      globalScene.phaseManager.unshiftNew(
+        "PokemonHealPhase",
+        enemyPokemon.getBattlerIndex(),
+        Math.max(Math.floor(enemyPokemon.getMaxHp() / (100 / this.healPercent)) * this.stackCount, 1),
+        i18next.t("modifier:enemyTurnHealApply", {
           pokemonNameWithAffix: getPokemonNameWithAffix(enemyPokemon),
         }),
-        preventFullHeal: true,
-      },
-    );
+        true,
+        false,
+        false,
+        false,
+        true,
+      );
+      return true;
+    }
 
-    return true;
+    return false;
   }
 
   getMaxStackCount(): number {

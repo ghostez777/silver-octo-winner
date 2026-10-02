@@ -1,6 +1,5 @@
 import type { InfoToggle } from "#app/battle-scene";
 import { globalScene } from "#app/global-scene";
-import { settings } from "#app/global-settings-manager";
 import { TextStyle } from "#enums/text-style";
 import { addTextObject } from "#ui/text";
 import { addWindow } from "#ui/ui-theme";
@@ -25,17 +24,17 @@ const GLOBAL_SCALE = 6;
 export class PokedexInfoOverlay extends Phaser.GameObjects.Container implements InfoToggle {
   public active = false;
 
-  private readonly desc: Phaser.GameObjects.Text;
+  private desc: Phaser.GameObjects.Text;
   private descScroll: Phaser.Tweens.Tween | null = null;
 
-  private readonly descBg: Phaser.GameObjects.NineSlice;
+  private descBg: Phaser.GameObjects.NineSlice;
 
-  private readonly options: PokedexInfoOverlaySettings;
+  private options: PokedexInfoOverlaySettings;
 
-  private readonly textMaskRect: Phaser.GameObjects.Graphics;
+  private textMaskRect: Phaser.GameObjects.Graphics;
 
-  private readonly maskPointOriginX: number;
-  private readonly maskPointOriginY: number;
+  private maskPointOriginX: number;
+  private maskPointOriginY: number;
   public width: number;
 
   constructor(options?: PokedexInfoOverlaySettings) {
@@ -89,8 +88,8 @@ export class PokedexInfoOverlay extends Phaser.GameObjects.Container implements 
 
   // show this component with infos for the specific move
   show(text: string): boolean {
-    if (!settings.display.enableMoveInfo) {
-      return false;
+    if (!globalScene.enableMoveInfo) {
+      return false; // move infos have been disabled // TODO:: is `false` correct? i used to be `undeefined`
     }
 
     this.desc.setText(text ?? "");

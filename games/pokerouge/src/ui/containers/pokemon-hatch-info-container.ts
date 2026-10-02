@@ -1,6 +1,7 @@
 import { globalScene } from "#app/global-scene";
 import { speciesDataRegistry } from "#app/global-species-data-registry";
-import { speciesEggMoves } from "#balance/egg-moves";
+import { getStarterColors } from "#app/global-vars/starter-colors";
+import { speciesEggMoves } from "#balance/moves/egg-moves";
 import { allMoves } from "#data/data-lists";
 import type { EggHatchData } from "#data/egg-hatch-data";
 import { Gender } from "#data/gender";
@@ -11,7 +12,7 @@ import type { PlayerPokemon } from "#field/pokemon";
 import { addTextObject, updateCandyCountTextStyle } from "#ui/text";
 import { argbFromRgba, rgbHexToRgba } from "#utils/color-utils";
 import { padInt } from "#utils/common";
-import { getDexNumber, getStarterColors } from "#utils/pokemon-utils";
+import { getDexNumber, getPokemonSpeciesForm } from "#utils/pokemon-utils";
 import { PokemonInfoContainer } from "./pokemon-info-container";
 
 /**
@@ -136,7 +137,7 @@ export class PokemonHatchInfoContainer extends PokemonInfoContainer {
     const variant = pokemon.variant;
     this.currentPokemonSprite.setVisible(false);
     species.loadAssets(female, formIndex, shiny, variant, true).then(() => {
-      speciesDataRegistry.getPokemonSpeciesForm(species.speciesId, pokemon.formIndex).cry();
+      getPokemonSpeciesForm(species.speciesId, pokemon.formIndex).cry();
       this.currentPokemonSprite.play(species.getSpriteKey(female, formIndex, shiny, variant));
       this.currentPokemonSprite.setPipelineData("shiny", shiny);
       this.currentPokemonSprite.setPipelineData("variant", variant);

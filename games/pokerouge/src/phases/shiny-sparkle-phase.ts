@@ -4,12 +4,12 @@ import { PokemonPhase } from "#phases/pokemon-phase";
 
 export class ShinySparklePhase extends PokemonPhase {
   public readonly phaseName = "ShinySparklePhase";
-
+  // biome-ignore lint/complexity/noUselessConstructor: This makes `battlerIndex` required
   constructor(battlerIndex: BattlerIndex) {
     super(battlerIndex);
   }
 
-  public override start(): void {
+  start() {
     super.start();
 
     this.getPokemon().sparkle();

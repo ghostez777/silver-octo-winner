@@ -17,9 +17,8 @@ SPDX-License-Identifier: CC-BY-NC-SA-4.0
 
 ### Artist
 - bwl626
-- “Caramel” saltedcarriemel
-- “chorus” worm_wcry.o
 - Crow W (aka Crowo)
+- “Caramel” saltedcarriemel
 - Dops
 - "Green Ninja757" (aka DaleB)
 - Fontbane
@@ -30,7 +29,6 @@ SPDX-License-Identifier: CC-BY-NC-SA-4.0
 - redactedinlight
 - “Togepi” togepimax
 - unicorn_power
-- vex💤
 
 ## Head Composer
 - Firel
@@ -491,8 +489,6 @@ In addition to the lists below, please check [the PokéRogue wiki](https://wiki.
 - zaccie
 - zacharied
 - Zé Ricardo
-
-and [everyone else](https://github.com/pagefaultgames/pokerogue/graphs/contributors?all=1) who has contributed to the project.
 
 ## Bug/Issue Managers
 - Daleks

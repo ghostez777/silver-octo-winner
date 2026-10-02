@@ -1,42 +1,50 @@
 import { applyAbAttrs } from "#abilities/apply-ab-attrs";
 import { globalScene } from "#app/global-scene";
-import { getWeatherAnim, getWeatherDamageMessage, getWeatherLapseMessage } from "#data/weather";
+import type { Weather } from "#data/weather";
+import { getWeatherDamageMessage, getWeatherLapseMessage } from "#data/weather";
 import { BattlerTagType } from "#enums/battler-tag-type";
 import { HitResult } from "#enums/hit-result";
+import { CommonAnim } from "#enums/move-anims-common";
+import { WeatherType } from "#enums/weather-type";
 import type { Pokemon } from "#field/pokemon";
 import { CommonAnimPhase } from "#phases/common-anim-phase";
-import { toDmgValue } from "#utils/common";
-import { ValueHolder } from "#utils/value-holder";
+import { BooleanHolder, toDmgValue } from "#utils/common";
 
 export class WeatherEffectPhase extends CommonAnimPhase {
   public readonly phaseName = "WeatherEffectPhase";
+  public weather: Weather | null;
 
   constructor() {
-    super(undefined, undefined, getWeatherAnim(globalScene.arena.weatherType));
+    super(
+      undefined,
+      undefined,
+      CommonAnim.SUNNY + ((globalScene?.arena?.weather?.weatherType || WeatherType.NONE) - 1),
+    );
+    this.weather = globalScene?.arena?.weather;
   }
 
-  public override start(): void {
-    const weather = globalScene.arena.weather;
+  start() {
+    // Update weather state with any changes that occurred during the turn
+    this.weather = globalScene?.arena?.weather;
 
-    if (!weather) {
-      this.end();
-      return;
+    if (!this.weather) {
+      return this.end();
     }
 
-    this.setAnimation(getWeatherAnim(weather.weatherType));
+    this.setAnimation(CommonAnim.SUNNY + (this.weather.weatherType - 1));
 
-    if (weather.isDamaging()) {
-      const suppressed = new ValueHolder(false);
+    if (this.weather.isDamaging()) {
+      const cancelled = new BooleanHolder(false);
 
       this.executeForAll((pokemon: Pokemon) =>
-        applyAbAttrs("SuppressWeatherEffectAbAttr", { pokemon, weather, cancelled: suppressed }),
+        applyAbAttrs("SuppressWeatherEffectAbAttr", { pokemon, weather: this.weather, cancelled }),
       );
 
-      if (!suppressed.value) {
+      if (!cancelled.value) {
         const inflictDamage = (pokemon: Pokemon) => {
-          const cancelled = new ValueHolder(false);
+          const cancelled = new BooleanHolder(false);
 
-          applyAbAttrs("PreWeatherDamageAbAttr", { pokemon, weather, cancelled });
+          applyAbAttrs("PreWeatherDamageAbAttr", { pokemon, weather: this.weather, cancelled });
           applyAbAttrs("BlockNonDirectDamageAbAttr", { pokemon, cancelled });
 
           if (
@@ -49,14 +57,14 @@ export class WeatherEffectPhase extends CommonAnimPhase {
 
           const damage = toDmgValue(pokemon.getMaxHp() / 16);
 
-          globalScene.phaseManager.queueMessage(getWeatherDamageMessage(weather.weatherType, pokemon));
+          globalScene.phaseManager.queueMessage(getWeatherDamageMessage(this.weather!.weatherType, pokemon) ?? "");
           pokemon.damageAndUpdate(damage, { result: HitResult.INDIRECT, ignoreSegments: true });
         };
 
         this.executeForAll((pokemon: Pokemon) => {
           const immune =
             !pokemon
-            || pokemon.getTypes({ returnOriginalTypesIfStellar: true }).filter(t => weather.isTypeDamageImmune(t))
+            || pokemon.getTypes({ returnOriginalTypesIfStellar: true }).filter(t => this.weather?.isTypeDamageImmune(t))
               .length > 0
             || pokemon.switchOutStatus;
           if (!immune) {
@@ -66,10 +74,10 @@ export class WeatherEffectPhase extends CommonAnimPhase {
       }
     }
 
-    globalScene.ui.showText(getWeatherLapseMessage(weather.weatherType), null, () => {
+    globalScene.ui.showText(getWeatherLapseMessage(this.weather.weatherType) ?? "", null, () => {
       this.executeForAll((pokemon: Pokemon) => {
         if (!pokemon.switchOutStatus) {
-          applyAbAttrs("PostWeatherLapseAbAttr", { pokemon, weather });
+          applyAbAttrs("PostWeatherLapseAbAttr", { pokemon, weather: this.weather });
         }
       });
 

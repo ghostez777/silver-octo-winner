@@ -1,6 +1,5 @@
 import { audioManager } from "#app/global-audio-manager";
 import { globalScene } from "#app/global-scene";
-import { settings } from "#app/global-settings-manager";
 import type { BattlerIndex } from "#enums/battler-index";
 import { HitResult } from "#enums/hit-result";
 import { PokemonPhase } from "#phases/pokemon-phase";
@@ -31,7 +30,7 @@ export class DamageAnimPhase extends PokemonPhase {
     super.start();
 
     if (this.damageResult === HitResult.ONE_HIT_KO || this.damageResult === HitResult.INDIRECT_KO) {
-      if (settings.display.enableMoveAnimations) {
+      if (globalScene.moveAnimations) {
         globalScene.toggleInvert(true);
       }
       globalScene.time.delayedCall(fixedInt(1000), () => {

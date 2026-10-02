@@ -1,9 +1,9 @@
 import { globalScene } from "#app/global-scene";
-import { settings } from "#app/global-settings-manager";
 import { getPokemonNameWithAffix } from "#app/messages";
 import { BerryType } from "#enums/berry-type";
 import { MoveId } from "#enums/move-id";
 import { TextStyle } from "#enums/text-style";
+import { UiTheme } from "#enums/ui-theme";
 import type { BerryUsedEvent, MoveUsedEvent } from "#events/battle-scene";
 import { BattleSceneEventType } from "#events/battle-scene";
 import type { EnemyPokemon, Pokemon } from "#field/pokemon";
@@ -25,35 +25,35 @@ interface MoveInfo {
 /** A Flyout Menu attached to each {@linkcode BattleInfo} object on the field UI */
 export class BattleFlyout extends Phaser.GameObjects.Container {
   /** Is this object linked to a player's Pokemon? */
-  private readonly player: boolean;
+  private player: boolean;
 
   /** The Pokemon this object is linked to */
   private pokemon: Pokemon;
 
   /** The restricted width of the flyout which should be drawn to */
-  private readonly flyoutWidth = 118;
+  private flyoutWidth = 118;
   /** The restricted height of the flyout which should be drawn to */
-  private readonly flyoutHeight = 23;
+  private flyoutHeight = 23;
 
   /** The amount of translation animation on the x-axis */
-  private readonly translationX: number;
+  private translationX: number;
   /** The x-axis point where the flyout should sit when activated */
-  private readonly anchorX: number;
+  private anchorX: number;
   /** The y-axis point where the flyout should sit when activated */
-  private readonly anchorY: number;
+  private anchorY: number;
 
   /** The initial container which defines where the flyout should be attached */
-  private readonly flyoutParent: Phaser.GameObjects.Container;
+  private flyoutParent: Phaser.GameObjects.Container;
   /** The background {@linkcode Phaser.GameObjects.Sprite;} for the flyout */
-  private readonly flyoutBackground: Phaser.GameObjects.Sprite;
+  private flyoutBackground: Phaser.GameObjects.Sprite;
 
   /** The container which defines the drawable dimensions of the flyout */
-  private readonly flyoutContainer: Phaser.GameObjects.Container;
+  private flyoutContainer: Phaser.GameObjects.Container;
 
   /** The array of {@linkcode Phaser.GameObjects.Text} objects which are drawn on the flyout */
-  private readonly flyoutText: Phaser.GameObjects.Text[] = new Array(4);
+  private flyoutText: Phaser.GameObjects.Text[] = new Array(4);
   /** The array of {@linkcode MoveInfo} used to track moves for the {@linkcode Pokemon} linked to the flyout */
-  private readonly moveInfo: MoveInfo[] = [];
+  private moveInfo: MoveInfo[] = [];
 
   /** Current state of the flyout's visibility */
   public flyoutVisible = false;
@@ -107,7 +107,7 @@ export class BattleFlyout extends Phaser.GameObjects.Container {
         this.flyoutWidth / 2,
         0,
         1,
-        this.flyoutHeight + (settings.isLegacyTheme ? 1 : 0),
+        this.flyoutHeight + (globalScene.uiTheme === UiTheme.LEGACY ? 1 : 0),
         0x212121,
       ).setOrigin(0.5, 0),
     );

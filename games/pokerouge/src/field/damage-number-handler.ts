@@ -1,7 +1,5 @@
 import { globalScene } from "#app/global-scene";
-import { settings } from "#app/global-settings-manager";
 import type { BattlerIndex } from "#enums/battler-index";
-import { DamageNumbersMode } from "#enums/damage-numbers-mode";
 import { HitResult } from "#enums/hit-result";
 import { TextStyle } from "#enums/text-style";
 import type { Pokemon } from "#field/pokemon";
@@ -12,7 +10,11 @@ import { fixedInt, formatStat } from "#utils/common";
 type TextAndShadowArr = [string | null, string | null];
 
 export class DamageNumberHandler {
-  private readonly damageNumbers: Map<BattlerIndex, Phaser.GameObjects.Text[]> = new Map();
+  private damageNumbers: Map<BattlerIndex, Phaser.GameObjects.Text[]>;
+
+  constructor() {
+    this.damageNumbers = new Map();
+  }
 
   add(
     target: Pokemon,
@@ -20,7 +22,7 @@ export class DamageNumberHandler {
     result: DamageResult | HitResult.HEAL = HitResult.EFFECTIVE,
     critical = false,
   ): void {
-    if (settings.display.damageNumbersMode === DamageNumbersMode.OFF) {
+    if (!globalScene?.damageNumbersMode) {
       return;
     }
 
@@ -84,7 +86,7 @@ export class DamageNumberHandler {
 
     this.damageNumbers.get(battlerIndex)!.push(damageNumber);
 
-    if (settings.display.damageNumbersMode === DamageNumbersMode.SIMPLE) {
+    if (globalScene.damageNumbersMode === 1) {
       globalScene.tweens.add({
         targets: damageNumber,
         duration: fixedInt(750),

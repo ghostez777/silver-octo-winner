@@ -28,7 +28,7 @@ import i18next from "i18next";
  * use a {@linkcode MoveRestriction} instead.
  */
 export class MoveCondition {
-  declare public readonly func: MoveConditionFunc;
+  public declare readonly func: MoveConditionFunc;
 
   /**
    * @param func - A condition function that determines if the move can be used successfully

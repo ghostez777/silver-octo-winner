@@ -1,7 +1,6 @@
 import { applyAbAttrs } from "#abilities/apply-ab-attrs";
 import { audioManager } from "#app/global-audio-manager";
 import { globalScene } from "#app/global-scene";
-import { settings } from "#app/global-settings-manager";
 import { getPokemonNameWithAffix } from "#app/messages";
 import { handleTutorial, Tutorial } from "#app/tutorial";
 import { OctolockTag } from "#data/battler-tags";
@@ -14,11 +13,11 @@ import { ResetNegativeStatStageModifier } from "#modifiers/modifier";
 import { PokemonPhase } from "#phases/pokemon-phase";
 import type { ConditionalUserFieldProtectStatAbAttrParams, PreStatStageChangeAbAttrParams } from "#types/ability-types";
 import type { StatChange, StatStageChangePhaseOptions } from "#types/stat-change";
+import type { Mutable } from "#types/type-helpers";
 import { playTween } from "#utils/anim-utils";
 import { deepCopy } from "#utils/data";
 import { ValueHolder } from "#utils/value-holder";
 import i18next from "i18next";
-import type { Writable } from "type-fest";
 
 /**
  * Phase responsible for resolving, animating, and applying one or more stat changes.
@@ -73,7 +72,7 @@ export class StatStageChangePhase extends PokemonPhase {
     const applied = this.getAppliedChanges(pokemon);
     this.options.onChange?.(pokemon, applied);
 
-    if (applied.some(c => c.stages !== 0) && settings.display.enableMoveAnimations) {
+    if (applied.some(c => c.stages !== 0) && globalScene.moveAnimations) {
       this.playStatChangeAnimation(pokemon).then(() => this.applyStatChangesAndEnd(pokemon, applied));
     } else {
       this.applyStatChangesAndEnd(pokemon, applied);
@@ -94,7 +93,7 @@ export class StatStageChangePhase extends PokemonPhase {
     applyAbAttrs("StatStageChangeMultiplierAbAttr", { pokemon, numStages: multiplier });
 
     for (const change of this.options.changes) {
-      (change as Writable<StatChange>).stages *= multiplier.value;
+      (change as Mutable<StatChange>).stages *= multiplier.value;
     }
   }
 
@@ -227,8 +226,7 @@ export class StatStageChangePhase extends PokemonPhase {
    * @param applied - The clamped per-stat deltas to apply
    */
   private applyStatChangesAndEnd(pokemon: Pokemon, applied: readonly StatChange[]): void {
-    this.queueStatChangeMessages(pokemon, applied);
-
+    this.queueStatChangeMessages(applied);
     this.updateStatStages(pokemon, applied);
     this.triggerReactionAbilities(pokemon);
     this.checkWhiteHerb(pokemon);
@@ -238,64 +236,20 @@ export class StatStageChangePhase extends PokemonPhase {
   }
 
   /**
-   * Queue all messages for the stat changes being applied.
-   * @param pokemon - The `Pokemon` receiving the stat changes
+   * Queue one battle message per distinct stage change magnitude.
+   *
    * @param applied - The applied changes
    */
-  private queueStatChangeMessages(pokemon: Pokemon, applied: readonly StatChange[]): void {
-    if (this.options.message != null) {
-      globalScene.phaseManager.queueMessage(this.options.message(pokemon));
-      return;
-    }
-
+  private queueStatChangeMessages(applied: readonly StatChange[]): void {
     for (const [_, group] of Map.groupBy(applied, c => c.stages)) {
       globalScene.phaseManager.queueMessage(this.buildStatStageChangeMessage(group));
     }
   }
 
   /**
-   * Build a stat change message for a group of changes that share the same magnitude.
-   *
-   * @param changes - The changes described by this message (all sharing one {@linkcode StatChange.stages | stages} value)
-   * @returns The localised message string
-   */
-  private buildStatStageChangeMessage(changes: readonly StatChange[]): string {
-    const relStages = changes[0].stages;
-    return i18next.t(getStatStageChangeDescriptionKey(Math.abs(relStages), this.isIncrease), {
-      pokemonNameWithAffix: getPokemonNameWithAffix(this.getPokemon()),
-      stats: this.formatStatsFragment(changes),
-      count: changes.length,
-    });
-  }
-
-  /**
-   * Format a list of changes into a localised stat-name fragment (e.g. `"Attack, Defense, and Speed"`).
-   *
-   * @param changes - The changes whose stat names should be listed
-   * @returns The localised fragment, or the generic `"stats"` string for 5+
-   */
-  private formatStatsFragment(changes: readonly StatChange[]): string {
-    if (changes.length >= 5) {
-      return i18next.t("battle:stats");
-    }
-
-    if (changes.length === 1) {
-      return i18next.t(getStatKey(changes[0].stat));
-    }
-
-    const allButLast = changes
-      .slice(0, -1)
-      .map(c => i18next.t(getStatKey(c.stat)))
-      .join(", ");
-    const oxfordComma = changes.length > 2 ? "," : "";
-    const last = i18next.t(getStatKey(changes.at(-1)!.stat));
-    return `${allButLast}${oxfordComma} ${i18next.t("battle:statsAnd")} ${last}`;
-  }
-
-  /**
    * Write each clamped change to the target's stat stages and flag turn data accordingly.
    *
-   * @param pokemon - The `Pokemon` receiving the stat changes
+   * @param pokemon - The Pokemon receiving the stat changes
    * @param applied - The applied changes
    */
   private updateStatStages(pokemon: Pokemon, applied: readonly StatChange[]): void {
@@ -411,5 +365,44 @@ export class StatStageChangePhase extends PokemonPhase {
     });
 
     pokemon.disableMask();
+  }
+
+  /**
+   * Build a stat change message for a group of changes that share the same magnitude.
+   *
+   * @param changes - The changes described by this message (all sharing one {@linkcode StatChange.stages | stages} value)
+   * @returns The localised message string
+   */
+  private buildStatStageChangeMessage(changes: readonly StatChange[]): string {
+    const relStages = changes[0].stages;
+    return i18next.t(getStatStageChangeDescriptionKey(Math.abs(relStages), this.isIncrease), {
+      pokemonNameWithAffix: getPokemonNameWithAffix(this.getPokemon()),
+      stats: this.formatStatsFragment(changes),
+      count: changes.length,
+    });
+  }
+
+  /**
+   * Format a list of changes into a localised stat-name fragment (e.g. `"Attack, Defense, and Speed"`).
+   *
+   * @param changes - The changes whose stat names should be listed
+   * @returns The localised fragment, or the generic `"stats"` string for 5+
+   */
+  private formatStatsFragment(changes: readonly StatChange[]): string {
+    if (changes.length >= 5) {
+      return i18next.t("battle:stats");
+    }
+
+    if (changes.length === 1) {
+      return i18next.t(getStatKey(changes[0].stat));
+    }
+
+    const allButLast = changes
+      .slice(0, -1)
+      .map(c => i18next.t(getStatKey(c.stat)))
+      .join(", ");
+    const oxfordComma = changes.length > 2 ? "," : "";
+    const last = i18next.t(getStatKey(changes.at(-1)!.stat));
+    return `${allButLast}${oxfordComma} ${i18next.t("battle:statsAnd")} ${last}`;
   }
 }

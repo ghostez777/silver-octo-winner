@@ -1,6 +1,5 @@
 import { audioManager } from "#app/global-audio-manager";
 import { globalScene } from "#app/global-scene";
-import { settings } from "#app/global-settings-manager";
 import { allMoves } from "#data/data-lists";
 import type { BattlerIndex } from "#enums/battler-index";
 import { BattlerTagType } from "#enums/battler-tag-type";
@@ -913,7 +912,7 @@ export abstract class BattleAnim {
       }
     };
 
-    if (!settings.display.enableMoveAnimations && !this.playRegardlessOfIssues) {
+    if (!globalScene.moveAnimations && !this.playRegardlessOfIssues) {
       return cleanUpAndComplete();
     }
 
@@ -1202,7 +1201,7 @@ export abstract class BattleAnim {
       }
     };
 
-    if (!settings.display.enableMoveAnimations && !this.playRegardlessOfIssues) {
+    if (!globalScene.moveAnimations && !this.playRegardlessOfIssues) {
       return cleanUpAndComplete();
     }
 

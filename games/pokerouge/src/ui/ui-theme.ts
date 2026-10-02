@@ -1,7 +1,6 @@
 import { globalScene } from "#app/global-scene";
-import { settings } from "#app/global-settings-manager";
 import { legacyCompatibleImages } from "#app/scene-base";
-import type { UiWindowStyle } from "#enums/ui-window-style";
+import { UiTheme } from "#enums/ui-theme";
 
 export enum WindowVariant {
   NORMAL,
@@ -20,7 +19,23 @@ export function getWindowVariantSuffix(windowVariant: WindowVariant): string {
   }
 }
 
-// TODO: use object param for optional params
+const windowTypeControlColors = {
+  [UiTheme.DEFAULT]: {
+    0: ["#6b5a73", "#DD5748", "#7E4955"],
+    1: ["#6b5a73", "#48DDAA", "#4D7574"],
+    2: ["#6b5a73", "#C5C5C5", "#766D7E"],
+    3: ["#6b5a73", "#EBC07C", "#836C66"],
+    4: ["#686868", "#E8E8E8", "#919191"],
+  },
+  [UiTheme.LEGACY]: {
+    0: ["#706880", "#8888c8", "#484868"],
+    1: ["#d04028", "#e0a028", "#902008"],
+    2: ["#48b840", "#88d880", "#089040"],
+    3: ["#2068d0", "#80b0e0", "#104888"],
+    4: ["#706880", "#8888c8", "#484868"],
+  },
+};
+
 export function addWindow(
   x: number,
   y: number,
@@ -32,12 +47,12 @@ export function addWindow(
   maskOffsetY = 0,
   windowVariant: WindowVariant = WindowVariant.NORMAL,
 ): Phaser.GameObjects.NineSlice {
-  const borderSize = settings.isLegacyTheme ? 6 : 8;
+  const borderSize = globalScene.uiTheme === UiTheme.LEGACY ? 6 : 8;
 
   const window = globalScene.add.nineslice(
     x,
     y,
-    `window_${settings.display.uiWindowStyle}${getWindowVariantSuffix(windowVariant)}`,
+    `window_${globalScene.windowType}${getWindowVariantSuffix(windowVariant)}`,
     undefined,
     width,
     height,
@@ -46,14 +61,14 @@ export function addWindow(
     borderSize,
     borderSize,
   );
-  window.setOrigin(0);
+  window.setOrigin(0, 0);
 
   if (mergeMaskLeft || mergeMaskTop || maskOffsetX || maskOffsetY) {
     /**
-     * - x: left
-     * - y: top
-     * - width: right
-     * - height: bottom
+     * x: left
+     * y: top
+     * width: right
+     * height: bottom
      */
     const maskRect = new Phaser.GameObjects.Rectangle(
       globalScene,
@@ -72,7 +87,7 @@ export function addWindow(
   return window;
 }
 
-export function updateWindowType(windowTypeIndex: UiWindowStyle): void {
+export function updateWindowType(windowTypeIndex: number): void {
   const windowObjects: [Phaser.GameObjects.NineSlice, WindowVariant][] = [];
   const themedObjects: (Phaser.GameObjects.Image | Phaser.GameObjects.NineSlice)[] = [];
   const traverse = (object: any) => {
@@ -105,7 +120,12 @@ export function updateWindowType(windowTypeIndex: UiWindowStyle): void {
 
   traverse(globalScene);
 
-  settings.display.uiWindowStyle = windowTypeIndex;
+  globalScene.windowType = windowTypeIndex;
+
+  const rootStyle = document.documentElement.style;
+  ["base", "light", "dark"].map((k, i) =>
+    rootStyle.setProperty(`--color-${k}`, windowTypeControlColors[globalScene.uiTheme][windowTypeIndex - 1][i]),
+  );
 
   const windowKey = `window_${windowTypeIndex}`;
 
@@ -127,7 +147,11 @@ export function addUiThemeOverrides(): void {
     frame?: string | number,
   ): Phaser.GameObjects.Image {
     let legacy = false;
-    if (typeof texture === "string" && settings.isLegacyTheme && legacyCompatibleImages.includes(texture)) {
+    if (
+      typeof texture === "string"
+      && globalScene.uiTheme === UiTheme.LEGACY
+      && legacyCompatibleImages.includes(texture)
+    ) {
       legacy = true;
       texture += "_legacy";
     }
@@ -150,23 +174,26 @@ export function addUiThemeOverrides(): void {
     frame?: string | number,
   ): Phaser.GameObjects.Sprite {
     let legacy = false;
-    if (typeof texture === "string" && settings.isLegacyTheme && legacyCompatibleImages.includes(texture)) {
+    if (
+      typeof texture === "string"
+      && globalScene.uiTheme === UiTheme.LEGACY
+      && legacyCompatibleImages.includes(texture)
+    ) {
       legacy = true;
       texture += "_legacy";
     }
     const ret: Phaser.GameObjects.Sprite = originalAddSprite.apply(this, [x, y, texture, frame]);
     if (legacy) {
       const originalSetTexture = ret.setTexture;
-      ret.setTexture = function (key: string, frm?: string | number) {
+      ret.setTexture = function (key: string, frame?: string | number) {
         key += "_legacy";
-        return originalSetTexture.apply(this, [key, frm]);
+        return originalSetTexture.apply(this, [key, frame]);
       };
     }
     return ret;
   };
 
   const originalAddNineslice = globalScene.add.nineslice;
-  // biome-ignore lint/complexity/useMaxParams: needs to be the same as the original
   globalScene.add.nineslice = function (
     x: number,
     y: number,
@@ -180,7 +207,11 @@ export function addUiThemeOverrides(): void {
     bottomHeight?: number,
   ): Phaser.GameObjects.NineSlice {
     let legacy = false;
-    if (typeof texture === "string" && settings.isLegacyTheme && legacyCompatibleImages.includes(texture)) {
+    if (
+      typeof texture === "string"
+      && globalScene.uiTheme === UiTheme.LEGACY
+      && legacyCompatibleImages.includes(texture)
+    ) {
       legacy = true;
       texture += "_legacy";
     }

@@ -1,6 +1,5 @@
 import { audioManager } from "#app/global-audio-manager";
 import { globalScene } from "#app/global-scene";
-import { settings } from "#app/global-settings-manager";
 import type { PlayerGender } from "#enums/player-gender";
 import { TextStyle } from "#enums/text-style";
 import { Achv } from "#system/achv";
@@ -24,7 +23,7 @@ export class AchvBar extends Phaser.GameObjects.Container {
 
   constructor() {
     super(globalScene, globalScene.scaledCanvas.width, 0);
-    this.playerGender = settings.general.playerGender;
+    this.playerGender = globalScene.gameData.gender;
   }
 
   setup(): void {

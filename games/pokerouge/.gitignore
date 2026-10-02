@@ -13,7 +13,6 @@ lerna-debug.log*
 
 temp
 node_modules
-dist
 dist-ssr
 *.local
 build
@@ -46,4 +45,4 @@ coverage
 
 # Script outputs
 *.csv
-game-data-output/*
+species-output/*

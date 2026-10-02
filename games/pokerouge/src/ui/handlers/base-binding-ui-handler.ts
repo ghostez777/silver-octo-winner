@@ -1,7 +1,8 @@
 import { globalScene } from "#app/global-scene";
 import { Button } from "#enums/buttons";
 import { TextStyle } from "#enums/text-style";
-import type { TabMenu } from "#ui/tab-menu";
+import type { UiMode } from "#enums/ui-mode";
+import { NavigationManager } from "#ui/navigation-menu";
 import { addTextObject, getTextColor } from "#ui/text";
 import { UiHandler } from "#ui/ui-handler";
 import { addWindow } from "#ui/ui-theme";
@@ -45,7 +46,10 @@ export abstract class BaseBindingUiHandler extends UiHandler {
 
   // The specific setting being modified.
   protected target;
-  protected tabMenu: TabMenu | undefined;
+
+  constructor(mode: UiMode | null = null) {
+    super(mode);
+  }
 
   public override setup(): void {
     const ui = this.getUi();
@@ -185,7 +189,7 @@ export abstract class BaseBindingUiHandler extends UiHandler {
           this.cancelFn?.();
         } else {
           success = this.swapAction();
-          this.tabMenu?.updateIcons();
+          NavigationManager.getInstance().updateIcons();
           this.cancelFn?.(success);
         }
         break;

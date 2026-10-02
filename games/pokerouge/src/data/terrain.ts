@@ -1,5 +1,4 @@
 import { getPokemonNameWithAffix } from "#app/messages";
-import { CommonAnim } from "#enums/move-anims-common";
 import type { Pokemon } from "#field/pokemon";
 import type { RGBArray } from "#types/sprite-types";
 import i18next from "i18next";
@@ -18,9 +17,9 @@ export interface SerializedTerrain {
 }
 
 export class Terrain {
-  public readonly terrainType: TerrainType;
+  public terrainType: TerrainType;
   public turnsLeft: number;
-  public readonly maxDuration: number;
+  public maxDuration: number;
 
   constructor(terrainType: TerrainType, turnsLeft = 0, maxDuration: number = turnsLeft) {
     this.terrainType = terrainType;
@@ -52,9 +51,9 @@ export function getTerrainName(terrainType: TerrainType): string {
       return i18next.t("terrain:grassy");
     case TerrainType.PSYCHIC:
       return i18next.t("terrain:psychic");
-    case TerrainType.NONE:
-      return "";
   }
+
+  return "";
 }
 
 export function getTerrainColor(terrainType: TerrainType): RGBArray {
@@ -67,9 +66,9 @@ export function getTerrainColor(terrainType: TerrainType): RGBArray {
       return [120, 200, 80];
     case TerrainType.PSYCHIC:
       return [160, 64, 160];
-    case TerrainType.NONE:
-      return [0, 0, 0];
   }
+
+  return [0, 0, 0];
 }
 
 /**
@@ -88,6 +87,9 @@ export function getTerrainStartMessage(terrainType: TerrainType): string {
     case TerrainType.PSYCHIC:
       return i18next.t("terrain:psychicStartMessage");
     case TerrainType.NONE:
+    default:
+      terrainType satisfies TerrainType.NONE;
+      console.warn(`${terrainType} unexpectedly provided as terrain type to getTerrainStartMessage!`);
       return "";
   }
 }
@@ -108,6 +110,9 @@ export function getTerrainClearMessage(terrainType: TerrainType): string {
     case TerrainType.PSYCHIC:
       return i18next.t("terrain:psychicClearMessage");
     case TerrainType.NONE:
+    default:
+      terrainType satisfies TerrainType.NONE;
+      console.warn(`${terrainType} unexpectedly provided as terrain type to getTerrainClearMessage!`);
       return "";
   }
 }
@@ -132,15 +137,9 @@ export function getTerrainBlockMessage(pokemon: Pokemon, terrainType: TerrainTyp
         terrainName: getTerrainName(terrainType),
       });
     case TerrainType.NONE:
+    default:
+      terrainType satisfies TerrainType.NONE;
+      console.warn(`${terrainType} unexpectedly provided as terrain type to getTerrainBlockMessage!`);
       return "";
   }
-}
-
-/**
- * Gets the animation associated with the given terrain type
- * @param terrainType - The {@linkcode TerrainType} to get the animiation for
- * @returns The {@linkcode CommonAnim} for the given terrain
- */
-export function getTerrainAnim(terrainType: TerrainType): CommonAnim {
-  return (CommonAnim.MISTY_TERRAIN + (terrainType - 1)) as CommonAnim;
 }

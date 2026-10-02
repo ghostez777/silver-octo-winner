@@ -3,7 +3,7 @@ import { globalScene } from "#app/global-scene";
 import { speciesDataRegistry } from "#app/global-species-data-registry";
 import { getPokemonNameWithAffix } from "#app/messages";
 import type { EntryHazardTag, SuppressAbilitiesTag } from "#data/arena-tag";
-import { type BattlerTag, CritBoostTag, SemiInvulnerableTag } from "#data/battler-tags";
+import { type BattlerTag, CritBoostTag } from "#data/battler-tags";
 import { getBerryEffectFunc } from "#data/berry";
 import { allAbilities, allMoves } from "#data/data-lists";
 import { SpeciesFormChangeAbilityTrigger, SpeciesFormChangeWeatherTrigger } from "#data/form-change-triggers";
@@ -45,7 +45,6 @@ import { BerryModifier, HitHealModifier, PokemonHeldItemModifier } from "#modifi
 import { BerryModifierType } from "#modifiers/modifier-type";
 import { getMoveTargets } from "#moves/move-utils";
 import { PokemonMove } from "#moves/pokemon-move";
-import type { HitCheckEntry, MoveEffectPhase } from "#phases/move-effect-phase";
 import type { MoveReflectPhase } from "#phases/move-reflect-phase";
 import type {
   AbAttrCondition,
@@ -55,18 +54,18 @@ import type {
   PokemonDefendCondition,
   PokemonStatStageChangeFunc,
 } from "#types/ability-types";
-import type { Move, MoveConditionFunc, StatusEffectAttr } from "#types/move-types";
+import type { Move, StatusEffectAttr } from "#types/move-types";
 import type { StatChange } from "#types/stat-change";
-import type { Closed, Exact } from "#types/type-helpers";
+import type { Closed, Exact, Mutable } from "#types/type-helpers";
 import { coerceArray } from "#utils/array";
-import { BooleanHolder, type NumberHolder, randSeedFloat, randSeedInt, randSeedItem, toDmgValue } from "#utils/common";
+import { BooleanHolder, NumberHolder, randSeedFloat, randSeedInt, randSeedItem, toDmgValue } from "#utils/common";
 import { getPokemonTypeLocaleKey } from "#utils/i18n";
 import { inSpeedOrder } from "#utils/speed-order-generator";
 import { groupStatChange } from "#utils/stat-change";
 import { toCamelCase } from "#utils/strings";
 import type { ValueHolder } from "#utils/value-holder";
 import i18next from "i18next";
-import type { NonEmptyTuple, Writable } from "type-fest";
+import type { NonEmptyTuple } from "type-fest";
 
 /**
  * Base set of parameters passed to every ability attribute's {@linkcode AbAttr.apply | apply} method.
@@ -207,24 +206,8 @@ abstract class CancelInteractionAbAttr extends AbAttr {
   }
 }
 
-/** @sealed */
-interface UngroundedAbAttrParams extends AbAttrBaseParams {
-  isUngrounded: ValueHolder<boolean>;
-}
-
-/** @sealed */
-export class UngroundedAbAttr extends AbAttr {
-  constructor() {
-    super(false);
-  }
-
-  public override apply({ isUngrounded }: UngroundedAbAttrParams): void {
-    isUngrounded.value = true;
-  }
-}
-
 export class BlockRecoilDamageAttr extends CancelInteractionAbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
   constructor() {
     super(false);
   }
@@ -241,7 +224,7 @@ export interface DoubleBattleChanceAbAttrParams extends AbAttrBaseParams {
 
 /** Attribute for abilities that increase the chance of a double battle occurring. */
 export class DoubleBattleChanceAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
   constructor() {
     super(false);
   }
@@ -254,7 +237,7 @@ export class DoubleBattleChanceAbAttr extends AbAttr {
 }
 
 export class PostBattleInitAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
 }
 
 export class PostBattleInitFormChangeAbAttr extends PostBattleInitAbAttr {
@@ -304,7 +287,7 @@ export interface PreDefendModifyDamageAbAttrParams extends AugmentMoveInteractio
  */
 // TODO: this class is effectively useless
 export abstract class PreDefendAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
 }
 
 export class PreDefendFullHpEndureAbAttr extends PreDefendAbAttr {
@@ -436,7 +419,24 @@ export class TypeImmunityAbAttr extends PreDefendAbAttr {
   }
 }
 
+export class AttackTypeImmunityAbAttr extends TypeImmunityAbAttr {
+  // biome-ignore lint/complexity/noUselessConstructor: Changes the type of `immuneType`
+  constructor(immuneType: PokemonType, condition?: AbAttrCondition) {
+    super(immuneType, condition);
+  }
+
+  override canApply(params: TypeMultiplierAbAttrParams): boolean {
+    const { move } = params;
+    return (
+      move.category !== MoveCategory.STATUS // TODO: make Thousand Arrows ignore Levitate in a different manner
+      && !move.hasAttr("NeutralDamageAgainstFlyingTypeAttr")
+      && super.canApply(params)
+    );
+  }
+}
+
 export class TypeImmunityHealAbAttr extends TypeImmunityAbAttr {
+  // biome-ignore lint/complexity/noUselessConstructor: Changes the type of `immuneType`
   constructor(immuneType: PokemonType) {
     super(immuneType);
   }
@@ -450,12 +450,11 @@ export class TypeImmunityHealAbAttr extends TypeImmunityAbAttr {
         "PokemonHealPhase",
         pokemon.getBattlerIndex(),
         toDmgValue(pokemon.getMaxHp() / 4),
-        {
-          message: i18next.t("abilityTriggers:typeImmunityHeal", {
-            pokemonNameWithAffix: getPokemonNameWithAffix(pokemon),
-            abilityName,
-          }),
-        },
+        i18next.t("abilityTriggers:typeImmunityHeal", {
+          pokemonNameWithAffix: getPokemonNameWithAffix(pokemon),
+          abilityName,
+        }),
+        true,
       );
       cancelled.value = true; // Suppresses "No Effect" message
     }
@@ -536,7 +535,12 @@ export class NonSuperEffectiveImmunityAbAttr extends TypeImmunityAbAttr {
  */
 export class FullHpResistTypeAbAttr extends PreDefendAbAttr {
   override canApply({ typeMultiplier, move, pokemon }: TypeMultiplierAbAttrParams): boolean {
-    return !move?.hasAttr("FixedDamageAttr") && pokemon.isFullHp() && typeMultiplier.value > 0.5;
+    return (
+      typeMultiplier instanceof NumberHolder
+      && !move?.hasAttr("FixedDamageAttr")
+      && pokemon.isFullHp()
+      && typeMultiplier.value > 0.5
+    );
   }
 
   override apply({ typeMultiplier, pokemon }: TypeMultiplierAbAttrParams): void {
@@ -558,7 +562,13 @@ export interface FieldPriorityMoveImmunityAbAttrParams extends AugmentMoveIntera
 
 export class FieldPriorityMoveImmunityAbAttr extends PreDefendAbAttr {
   override canApply({ move, opponent: attacker, cancelled, pokemon }: FieldPriorityMoveImmunityAbAttrParams): boolean {
-    return !cancelled.value && move.getPriority(attacker) > 0 && !move.isAllyTarget() && attacker.isOpponent(pokemon);
+    return (
+      !cancelled.value
+      && move.getPriority(attacker) > 0
+      && !move.isAllyTarget()
+      && !move.isMultiTarget()
+      && attacker.isOpponent(pokemon)
+    );
   }
 
   override apply({ cancelled }: FieldPriorityMoveImmunityAbAttrParams): void {
@@ -657,7 +667,7 @@ export interface PostMoveInteractionAbAttrParams extends AugmentMoveInteractionA
 }
 
 export class PostDefendAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
   override canApply(_params: PostMoveInteractionAbAttrParams): boolean {
     return true;
   }
@@ -681,13 +691,15 @@ export class ReverseDrainAbAttr extends PostDefendAbAttr {
     if (simulated) {
       return;
     }
-    const damageAmount = move.getAttrs("HitHealAttr")[0].getHealAmount(opponent, pokemon);
+    const damageAmount = move.getAttrs<"HitHealAttr">("HitHealAttr")[0].getHealAmount(opponent, pokemon);
     pokemon.turnData.damageTaken += damageAmount;
     globalScene.phaseManager.unshiftNew(
-      "PokemonHealPhase", //
+      "PokemonHealPhase",
       opponent.getBattlerIndex(),
       -damageAmount,
-      { skipAnim: true },
+      null,
+      false,
+      true,
     );
   }
 
@@ -1195,7 +1207,7 @@ export interface PostStatStageChangeAbAttrParams extends AbAttrBaseParams {
 }
 
 export class PostStatStageChangeAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
 
   override canApply(_params: Closed<PostStatStageChangeAbAttrParams>) {
     return true;
@@ -1229,39 +1241,7 @@ export class PostStatStageChangeStatStageChangeAbAttr extends PostStatStageChang
 }
 
 export abstract class PreAttackAbAttr extends AbAttr {
-  declare private readonly _: never;
-}
-
-export interface MoveHealBoostAbAttrParams extends AugmentMoveInteractionAbAttrParams {
-  /** The base amount of HP being healed, as a fraction of the recipient's maximum HP. */
-  healRatio: ValueHolder<number>;
-}
-
-/**
- * Ability attribute to boost the healing potency of the user's moves.
- *
- * Used by Mega Launcher to implement Heal Pulse boosting.
- */
-export class MoveHealBoostAbAttr extends AbAttr {
-  /** The amount to boost the healing by, as a multiplier of the base amount. */
-  private readonly healMulti: number;
-  /** A lambda function determining whether to boost the heal amount. */
-  private readonly boostCondition: MoveConditionFunc;
-
-  constructor(boostCondition: MoveConditionFunc, healMulti: number, showAbility = false) {
-    super(showAbility);
-
-    this.healMulti = healMulti;
-    this.boostCondition = boostCondition;
-  }
-
-  public override canApply({ pokemon: user, opponent: target, move }: MoveHealBoostAbAttrParams): boolean {
-    return this.boostCondition(user, target, move);
-  }
-
-  public override apply({ healRatio }: MoveHealBoostAbAttrParams): void {
-    healRatio.value *= this.healMulti;
-  }
+  private declare readonly _: never;
 }
 
 export interface ModifyMoveEffectChanceAbAttrParams extends AbAttrBaseParams {
@@ -1541,7 +1521,7 @@ export class MovePowerBoostAbAttr extends VariableMovePowerAbAttr {
 
 export class MoveTypePowerBoostAbAttr extends MovePowerBoostAbAttr {
   // Need to use declare here to override the parent class's property, allows for modification in subclass' constructor
-  declare protected readonly skipDuringMovesetGen: boolean;
+  protected declare readonly skipDuringMovesetGen: boolean;
   constructor(boostedType: PokemonType, powerMultiplier?: number, skipDuringMovesetGen?: boolean) {
     super((pokemon, _defender, move) => pokemon?.getMoveType(move) === boostedType, powerMultiplier || 1.5, false);
     if (skipDuringMovesetGen != null) {
@@ -1552,7 +1532,7 @@ export class MoveTypePowerBoostAbAttr extends MovePowerBoostAbAttr {
 
 export class LowHpMoveTypePowerBoostAbAttr extends MoveTypePowerBoostAbAttr {
   protected override readonly skipDuringMovesetGen = true;
-
+  // biome-ignore lint/complexity/noUselessConstructor: Changes the constructor params
   constructor(boostedType: PokemonType) {
     super(boostedType);
   }
@@ -1675,7 +1655,7 @@ export interface StatMultiplierAbAttrParams extends AbAttrBaseParams {
 }
 
 export class StatMultiplierAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
   public readonly stat: BattleStat;
   public readonly multiplier: number;
   /**
@@ -2485,13 +2465,12 @@ export class PostSummonAllyHealAbAttr extends PostSummonAbAttr {
         "PokemonHealPhase",
         target.getBattlerIndex(),
         toDmgValue(pokemon.getMaxHp() / this.healRatio),
-        {
-          message: i18next.t("abilityTriggers:postSummonAllyHeal", {
-            pokemonNameWithAffix: getPokemonNameWithAffix(target),
-            pokemonName: pokemon.name,
-          }),
-          skipAnim: !this.showAnim,
-        },
+        i18next.t("abilityTriggers:postSummonAllyHeal", {
+          pokemonNameWithAffix: getPokemonNameWithAffix(target),
+          pokemonName: pokemon.name,
+        }),
+        true,
+        !this.showAnim,
       );
     }
   }
@@ -2787,7 +2766,7 @@ export class PostSummonCopyAllyStatsAbAttr extends PostSummonAbAttr {
     const dragonCheerTag = this.ally.getTag(BattlerTagType.DRAGON_CHEER) as CritBoostTag;
     if (dragonCheerTag) {
       pokemon.addTag(BattlerTagType.DRAGON_CHEER);
-      (pokemon.getTag(CritBoostTag) as Writable<CritBoostTag>).critStages = dragonCheerTag.critStages;
+      (pokemon.getTag(CritBoostTag) as Mutable<CritBoostTag>).critStages = dragonCheerTag.critStages;
     }
 
     const critBoostTag = this.ally.getTag(BattlerTagType.CRIT_BOOST);
@@ -3284,7 +3263,7 @@ export interface UserFieldStatusEffectImmunityAbAttrParams extends AbAttrBasePar
 
 /** Provides immunity to status effects to the user's field. */
 export class UserFieldStatusEffectImmunityAbAttr extends CancelInteractionAbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
   protected readonly immuneEffects: readonly StatusEffect[];
 
   /**
@@ -3652,7 +3631,7 @@ export class ChangeMovePriorityInBracketAbAttr extends AbAttr {
 }
 
 export class IgnoreContactAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
 }
 
 /** Shared interface for attributes that respond to a weather. */
@@ -3991,12 +3970,11 @@ export class PostWeatherLapseHealAbAttr extends PostWeatherLapseAbAttr {
         "PokemonHealPhase",
         pokemon.getBattlerIndex(),
         toDmgValue(pokemon.getMaxHp() / (16 / this.healFactor)),
-        {
-          message: i18next.t("abilityTriggers:postWeatherLapseHeal", {
-            pokemonNameWithAffix: getPokemonNameWithAffix(pokemon),
-            abilityName,
-          }),
-        },
+        i18next.t("abilityTriggers:postWeatherLapseHeal", {
+          pokemonNameWithAffix: getPokemonNameWithAffix(pokemon),
+          abilityName,
+        }),
+        true,
       );
     }
   }
@@ -4104,12 +4082,8 @@ export class PostTurnStatusHealAbAttr extends PostTurnAbAttr {
         "PokemonHealPhase",
         pokemon.getBattlerIndex(),
         toDmgValue(pokemon.getMaxHp() / 8),
-        {
-          message: i18next.t("abilityTriggers:poisonHeal", {
-            pokemonName: getPokemonNameWithAffix(pokemon),
-            abilityName,
-          }),
-        },
+        i18next.t("abilityTriggers:poisonHeal", { pokemonName: getPokemonNameWithAffix(pokemon), abilityName }),
+        true,
       );
     }
   }
@@ -4376,12 +4350,11 @@ export class PostTurnHealAbAttr extends PostTurnAbAttr {
         "PokemonHealPhase",
         pokemon.getBattlerIndex(),
         toDmgValue(pokemon.getMaxHp() / 16),
-        {
-          message: i18next.t("abilityTriggers:postTurnHeal", {
-            pokemonNameWithAffix: getPokemonNameWithAffix(pokemon),
-            abilityName,
-          }),
-        },
+        i18next.t("abilityTriggers:postTurnHeal", {
+          pokemonNameWithAffix: getPokemonNameWithAffix(pokemon),
+          abilityName,
+        }),
+        true,
       );
     }
   }
@@ -4473,7 +4446,7 @@ export class FetchBallAbAttr extends PostTurnAbAttr {
 
 // TODO: Remove this and just replace it with applying `PostSummonChangeTerrainAbAttr` again
 export class PostBiomeChangeAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
 }
 
 export class PostBiomeChangeWeatherChangeAbAttr extends PostBiomeChangeAbAttr {
@@ -4518,88 +4491,80 @@ export class PostBiomeChangeTerrainChangeAbAttr extends PostBiomeChangeAbAttr {
   }
 }
 
-// TODO: Rework into taking a partial and/or readonly copy of the current move in flight
 export interface PostMoveUsedAbAttrParams extends AbAttrBaseParams {
-  /** The move that was used. */
-  readonly move: Move;
-  /** The Pokemon that initially used the move. */
-  readonly source: Pokemon;
-  /** The inital targets of the move */
-  readonly targets: readonly BattlerIndex[];
-  /** The hit check results for each target */
-  readonly hitChecks: readonly HitCheckEntry[];
+  /** The move that was used */
+  move: PokemonMove;
+  /** The source of the move */
+  source: Pokemon;
+  /** The targets of the move */
+  targets: BattlerIndex[];
 }
 
-/**
- * Attribute to trigger effects after a move is used by a different Pokémon on the field.
- * @remarks
- * This will only trigger on successful, non-Dancer induced and non-reflected move uses, the checks for which are
- * performed inside the {@linkcode MoveEffectPhase}.
- */
-abstract class PostMoveUsedAbAttr extends AbAttr {
-  // biome-ignore lint/correctness/noUnusedFunctionParameters: psuedo-abstract method
-  public override canApply(params: Closed<PostMoveUsedAbAttrParams>): boolean {
+/** Triggers just after a move is used either by the opponent or the player */
+export class PostMoveUsedAbAttr extends AbAttr {
+  canApply(_params: Closed<PostMoveUsedAbAttrParams>): boolean {
     return true;
   }
 
-  public abstract override apply(params: Closed<PostMoveUsedAbAttrParams>): void;
+  apply(_params: Closed<PostMoveUsedAbAttrParams>): void {}
 }
 
-/**
- * Ability attribute to implement the effect of {@link https://bulbapedia.bulbagarden.net/wiki/Dancer_(Ability) | Dancer}. \
- * Dancer triggers whenever another Pokemon uses a dance move, copying it against either the original user or the move's original target as applicable.
- */
+/** Triggers after a dance move is used either by the opponent or the player */
 export class PostDancingMoveAbAttr extends PostMoveUsedAbAttr {
-  public override canApply({ pokemon, move }: PostMoveUsedAbAttrParams): boolean {
-    return move.hasFlag(MoveFlags.DANCE_MOVE) && !pokemon.getTag(SemiInvulnerableTag);
-  }
-  public override apply(params: PostMoveUsedAbAttrParams): void {
-    const { pokemon, move } = params;
-    globalScene.phaseManager.unshiftNew(
-      "MovePhase",
-      pokemon,
-      this.getMoveTargets(params),
-      new PokemonMove(move.id),
-      MoveUseMode.INDIRECT,
-      MovePhaseTimingModifier.FIRST,
+  override canApply({ source, pokemon }: PostMoveUsedAbAttrParams): boolean {
+    /** Tags that prevent Dancer from replicating the move */
+    const forbiddenTags = [
+      BattlerTagType.FLYING,
+      BattlerTagType.UNDERWATER,
+      BattlerTagType.UNDERGROUND,
+      BattlerTagType.HIDDEN,
+    ];
+    // The move to replicate cannot come from the Dancer
+    return (
+      source.getBattlerIndex() !== pokemon.getBattlerIndex()
+      && !pokemon.summonData.tags.some(tag => forbiddenTags.includes(tag.tagType))
     );
   }
 
+  override apply({ source, pokemon, move, targets, simulated }: PostMoveUsedAbAttrParams): void {
+    if (!simulated) {
+      // If the move is an AttackMove or a StatusMove the Dancer must replicate the move on the source of the Dance
+      if (move.getMove().is("AttackMove") || move.getMove().is("StatusMove")) {
+        const target = this.getTarget(pokemon, source, targets);
+        globalScene.phaseManager.unshiftNew(
+          "MovePhase",
+          pokemon,
+          target,
+          move,
+          MoveUseMode.INDIRECT,
+          MovePhaseTimingModifier.FIRST,
+        );
+      } else if (move.getMove().is("SelfStatusMove")) {
+        // If the move is a SelfStatusMove (ie. Swords Dance) the Dancer should replicate it on itself
+        globalScene.phaseManager.unshiftNew(
+          "MovePhase",
+          pokemon,
+          [pokemon.getBattlerIndex()],
+          move,
+          MoveUseMode.INDIRECT,
+          MovePhaseTimingModifier.FIRST,
+        );
+      }
+    }
+  }
+
   /**
-   * Helper function to compute the correct targets of Dancer's copied move use.
-   * @param params - The parameters passed to the ability attribute
-   * @returns The modified set of targets to use
+   * Get the correct targets of Dancer ability
+   *
+   * @param dancer - Pokémon with Dancer ability
+   * @param source - The user of the dancing move
+   * @param targets - Targets of the dancing move
    */
-  private getMoveTargets({ pokemon, source, move, targets }: PostMoveUsedAbAttrParams): BattlerIndex[] {
-    if (move.isMultiTarget()) {
-      return getMoveTargets(pokemon, move.id).targets;
+  private getTarget(dancer: Pokemon, source: Pokemon, targets: BattlerIndex[]): BattlerIndex[] {
+    if (dancer.isPlayer()) {
+      return source.isPlayer() ? targets : [source.getBattlerIndex()];
     }
-
-    // Self-targeted status moves (Swords Dance & co.) are always replicated on the user.
-    if (move.is("SelfStatusMove")) {
-      return [pokemon.getBattlerIndex()];
-    }
-
-    // Attack moves are unleashed on the source of the dance UNLESS they are an ally attacking an enemy
-    // (in which case we retain the prior move's targeting)
-    if (!(pokemon.isAlly(source) && !targets.includes(pokemon.getBattlerIndex()))) {
-      targets = [source.getBattlerIndex()];
-    }
-
-    // Attempt to redirect to the prior target's partner if fainted and not our own ally.
-    // TODO: There should _really_ be a helper for this...
-    const firstTarget = globalScene.getField()[targets[0]];
-    const ally = firstTarget.getAlly();
-    if (
-      globalScene.currentBattle.double
-      && firstTarget.isFainted()
-      && firstTarget.isOpponent(pokemon)
-      && ally?.isActive()
-    ) {
-      return [ally.getBattlerIndex()];
-    }
-
-    return targets.slice();
+    return source.isPlayer() ? [source.getBattlerIndex()] : targets;
   }
 }
 
@@ -4667,7 +4632,7 @@ export class StatStageChangeCopyAbAttr extends AbAttr {
 }
 
 export class BypassBurnDamageReductionAbAttr extends CancelInteractionAbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
   constructor() {
     super(false);
   }
@@ -4739,12 +4704,11 @@ export class HealFromBerryUseAbAttr extends AbAttr {
       "PokemonHealPhase",
       pokemon.getBattlerIndex(),
       toDmgValue(pokemon.getMaxHp() * this.healPercent),
-      {
-        message: i18next.t("abilityTriggers:healFromBerryUse", {
-          pokemonNameWithAffix: getPokemonNameWithAffix(pokemon),
-          abilityName,
-        }),
-      },
+      i18next.t("abilityTriggers:healFromBerryUse", {
+        pokemonNameWithAffix: getPokemonNameWithAffix(pokemon),
+        abilityName,
+      }),
+      true,
     );
   }
 }
@@ -4838,7 +4802,7 @@ export interface PostBattleAbAttrParams extends AbAttrBaseParams {
 }
 
 export abstract class PostBattleAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
   constructor(showAbility = true) {
     super(showAbility);
   }
@@ -5071,7 +5035,7 @@ export class RedirectTypeMoveAbAttr extends RedirectMoveAbAttr {
 }
 
 export class BlockRedirectAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
 }
 
 export interface ReduceStatusEffectDurationAbAttrParams extends AbAttrBaseParams {
@@ -5260,7 +5224,7 @@ export class MoveAbilityBypassAbAttr extends AbAttr {
 
 /** Attribute for abilities that allow moves that make contact to ignore protection (i.e. Unseen Fist) */
 export class IgnoreProtectOnContactAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
 }
 
 export interface InfiltratorAbAttrParams extends AbAttrBaseParams {
@@ -5274,7 +5238,7 @@ export interface InfiltratorAbAttrParams extends AbAttrBaseParams {
  * @sealed
  */
 export class InfiltratorAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
   constructor() {
     super(false);
   }
@@ -5318,7 +5282,7 @@ export class ReflectStatusMoveAbAttr extends PreDefendAbAttr {
 // TODO: Make these ability attributes be flags instead of dummy attributes
 /** @sealed */
 export class NoTransformAbilityAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
   constructor() {
     super(false);
   }
@@ -5326,7 +5290,7 @@ export class NoTransformAbilityAbAttr extends AbAttr {
 
 /** @sealed */
 export class NoFusionAbilityAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
   constructor() {
     super(false);
   }
@@ -5506,7 +5470,7 @@ export class FormBlockDamageAbAttr extends ReceivedMoveDamageMultiplierAbAttr {
  */
 
 export class PreSummonAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
   apply(_params: Closed<AbAttrBaseParams>): void {}
 
   canApply(_params: Closed<AbAttrBaseParams>): boolean {
@@ -5559,7 +5523,7 @@ export class IllusionPreSummonAbAttr extends PreSummonAbAttr {
 
 /** @sealed */
 export class IllusionBreakAbAttr extends AbAttr {
-  declare private readonly _: never;
+  private declare readonly _: never;
   // TODO: Consider adding a `canApply` method that checks if the pokemon has an active illusion
   override apply({ pokemon }: AbAttrBaseParams): void {
     pokemon.breakIllusion();
@@ -6136,6 +6100,7 @@ export const AbilityAttrs = Object.freeze({
   AllyStatMultiplierAbAttr,
   AlwaysHitAbAttr,
   ArenaTrapAbAttr,
+  AttackTypeImmunityAbAttr,
   BattlerTagImmunityAbAttr,
   BlockCritAbAttr,
   BlockItemTheftAbAttr,
@@ -6198,7 +6163,6 @@ export const AbilityAttrs = Object.freeze({
   MoveAbilityBypassAbAttr,
   MoveDamageBoostAbAttr,
   MoveEffectChanceMultiplierAbAttr,
-  MoveHealBoostAbAttr,
   MoveImmunityAbAttr,
   MoveImmunityStatStageChangeAbAttr,
   MovePowerBoostAbAttr,
@@ -6345,7 +6309,6 @@ export const AbilityAttrs = Object.freeze({
   VariableMovePowerAbAttr,
   VariableMovePowerBoostAbAttr,
   WeightMultiplierAbAttr,
-  UngroundedAbAttr,
   WonderSkinAbAttr,
   AiMovegenMoveStatsAbAttr,
   SummonTerrainAiMovegenMoveStatsAbAttr,

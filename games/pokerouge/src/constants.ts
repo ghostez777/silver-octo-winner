@@ -1,5 +1,4 @@
 import { SpeciesId } from "#enums/species-id";
-import type { StarterSpeciesId } from "#types/starter-species-id";
 
 /** The maximum size of the player's party */
 export const PLAYER_PARTY_MAX_SIZE: number = 6;
@@ -24,7 +23,7 @@ export const TYPE_BOOST_ITEM_BOOST_PERCENT = 20;
 /**
  * The default species that a new player can choose from
  */
-export const defaultStarterSpecies: readonly StarterSpeciesId[] = [
+export const defaultStarterSpecies: readonly SpeciesId[] = [
   SpeciesId.BULBASAUR,
   SpeciesId.CHARMANDER,
   SpeciesId.SQUIRTLE,
@@ -108,11 +107,6 @@ export const FAKE_TITLE_LOGO_CHANCE = 10000;
  * Using rare candies will never increase friendship beyond this value.
  */
 export const RARE_CANDY_FRIENDSHIP_CAP = 200;
-
-/**
- * The maximum number of cost reduction upgrades that can be bought with candy.
- */
-export const VALUE_REDUCTION_MAX = 2;
 
 /**
  * The maximum number of times a player can Terastallize in a single arena run

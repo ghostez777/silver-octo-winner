@@ -33,8 +33,6 @@ export class AttemptRunPhase extends FieldPhase {
       audioManager.playSound("se/flee");
       globalScene.phaseManager.queueMessage(i18next.t("battle:runAwaySuccess"), null, true, 500);
 
-      globalScene.currentBattle.successfulRun = true;
-
       globalScene.tweens.add({
         targets: [globalScene.arenaEnemy, enemyField].flat(),
         alpha: 0,

@@ -100,9 +100,7 @@ export class QuietFormChangePhase extends BattlePhase {
 
     applyOnLoseAbAttrs({ pokemon });
     await pokemon.changeForm(formChange);
-    if (pokemon.isActive(true)) {
-      applyPostFormChangeAbAttrs({ pokemon });
-    }
+    applyPostFormChangeAbAttrs({ pokemon });
   }
 
   private async playFormChangeTween(): Promise<void> {
@@ -198,29 +196,31 @@ export class QuietFormChangePhase extends BattlePhase {
     return sprite;
   }
 
-  public override end(): void {
-    const { pokemon } = this;
-
+  end(): void {
     // Autotomize's weight reduction is reset when form changing
-    pokemon.removeTag(BattlerTagType.AUTOTOMIZED);
+    this.pokemon.removeTag(BattlerTagType.AUTOTOMIZED);
 
-    // TODO: This eternatus boss fight code should almost certainly go in its own subclass phase
-    if (globalScene.currentBattle.isClassicFinalBoss && pokemon.isEnemy()) {
+    // TODO: This eternatus boss fight code should almost certainly go in its own superclass phase
+    if (globalScene.currentBattle.isClassicFinalBoss && this.pokemon.isEnemy()) {
       audioManager.playBgm();
       globalScene.phaseManager.unshiftNew(
-        "PokemonHealPhase", //
-        pokemon.getBattlerIndex(),
-        pokemon.getMaxHp(),
-        { showFullHpMessage: false, healStatus: true, fullRestorePP: true },
+        "PokemonHealPhase",
+        this.pokemon.getBattlerIndex(),
+        this.pokemon.getMaxHp(),
+        null,
+        false,
+        false,
+        false,
+        true,
       );
       // TODO: Use or create a helper function to remove all tags on a Pokemon
-      pokemon.findAndRemoveTags(() => true);
-      pokemon.bossSegments = 5;
-      pokemon.bossSegmentIndex = 4;
-      pokemon.initBattleInfo();
-      pokemon.cry();
+      this.pokemon.findAndRemoveTags(() => true);
+      this.pokemon.bossSegments = 5;
+      this.pokemon.bossSegmentIndex = 4;
+      this.pokemon.initBattleInfo();
+      this.pokemon.cry();
 
-      globalScene.phaseManager.cancelMove(p => p.pokemon === pokemon);
+      globalScene.phaseManager.cancelMove(p => p.pokemon === this.pokemon);
     }
 
     super.end();

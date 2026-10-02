@@ -23,6 +23,10 @@ export class CommandUiHandler extends UiHandler {
   protected fieldIndex = 0;
   protected cursor2 = 0;
 
+  constructor() {
+    super(UiMode.COMMAND);
+  }
+
   setup() {
     const ui = this.getUi();
     const commands = [

@@ -1,6 +1,5 @@
 import { audioManager } from "#app/global-audio-manager";
 import { globalScene } from "#app/global-scene";
-import { settings } from "#app/global-settings-manager";
 import { getPokemonNameWithAffix } from "#app/messages";
 import { allMoves } from "#data/data-lists";
 import { ExpNotification } from "#enums/exp-notification";
@@ -39,7 +38,7 @@ export class LevelUpPhase extends PlayerPartyMemberPokemonPhase {
     this.pokemon.calculateStats();
     this.pokemon.updateInfo();
 
-    switch (settings.general.partyExpNotificationMode) {
+    switch (globalScene.expParty) {
       case ExpNotification.DEFAULT:
         this.showLevelUpMessages(prevStats).then(() => this.end());
         return;
@@ -82,10 +81,7 @@ export class LevelUpPhase extends PlayerPartyMemberPokemonPhase {
   public override end(): void {
     // this if check feels like an unnecessary optimization
     if (this.lastLevel < 100) {
-      const levelMoves = this.getPokemon().getLevelMoves({
-        startingLevel: this.lastLevel + 1,
-        includePrevolutionMoves: true,
-      });
+      const levelMoves = this.getPokemon().getLevelMoves(this.lastLevel + 1, false, true);
       const prevoMoves = levelMoves.filter(
         ([, , source]) => getBaseLearnableMoveSource(source) === LearnableMoveSource.PREVO,
       );

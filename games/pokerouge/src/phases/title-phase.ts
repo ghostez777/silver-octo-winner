@@ -8,7 +8,7 @@ import { speciesDataRegistry } from "#app/global-species-data-registry";
 import { activeOverrides } from "#app/overrides";
 import { Phase } from "#app/phase";
 import { bypassLogin } from "#constants/app-constants";
-import { getDailyRunStarters, startDailyEventChallenges } from "#data/daily-run";
+import { getDailyRunStarters, startDailyEventChallenges } from "#data/daily-seed/daily-run";
 import { modifierTypes } from "#data/data-lists";
 import { Gender } from "#data/gender";
 import { BattleType } from "#enums/battle-type";
@@ -20,7 +20,7 @@ import { getBiomeKey } from "#field/arena";
 import type { Modifier } from "#modifiers/modifier";
 import { getDailyRunStarterModifiers, regenerateModifierPoolThresholds } from "#modifiers/modifier-type";
 import { vouchers } from "#system/voucher";
-import type { OptionSelectItem, OptionSelectModeConfig } from "#types/ui-types";
+import type { OptionSelectConfig, OptionSelectItem } from "#types/ui-types";
 import { SaveSlotUiMode } from "#ui/save-slot-select-ui-handler";
 import { isLocalServerConnected } from "#utils/common";
 import i18next from "i18next";
@@ -80,7 +80,6 @@ export class TitlePhase extends Phase {
   }
 
   private async showOptions(lastSessionSlot: number): Promise<void> {
-    const { gameData, ui } = globalScene;
     const options: OptionSelectItem[] = [];
     // Add a "continue" menu if the session slot ID is >-1
     if (lastSessionSlot > NO_SAVE_SLOT) {
@@ -98,19 +97,20 @@ export class TitlePhase extends Phase {
         handler: () => {
           const setModeAndEnd = (gameMode: GameModes) => {
             this.gameMode = gameMode;
-            ui.setMode(UiMode.MESSAGE);
-            ui.clearText();
+            globalScene.ui.setMode(UiMode.MESSAGE);
+            globalScene.ui.clearText();
             this.end();
           };
-          const newGameOptions: OptionSelectItem[] = [];
-          newGameOptions.push({
+          const { gameData } = globalScene;
+          const options: OptionSelectItem[] = [];
+          options.push({
             label: GameMode.getModeName(GameModes.CLASSIC),
             handler: () => {
               setModeAndEnd(GameModes.CLASSIC);
               return true;
             },
           });
-          newGameOptions.push({
+          options.push({
             label: i18next.t("menu:dailyRun"),
             handler: () => {
               this.initDailyRun();
@@ -118,14 +118,14 @@ export class TitlePhase extends Phase {
             },
           });
           if (gameData.isUnlocked(Unlockables.ENDLESS_MODE)) {
-            newGameOptions.push({
+            options.push({
               label: GameMode.getModeName(GameModes.CHALLENGE),
               handler: () => {
                 setModeAndEnd(GameModes.CHALLENGE);
                 return true;
               },
             });
-            newGameOptions.push({
+            options.push({
               label: GameMode.getModeName(GameModes.ENDLESS),
               handler: () => {
                 setModeAndEnd(GameModes.ENDLESS);
@@ -133,7 +133,7 @@ export class TitlePhase extends Phase {
               },
             });
             if (gameData.isUnlocked(Unlockables.SPLICED_ENDLESS_MODE)) {
-              newGameOptions.push({
+              options.push({
                 label: GameMode.getModeName(GameModes.SPLICED_ENDLESS),
                 handler: () => {
                   setModeAndEnd(GameModes.SPLICED_ENDLESS);
@@ -143,7 +143,7 @@ export class TitlePhase extends Phase {
             }
           }
           // Cancel button = back to title
-          newGameOptions.push({
+          options.push({
             label: i18next.t("menu:cancel"),
             handler: () => {
               globalScene.phaseManager.toTitleScreen();
@@ -151,17 +151,18 @@ export class TitlePhase extends Phase {
               return true;
             },
           });
-          ui.showText(i18next.t("menu:selectGameMode"), null, () => {
-            const config: OptionSelectModeConfig = { options: newGameOptions, yOffset: 48 };
-            ui.setOverlayMode(UiMode.OPTION_SELECT, config);
-          });
+          globalScene.ui.showText(i18next.t("menu:selectGameMode"), null, () =>
+            globalScene.ui.setOverlayMode(UiMode.OPTION_SELECT, {
+              options,
+            }),
+          );
           return true;
         },
       },
       {
         label: i18next.t("menu:loadGame"),
         handler: () => {
-          ui.setOverlayMode(UiMode.SAVE_SLOT, SaveSlotUiMode.LOAD, (slotId: number) => {
+          globalScene.ui.setOverlayMode(UiMode.SAVE_SLOT, SaveSlotUiMode.LOAD, (slotId: number) => {
             if (slotId === NO_SAVE_SLOT) {
               console.warn("Attempted to load save slot of -1 through load game menu!");
               return this.showOptions(slotId);
@@ -174,7 +175,7 @@ export class TitlePhase extends Phase {
       {
         label: i18next.t("menu:runHistory"),
         handler: () => {
-          ui.setOverlayMode(UiMode.RUN_HISTORY);
+          globalScene.ui.setOverlayMode(UiMode.RUN_HISTORY);
           return true;
         },
         keepOpen: true,
@@ -182,14 +183,18 @@ export class TitlePhase extends Phase {
       {
         label: i18next.t("menu:settings"),
         handler: () => {
-          ui.setOverlayMode(UiMode.SETTINGS_GENERAL);
+          globalScene.ui.setOverlayMode(UiMode.SETTINGS);
           return true;
         },
         keepOpen: true,
       },
     );
-    const config: OptionSelectModeConfig = { options, blockCancelButton: true };
-    await ui.setMode(UiMode.TITLE, config);
+    const config: OptionSelectConfig = {
+      options,
+      noCancel: true,
+      yOffset: 47,
+    };
+    await globalScene.ui.setMode(UiMode.TITLE, config);
   }
 
   // TODO: Make callers actually wait for the save slot to load

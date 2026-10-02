@@ -1,4 +1,4 @@
-import { settings } from "#app/global-settings-manager";
+import { globalScene } from "#app/global-scene";
 import { VariantTier } from "#enums/variant-tier";
 import type { Pokemon } from "#field/pokemon";
 import { hasExpSprite } from "#sprites/sprite-utils";
@@ -77,7 +77,7 @@ export async function populateVariantColors(
     .replace(/_[1-3]$/, "");
   let config = variantData;
   const useExpSprite =
-    settings.expSpritesEnabled && hasExpSprite(pokemon.getBattleSpriteKey(isBackSprite, ignoreOverride));
+    globalScene.experimentalSprites && hasExpSprite(pokemon.getBattleSpriteKey(isBackSprite, ignoreOverride));
   battleSpritePath.split("/").map(p => (config ? (config = config[p]) : null));
   const variantSet: VariantSet = config as VariantSet;
   if (!variantSet || variantSet[pokemon.variant] !== 1) {

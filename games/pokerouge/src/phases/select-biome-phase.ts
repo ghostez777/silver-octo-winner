@@ -5,7 +5,7 @@ import { ChallengeType } from "#enums/challenge-type";
 import { UiMode } from "#enums/ui-mode";
 import { MapModifier, MoneyInterestModifier } from "#modifiers/modifier";
 import { BattlePhase } from "#phases/battle-phase";
-import type { OptionSelectItem, OptionSelectModeConfig } from "#types/ui-types";
+import type { OptionSelectItem } from "#types/ui-types";
 import { applyChallenges } from "#utils/challenge-utils";
 import { BooleanHolder, getBiomeName, randSeedInt, randSeedItem } from "#utils/common";
 import { enumValueToKey } from "#utils/enums";
@@ -54,13 +54,10 @@ export class SelectBiomePhase extends BattlePhase {
             },
           } satisfies OptionSelectItem as OptionSelectItem;
         });
-        const optionSelectConfig: OptionSelectModeConfig = {
+        globalScene.ui.setMode(UiMode.OPTION_SELECT, {
           options: biomeSelectItems,
-          blockCancelButton: true,
-          inputDelay: 1000,
-          yOffset: 48,
-        };
-        globalScene.ui.setMode(UiMode.OPTION_SELECT, optionSelectConfig);
+          delay: 1000,
+        });
       } else {
         this.setNextBiomeAndEnd(randSeedItem(biomes));
       }

@@ -1,26 +1,33 @@
+import { globalScene } from "#app/global-scene";
+import { SettingKeys } from "#system/settings";
 import type { SettingsSaveMigrator } from "#types/save-migrators";
 
 /**
- * Migrate old values of the game speed setting to new values
+ * Migrate old values of {@linkcode SettingKeys.Game_Speed} property to reworked indexes
  * @param data - The `settings` object
  */
 const fixGameSpeed: SettingsSaveMigrator = {
   name: "fixGameSpeed",
   version: "1.11.19",
   migrate: (data: object): void => {
-    if (Object.hasOwn(data, "GAME_SPEED")) {
-      const savedValue = data["GAME_SPEED"];
-      let newValue = 3;
+    if (Object.hasOwn(data, SettingKeys.Game_Speed)) {
+      const savedValue = data[SettingKeys.Game_Speed];
+      let newValue = 1;
       if (savedValue <= 3) {
-        newValue = 2;
+        newValue = 0;
+        globalScene.gameSpeed = 2;
       } else if (savedValue <= 5) {
-        newValue = 3;
+        newValue = 1;
+        globalScene.gameSpeed = 3;
       } else if (savedValue <= 6) {
-        newValue = 4;
+        newValue = 2;
+        globalScene.gameSpeed = 4;
       } else if (savedValue <= 7) {
-        newValue = 5;
+        newValue = 3;
+        globalScene.gameSpeed = 5;
       }
-      data["GAME_SPEED"] = newValue;
+      data[SettingKeys.Game_Speed] = newValue;
+      localStorage.setItem("settings", JSON.stringify(data));
     }
   },
 };

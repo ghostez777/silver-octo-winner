@@ -2,7 +2,6 @@ import type { PreAttackWeatherOverrideAbAttr, SuppressWeatherEffectAbAttr } from
 import { applyAbAttrs } from "#abilities/apply-ab-attrs";
 import { globalScene } from "#app/global-scene";
 import { getPokemonNameWithAffix } from "#app/messages";
-import { CommonAnim } from "#enums/move-anims-common";
 import { PokemonType } from "#enums/pokemon-type";
 import { WeatherType } from "#enums/weather-type";
 import type { Pokemon } from "#field/pokemon";
@@ -17,9 +16,9 @@ export interface SerializedWeather {
 
 export class Weather {
   // TODO: Exclude `WeatherType.NONE` from this (which indicates a lack of weather)
-  public readonly weatherType: WeatherType;
+  public weatherType: WeatherType;
   public turnsLeft: number;
-  public readonly maxDuration: number;
+  public maxDuration: number;
 
   constructor(weatherType: WeatherType, turnsLeft = 0, maxDuration: number = turnsLeft) {
     this.weatherType = weatherType;
@@ -109,7 +108,9 @@ export class Weather {
   }
 }
 
-export function getWeatherStartMessage(weatherType: WeatherType): string {
+// TODO: These functions should not be able to accept `WeatherType.NONE`
+// and should have `null` removed from the signature
+export function getWeatherStartMessage(weatherType: WeatherType): string | null {
   switch (weatherType) {
     case WeatherType.SUNNY:
       return i18next.t("weather:sunnyStartMessage");
@@ -129,12 +130,12 @@ export function getWeatherStartMessage(weatherType: WeatherType): string {
       return i18next.t("weather:harshSunStartMessage");
     case WeatherType.STRONG_WINDS:
       return i18next.t("weather:strongWindsStartMessage");
-    case WeatherType.NONE:
-      return "";
   }
+
+  return null;
 }
 
-export function getWeatherLapseMessage(weatherType: WeatherType): string {
+export function getWeatherLapseMessage(weatherType: WeatherType): string | null {
   switch (weatherType) {
     case WeatherType.SUNNY:
       return i18next.t("weather:sunnyLapseMessage");
@@ -154,12 +155,12 @@ export function getWeatherLapseMessage(weatherType: WeatherType): string {
       return i18next.t("weather:harshSunLapseMessage");
     case WeatherType.STRONG_WINDS:
       return i18next.t("weather:strongWindsLapseMessage");
-    case WeatherType.NONE:
-      return "";
   }
+
+  return null;
 }
 
-export function getWeatherDamageMessage(weatherType: WeatherType, pokemon: Pokemon): string {
+export function getWeatherDamageMessage(weatherType: WeatherType, pokemon: Pokemon): string | null {
   switch (weatherType) {
     case WeatherType.SANDSTORM:
       return i18next.t("weather:sandstormDamageMessage", {
@@ -171,10 +172,10 @@ export function getWeatherDamageMessage(weatherType: WeatherType, pokemon: Pokem
       });
   }
 
-  return "";
+  return null;
 }
 
-export function getWeatherClearMessage(weatherType: WeatherType): string {
+export function getWeatherClearMessage(weatherType: WeatherType): string | null {
   switch (weatherType) {
     case WeatherType.SUNNY:
       return i18next.t("weather:sunnyClearMessage");
@@ -194,12 +195,12 @@ export function getWeatherClearMessage(weatherType: WeatherType): string {
       return i18next.t("weather:harshSunClearMessage");
     case WeatherType.STRONG_WINDS:
       return i18next.t("weather:strongWindsClearMessage");
-    case WeatherType.NONE:
-      return "";
   }
+
+  return null;
 }
 
-export function getLegendaryWeatherContinuesMessage(weatherType: WeatherType): string {
+export function getLegendaryWeatherContinuesMessage(weatherType: WeatherType): string | null {
   switch (weatherType) {
     case WeatherType.HARSH_SUN:
       return i18next.t("weather:harshSunContinueMessage");
@@ -208,8 +209,7 @@ export function getLegendaryWeatherContinuesMessage(weatherType: WeatherType): s
     case WeatherType.STRONG_WINDS:
       return i18next.t("weather:strongWindsContinueMessage");
   }
-
-  return "";
+  return null;
 }
 
 export function getWeatherBlockMessage(weatherType: WeatherType): string {
@@ -219,7 +219,6 @@ export function getWeatherBlockMessage(weatherType: WeatherType): string {
     case WeatherType.HEAVY_RAIN:
       return i18next.t("weather:heavyRainEffectMessage");
   }
-
   return i18next.t("weather:defaultEffectMessage");
 }
 
@@ -247,7 +246,6 @@ export function getEffectiveWeatherForMove(user: Pokemon): WeatherType {
   if (!weather || weather.isEffectSuppressed()) {
     return WeatherType.NONE;
   }
-
   return weather.weatherType;
 }
 
@@ -290,13 +288,4 @@ export function getWeatherMultiplierForMove(user: Pokemon, move: Move): number {
   }
 
   return 1;
-}
-
-/**
- * Gets the animation associated with the given weather type
- * @param weatherType - The {@linkcode WeatherType} to get the animiation for
- * @returns The {@linkcode CommonAnim} for the given weather
- */
-export function getWeatherAnim(weatherType: WeatherType): CommonAnim {
-  return (CommonAnim.SUNNY + (weatherType - 1)) as CommonAnim;
 }

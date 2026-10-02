@@ -1,4 +1,4 @@
-import { getRandomRivalPartyMemberFunc } from "#ai/rival-team-gen";
+import { getRandomRivalPartyMemberFunc } from "#app/ai/rival-team-gen";
 import { timedEventManager } from "#app/global-event-manager";
 import { globalScene } from "#app/global-scene";
 import { speciesDataRegistry } from "#app/global-species-data-registry";
@@ -8,7 +8,6 @@ import { doubleBattleDialogue } from "#data/double-battle-dialogue";
 import { Gender } from "#data/gender";
 import type { PokemonSpecies, PokemonSpeciesFilter } from "#data/pokemon-species";
 import { AbilityId } from "#enums/ability-id";
-import type { EvoLevelThresholdKind } from "#enums/evo-level-threshold-kind";
 import { ClassicFixedBossWaves } from "#enums/fixed-boss-waves";
 import { MoveId } from "#enums/move-id";
 import { PartyMemberStrength } from "#enums/party-member-strength";
@@ -51,11 +50,11 @@ import type {
   TrainerConfigs,
   TrainerTierPools,
 } from "#types/trainer-funcs";
+import type { Mutable } from "#types/type-helpers";
 import { coerceArray } from "#utils/array";
 import { randSeedInt, randSeedIntRange, randSeedItem } from "#utils/common";
 import { toCamelCase, toTitleCase } from "#utils/strings";
 import i18next from "i18next";
-import type { Writable } from "type-fest";
 
 /** Minimum BST for Pokemon generated onto the Elite Four's teams */
 const ELITE_FOUR_MINIMUM_BST = 460;
@@ -256,56 +255,76 @@ export class TrainerConfig {
 
   /**
    * Returns the derived trainer type for a given trainer type.
-   * @param trainerType - (Default `this.trainerType`) The trainer type to derive from.
+   * @param trainerTypeToDeriveFrom - The trainer type to derive from. (If null, the this.trainerType property will be used.)
    * @returns - The derived trainer type.
    */
-  getDerivedType(trainerType: Exclude<TrainerType, TrainerType.UNKNOWN> = this.trainerType as any): TrainerType {
+  getDerivedType(trainerTypeToDeriveFrom: TrainerType | null = null): TrainerType {
+    let trainerType = trainerTypeToDeriveFrom ? trainerTypeToDeriveFrom : this.trainerType;
     switch (trainerType) {
       case TrainerType.RIVAL_2:
       case TrainerType.RIVAL_3:
       case TrainerType.RIVAL_4:
       case TrainerType.RIVAL_5:
       case TrainerType.RIVAL_6:
-        return TrainerType.RIVAL;
+        trainerType = TrainerType.RIVAL;
+        break;
       case TrainerType.LANCE_CHAMPION:
-        return TrainerType.LANCE;
+        trainerType = TrainerType.LANCE;
+        break;
       case TrainerType.LARRY_ELITE:
-        return TrainerType.LARRY;
+        trainerType = TrainerType.LARRY;
+        break;
       case TrainerType.ROCKET_BOSS_GIOVANNI_2:
-        return TrainerType.ROCKET_BOSS_GIOVANNI_1;
+        trainerType = TrainerType.ROCKET_BOSS_GIOVANNI_1;
+        break;
       case TrainerType.MAXIE_2:
-        return TrainerType.MAXIE;
+        trainerType = TrainerType.MAXIE;
+        break;
       case TrainerType.ARCHIE_2:
-        return TrainerType.ARCHIE;
+        trainerType = TrainerType.ARCHIE;
+        break;
       case TrainerType.CYRUS_2:
-        return TrainerType.CYRUS;
+        trainerType = TrainerType.CYRUS;
+        break;
       case TrainerType.GHETSIS_2:
-        return TrainerType.GHETSIS;
+        trainerType = TrainerType.GHETSIS;
+        break;
       case TrainerType.LYSANDRE_2:
-        return TrainerType.LYSANDRE;
+        trainerType = TrainerType.LYSANDRE;
+        break;
       case TrainerType.LUSAMINE_2:
-        return TrainerType.LUSAMINE;
+        trainerType = TrainerType.LUSAMINE;
+        break;
       case TrainerType.GUZMA_2:
-        return TrainerType.GUZMA;
+        trainerType = TrainerType.GUZMA;
+        break;
       case TrainerType.ROSE_2:
-        return TrainerType.ROSE;
+        trainerType = TrainerType.ROSE;
+        break;
       case TrainerType.PENNY_2:
-        return TrainerType.PENNY;
+        trainerType = TrainerType.PENNY;
+        break;
       case TrainerType.MARNIE_ELITE:
-        return TrainerType.MARNIE;
+        trainerType = TrainerType.MARNIE;
+        break;
       case TrainerType.BEDE_ELITE:
-        return TrainerType.BEDE;
+        trainerType = TrainerType.BEDE;
+        break;
       case TrainerType.NESSA_ELITE:
-        return TrainerType.NESSA;
+        trainerType = TrainerType.NESSA;
+        break;
       case TrainerType.BEA_ELITE:
-        return TrainerType.BEA;
+        trainerType = TrainerType.BEA;
+        break;
       case TrainerType.ALLISTER_ELITE:
-        return TrainerType.ALLISTER;
+        trainerType = TrainerType.ALLISTER;
+        break;
       case TrainerType.RAIHAN_ELITE:
-        return TrainerType.RAIHAN;
-      default:
-        return trainerType;
+        trainerType = TrainerType.RAIHAN;
+        break;
     }
+
+    return trainerType;
   }
 
   /**
@@ -422,7 +441,7 @@ export class TrainerConfig {
    * @see {@linkcode allowEggMoves}
    */
   public setEggMovesAllowed(): this {
-    (this as Writable<TrainerConfig>).allowEggMoves = true;
+    (this as Mutable<this>).allowEggMoves = true;
     return this;
   }
 
@@ -433,7 +452,7 @@ export class TrainerConfig {
    */
   public setBoss(): TrainerConfig {
     this.isBoss = true;
-    (this as Writable<TrainerConfig>).allowEggMoves = true;
+    (this as Mutable<this>).allowEggMoves = true;
     return this;
   }
 
@@ -972,17 +991,15 @@ export function getRandomPartyMemberFunc(
   trainerSlot: TrainerSlot = TrainerSlot.TRAINER,
   ignoreEvolution = false,
   postProcess?: (enemyPokemon: EnemyPokemon) => void,
-): PartyMemberFunc {
-  return (level: number, strength: PartyMemberStrength, evoThresholdKind: EvoLevelThresholdKind) => {
+): (level: number, strength: PartyMemberStrength) => EnemyPokemon {
+  return (level: number, strength: PartyMemberStrength) => {
     let species: SpeciesId | readonly SpeciesId[] | typeof speciesPool = speciesPool;
     do {
       species = randSeedItem(species);
     } while (typeof species !== "number");
 
     if (!ignoreEvolution) {
-      species = speciesDataRegistry
-        .getSpecies(species)
-        .getTrainerSpeciesForLevel(level, true, strength, evoThresholdKind);
+      species = speciesDataRegistry.getSpecies(species).getTrainerSpeciesForLevel(level, true, strength);
     }
 
     return globalScene.addEnemyPokemon(
@@ -2081,7 +2098,6 @@ export const trainerConfigs: TrainerConfigs = {
         SpeciesId.DITTO,
         SpeciesId.PORYGON,
         SpeciesId.ELEKID,
-        SpeciesId.ROTOM,
         SpeciesId.SOLOSIS,
         SpeciesId.GALAR_WEEZING,
       ],
@@ -2095,14 +2111,12 @@ export const trainerConfigs: TrainerConfigs = {
         SpeciesId.SHIELDON,
         SpeciesId.TIRTOUGA,
         SpeciesId.ARCHEN,
-        SpeciesId.TYRUNT,
-        SpeciesId.AMAURA,
         SpeciesId.ARCTOVISH,
         SpeciesId.ARCTOZOLT,
         SpeciesId.DRACOVISH,
         SpeciesId.DRACOZOLT,
       ],
-      [TrainerPoolTier.ULTRA_RARE]: [SpeciesId.MELTAN],
+      [TrainerPoolTier.ULTRA_RARE]: [SpeciesId.ROTOM, SpeciesId.MELTAN],
     }),
   [TrainerType.SCUBA_DIVER]: new TrainerConfig(++t)
     .setHasGenders("Free Diver")

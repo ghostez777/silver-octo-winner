@@ -26,7 +26,6 @@ import {
   TmModifierType,
 } from "#modifiers/modifier-type";
 import { BattlePhase } from "#phases/battle-phase";
-import type { ConfirmModeConfig } from "#types/ui-types";
 import type { ModifierSelectUiHandler } from "#ui/modifier-select-ui-handler";
 import { SHOP_OPTIONS_ROW_LIMIT } from "#ui/modifier-select-ui-handler";
 import { PartyOption, PartyUiHandler } from "#ui/party-ui-handler";
@@ -37,10 +36,10 @@ export type ModifierSelectCallback = (rowCursor: number, cursor: number) => bool
 
 export class SelectModifierPhase extends BattlePhase {
   public readonly phaseName = "SelectModifierPhase";
-  private readonly rerollCount: number;
-  private readonly modifierTiers?: ModifierTier[] | undefined;
-  private readonly customModifierSettings?: CustomModifierSettings | undefined;
-  private readonly isCopy: boolean;
+  private rerollCount: number;
+  private modifierTiers?: ModifierTier[] | undefined;
+  private customModifierSettings?: CustomModifierSettings | undefined;
+  private isCopy: boolean;
 
   private typeOptions: ModifierTypeOption[];
 
@@ -82,15 +81,15 @@ export class SelectModifierPhase extends BattlePhase {
     const modifierSelectCallback = (rowCursor: number, cursor: number) => {
       if (rowCursor < 0 || cursor < 0) {
         globalScene.ui.showText(i18next.t("battle:skipItemQuestion"), null, () => {
-          const skipRewardConfirmOptions: ConfirmModeConfig = {
-            yesHandler: () => {
+          globalScene.ui.setOverlayMode(
+            UiMode.CONFIRM,
+            () => {
               globalScene.ui.revertMode();
               globalScene.ui.setMode(UiMode.MESSAGE);
               super.end();
             },
-            noHandler: () => this.resetModifierSelect(modifierSelectCallback),
-          };
-          globalScene.ui.setOverlayMode(UiMode.CONFIRM, skipRewardConfirmOptions);
+            () => this.resetModifierSelect(modifierSelectCallback),
+          );
         });
         return false;
       }

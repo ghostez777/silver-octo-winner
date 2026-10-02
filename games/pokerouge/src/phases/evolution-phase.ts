@@ -10,7 +10,6 @@ import { getTypeRgb } from "#data/type";
 import { LearnMoveSituation } from "#enums/learn-move-situation";
 import { UiMode } from "#enums/ui-mode";
 import type { PlayerPokemon, Pokemon } from "#field/pokemon";
-import type { ConfirmModeConfig } from "#types/ui-types";
 import type { EvolutionSceneUiHandler } from "#ui/evolution-scene-ui-handler";
 import { fixedInt } from "#utils/common";
 import i18next from "i18next";
@@ -19,7 +18,6 @@ export class EvolutionPhase extends Phase {
   // FormChangePhase inherits from this, but EvolutionPhase is not abstract.
   // We have to use the union here
   public readonly phaseName: "EvolutionPhase" | "FormChangePhase" = "EvolutionPhase";
-
   protected pokemon: PlayerPokemon;
   protected lastLevel: number;
 
@@ -27,8 +25,8 @@ export class EvolutionPhase extends Phase {
 
   private preEvolvedPokemonName: string;
 
-  private readonly evolution: SpeciesFormEvolution | null;
-  private readonly fusionSpeciesEvolved: boolean; // Whether the evolution is of the fused species
+  private evolution: SpeciesFormEvolution | null;
+  private fusionSpeciesEvolved: boolean; // Whether the evolution is of the fused species
   private evolutionBgm: BackgroundMusic | null;
   private evolutionHandler: EvolutionSceneUiHandler;
 
@@ -192,21 +190,11 @@ export class EvolutionPhase extends Phase {
     if (!this.validate()) {
       return this.end();
     }
-    this.onBeforeSpriteSetup();
     this.setupEvolutionAssets();
     this.setupPokemonSprites();
     this.preEvolvedPokemonName = getPokemonNameWithAffix(this.pokemon);
     this.doEvolution();
   }
-
-  /**
-   * Hook allowing subclasses to mutate the Pokemon before the scene's sprites are configured.
-   *
-   * @remarks
-   * Runs after the transition into the evolution scene, so any resulting change to the Pokemon's
-   * appearance is hidden from the player rather than popping in on the field.
-   */
-  protected onBeforeSpriteSetup(): void {}
 
   /**
    * Update the sprites depicting the evolved Pokemon
@@ -314,23 +302,25 @@ export class EvolutionPhase extends Phase {
    *  This should end the evolution phase
    */
   private showPauseEvolutionConfirmation(endCallback: () => void): void {
-    const options: ConfirmModeConfig = {
-      yesHandler: () => {
+    globalScene.ui.setOverlayMode(
+      UiMode.CONFIRM,
+      () => {
         globalScene.ui.revertMode();
         this.pokemon.pauseEvolutions = true;
         globalScene.ui.showText(
-          i18next.t("menu:evolutionsPaused", { pokemonName: this.preEvolvedPokemonName }),
+          i18next.t("menu:evolutionsPaused", {
+            pokemonName: this.preEvolvedPokemonName,
+          }),
           null,
           endCallback,
           3000,
         );
       },
-      noHandler: () => {
+      () => {
         globalScene.ui.revertMode();
         globalScene.time.delayedCall(3000, endCallback);
       },
-    };
-    globalScene.ui.setOverlayMode(UiMode.CONFIRM, options);
+    );
   }
 
   /**
@@ -413,7 +403,7 @@ export class EvolutionPhase extends Phase {
         ? LearnMoveSituation.EVOLUTION_FUSED_BASE
         : LearnMoveSituation.EVOLUTION;
     const levelMoves = this.pokemon
-      .getLevelMoves({ startingLevel: this.lastLevel + 1, includeEvolutionMoves: true, learnSituation })
+      .getLevelMoves(this.lastLevel + 1, true, false, false, learnSituation)
       .filter(lm => lm[0] === EVOLVE_MOVE);
     for (const lm of levelMoves) {
       globalScene.phaseManager.unshiftNew("LearnMovePhase", globalScene.getPlayerParty().indexOf(this.pokemon), lm[1]);

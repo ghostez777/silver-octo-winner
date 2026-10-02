@@ -3,31 +3,31 @@ import { speciesDataRegistry } from "#app/global-species-data-registry";
 import { LearnMoveSituation } from "#enums/learn-move-situation";
 import { LearnableMoveSource } from "#enums/learnable-move-source";
 import type { MoveId } from "#enums/move-id";
-import type { LevelMoveContext, LevelMovesWithSource } from "#types/level-moves";
+import type { Pokemon } from "#field/pokemon";
+import type { LevelMovesWithSource } from "#types/pokemon-species";
+import { getPokemonSpeciesForm } from "#utils/pokemon-utils";
 
 /**
  * Helper method for {@linkcode getLevelMoves}
  *
  * Get all level moves the species form can learn on its own.
- * @param context - Basic information about the Pokemon to get the level moves for
+ * @param pokemon - The Pokemon to get the moves for
  * @param includeEvolutionMoves - Whether to include evolution moves
  * @param includeRelearnerMoves - Whether to include moves that would require a relearner. Note the move relearner inherently allows evolution moves
  * @param fromFusion - (Default `false`) Whether to get the moves from the fusion species
  * @remarks
- * `fromFusion` should only be used if a fusion species is being provided.
+ * `fromFusion` should only be used if the pokemon is a fusion
  * @returns A list of moves and the levels they can be learned at, along with the source of the move.
  * Excludes moves from prevolutions, but includes evolution moves and relearner moves.
  */
 function getRegularLevelMoves(
-  context: LevelMoveContext,
+  pokemon: Pokemon,
   includeEvolutionMoves: boolean,
   includeRelearnerMoves: boolean,
   fromFusion = false,
 ): LevelMovesWithSource {
   const ret: LevelMovesWithSource = [];
-  const moves = fromFusion
-    ? context.fusionSpeciesForm!.getLevelMoves(context.fusionFormIndex!)
-    : context.pokemonSpeciesForm.getLevelMoves(context.pokemonFormIndex);
+  const moves = (fromFusion ? pokemon.getFusionSpeciesForm(true) : pokemon.getSpeciesForm(true)).getLevelMoves();
   for (const [level, move] of moves) {
     if (
       (includeEvolutionMoves && level === EVOLVE_MOVE)
@@ -56,22 +56,22 @@ function getRegularLevelMoves(
  * Helper method for {@linkcode getLevelMoves}
  *
  * Get all level moves the species form and its prevolutions can learn.
- * @param context - Basic information about the Pokemon to get the level moves for
+ * @param pokemon - The Pokemon to get the prevolution moves for
  * @param includeEvolutionMoves - Whether to include evolution moves
  * @param includeRelearnerMoves - Whether to include moves that would require a relearner. Note the move relearner inherently allows evolution moves
  * @param fromFusion - (Default `false`) Whether to get the prevolution moves from the fusion species
  * @remarks
- * `fromFusion` should only be used if a fusion species is being provided.
+ * `fromFusion` should only be used if the pokemon is a fusion
  * @returns A list of moves and the levels they can be learned at, along with the source of the move
  */
 function getPrevolutionMoves(
-  context: LevelMoveContext,
+  pokemon: Pokemon,
   includeEvolutionMoves: boolean,
   includeRelearnerMoves: boolean,
   fromFusion = false,
 ): LevelMovesWithSource {
   const ret: LevelMovesWithSource = [];
-  const speciesBase = fromFusion ? context.fusionSpeciesForm! : context.pokemonSpeciesForm;
+  const speciesBase = fromFusion ? pokemon.fusionSpecies! : pokemon.species;
 
   if (!speciesBase && fromFusion) {
     // TODO: Find a better way to handle `fromFusion=true` without being a fusion
@@ -82,9 +82,7 @@ function getPrevolutionMoves(
   const evolutionLine = [...speciesDataRegistry.getPrevolutionChain(speciesBase.speciesId), speciesBase.speciesId];
   for (let index = 0; index < evolutionLine.length; index++) {
     const isPrevo = index < evolutionLine.length - 1;
-    const speciesLevelMoves = speciesDataRegistry
-      .getPokemonSpeciesForm(evolutionLine[index], context.pokemonFormIndex)
-      .getLevelMoves();
+    const speciesLevelMoves = getPokemonSpeciesForm(evolutionLine[index], pokemon.formIndex).getLevelMoves();
 
     for (const [level, move] of speciesLevelMoves) {
       const includeLevelOne = !index || level > 1 || includeRelearnerMoves;
@@ -95,7 +93,7 @@ function getPrevolutionMoves(
       } else if (includeEvolutionMoves && level === EVOLVE_MOVE) {
         const source = isPrevo ? LearnableMoveSource.PREVO : LearnableMoveSource.EVOLUTION;
         ret.push([level, move, (source + +fromFusion) as LearnableMoveSource]);
-      } else if (includeLevelOne && (!isPrevo || level <= context.level)) {
+      } else if (includeLevelOne && (!isPrevo || level <= pokemon.level)) {
         const source = isPrevo ? LearnableMoveSource.PREVO : LearnableMoveSource.LEVEL;
         ret.push([level, move, (source + +fromFusion) as LearnableMoveSource]);
       }
@@ -146,8 +144,9 @@ export function getBaseLearnableMoveSource(source: LearnableMoveSource): Learnab
  * @returns A filtered and sorted list of level moves
  */
 function filterAndSortLevelMoves(
-  context: LevelMoveContext,
+  pokemon: Pokemon,
   levelMoves: LevelMovesWithSource,
+  startingLevel: number,
   includeEvolutionMoves = false,
   includeRelearnerMoves = false,
 ): LevelMovesWithSource {
@@ -163,7 +162,7 @@ function filterAndSortLevelMoves(
   // A set of moves the species gets by level, but are above the current level
   const levelMovesAboveCurrentLevel = new Set(
     levelMoves
-      .filter(lm => getBaseLearnableMoveSource(lm[2]) === LearnableMoveSource.LEVEL && lm[0] > context.level)
+      .filter(lm => getBaseLearnableMoveSource(lm[2]) === LearnableMoveSource.LEVEL && lm[0] > pokemon.level)
       .map(lm => lm[1]),
   );
 
@@ -172,7 +171,7 @@ function filterAndSortLevelMoves(
   // Used to prefer showing a move as level rather than showing as a prevo/evo move
   const ownMoves = new Set(
     levelMoves
-      .filter(lm => getBaseLearnableMoveSource(lm[2]) === LearnableMoveSource.LEVEL && lm[0] <= context.level)
+      .filter(lm => getBaseLearnableMoveSource(lm[2]) === LearnableMoveSource.LEVEL && lm[0] <= pokemon.level)
       .map(lm => lm[1]),
   );
 
@@ -183,7 +182,7 @@ function filterAndSortLevelMoves(
    */
   levelMoves = levelMoves.filter(lm => {
     const [level, move, source] = lm;
-    const isRelearner = level < context.startingLevel;
+    const isRelearner = level < startingLevel;
     const allowedEvolutionMove = level === 0 && includeEvolutionMoves;
     const isLevelMoveSource = getBaseLearnableMoveSource(source) === LearnableMoveSource.LEVEL;
     const isOwnMoveFromNonLevelSource = ownMoves.has(move) && !isLevelMoveSource;
@@ -192,7 +191,7 @@ function filterAndSortLevelMoves(
       && (source === LearnableMoveSource.PREVO || source === LearnableMoveSource.FUSION_PREVO);
 
     return (
-      !(level > context.level)
+      !(level > pokemon.level)
       && !isOwnMoveFromNonLevelSource
       && !isLockedPrevoMove
       && (includeRelearnerMoves || !isRelearner || allowedEvolutionMove)
@@ -211,42 +210,28 @@ function filterAndSortLevelMoves(
   return ret;
 }
 
-/**
- * Get all level moves the species form can learn
- * @param context - Basic information about the Pokemon to get the level moves for
- * @param includeEvolutionMoves - (Default: false) Whether to include evolution moves
- * @param includePrevolutionMoves - (Default: false) Whether to include moves from prevolutions
- * @param includeRelearnerMoves - (Default: false) Whether to include moves that would require a relearner. Note the move relearner inherently allows evolution moves
- * @param learnSituation - (Default: LearnMoveSituation.MISC) The situation in which the moves are being learned
- * @returns An array of level, moveid and source tuples, sorted by level and source.
- */
 export function getLevelMoves(
-  context: LevelMoveContext,
+  pokemon: Pokemon,
+  startingLevel = pokemon.level,
   includeEvolutionMoves = false,
   includePrevolutionMoves = false,
   includeRelearnerMoves = false,
   learnSituation: LearnMoveSituation = LearnMoveSituation.MISC,
 ): LevelMovesWithSource {
   const levelMoves: LevelMovesWithSource = [];
-  const isFusion = context.fusionSpeciesForm !== undefined;
-  if (includeRelearnerMoves) {
-    // Relearner moves inherently allow evolution moves
-    // Setting this to ture ensures the correct source is used
-    includeEvolutionMoves = true;
-  }
-  if (learnSituation === LearnMoveSituation.EVOLUTION_FUSED && isFusion) {
+  if (learnSituation === LearnMoveSituation.EVOLUTION_FUSED && pokemon.isFusion()) {
     // For fusion evolutions, get ONLY the moves of the component mon that evolved
-    levelMoves.push(...getRegularLevelMoves(context, includeEvolutionMoves, includeRelearnerMoves, true));
+    levelMoves.push(...getRegularLevelMoves(pokemon, includeEvolutionMoves, includeRelearnerMoves, true));
   } else if (includePrevolutionMoves) {
-    levelMoves.push(...getPrevolutionMoves(context, includeEvolutionMoves, includeRelearnerMoves));
+    levelMoves.push(...getPrevolutionMoves(pokemon, includeEvolutionMoves, includeRelearnerMoves));
   } else {
-    levelMoves.push(...getRegularLevelMoves(context, includeEvolutionMoves, includeRelearnerMoves));
+    levelMoves.push(...getRegularLevelMoves(pokemon, includeEvolutionMoves, includeRelearnerMoves));
   }
 
-  if (isFusion && learnSituation !== LearnMoveSituation.EVOLUTION_FUSED_BASE) {
+  if (pokemon.isFusion() && learnSituation !== LearnMoveSituation.EVOLUTION_FUSED_BASE) {
     const methodFunc = includePrevolutionMoves ? getPrevolutionMoves : getRegularLevelMoves;
-    levelMoves.push(...methodFunc(context, includeEvolutionMoves, includeRelearnerMoves, true));
+    levelMoves.push(...methodFunc(pokemon, includeEvolutionMoves, includeRelearnerMoves, true));
   }
 
-  return filterAndSortLevelMoves(context, levelMoves, includeEvolutionMoves, includeRelearnerMoves);
+  return filterAndSortLevelMoves(pokemon, levelMoves, startingLevel, includeEvolutionMoves, includeRelearnerMoves);
 }

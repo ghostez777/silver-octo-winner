@@ -6,16 +6,15 @@ import type { InputFieldConfig } from "#ui/form-modal-ui-handler";
 import { FormModalUiHandler } from "#ui/form-modal-ui-handler";
 import i18next from "i18next";
 
-// TODO: Consider replacing server error strings with numeric error codes for better maintainability
-// TODO: Centralize server error constants
-const ERR_INVALID_PASSWORD = "invalid password";
-const ERR_NO_ACCOUNT = "account doesn't exist";
-const ERR_PASSWORD_MISMATCH = "password doesn't match";
-const ERR_FAILED_TO_GENERATE_PASSWORD = "failed to generate salt";
-const ERR_REMOVE_SESSIONS = "failed to remove sessions";
-const ERR_ACCOUNT_UPDATE_FAILURE = "failed to add account record";
-
 export class ChangePasswordFormUiHandler extends FormModalUiHandler {
+  private readonly ERR_PASSWORD: string = "invalid password";
+  private readonly ERR_ACCOUNT_EXIST: string = "account doesn't exist";
+  private readonly ERR_PASSWORD_MISMATCH: string = "password doesn't match";
+
+  constructor(mode: UiMode | null = null) {
+    super(mode);
+  }
+
   setup(): void {
     super.setup();
   }
@@ -42,18 +41,12 @@ export class ChangePasswordFormUiHandler extends FormModalUiHandler {
       error = error.slice(0, colonIndex);
     }
     switch (error) {
-      case ERR_INVALID_PASSWORD:
+      case this.ERR_PASSWORD:
         return i18next.t("menu:invalidRegisterPassword");
-      case ERR_NO_ACCOUNT:
+      case this.ERR_ACCOUNT_EXIST:
         return i18next.t("menu:accountNonExistent");
-      case ERR_PASSWORD_MISMATCH:
+      case this.ERR_PASSWORD_MISMATCH:
         return i18next.t("menu:passwordNotMatchingConfirmPassword");
-      case ERR_FAILED_TO_GENERATE_PASSWORD:
-        return `${i18next.t("menu:serverErrorGenerateSalt")}\n${i18next.t("menu:pleaseTryAgainLater")}`;
-      case ERR_REMOVE_SESSIONS:
-        return `${i18next.t("menu:serverErrorRemoveSessions")}\n${i18next.t("menu:pleaseTryAgainLater")}`;
-      case ERR_ACCOUNT_UPDATE_FAILURE:
-        return `${i18next.t("menu:serverErrorUpdateAccount")}\n${i18next.t("menu:pleaseTryAgainLater")}`;
     }
 
     return super.getReadableErrorMessage(error);
@@ -91,7 +84,7 @@ export class ChangePasswordFormUiHandler extends FormModalUiHandler {
             return onFail(this.getReadableErrorMessage("invalid password"));
           }
           if (passwordInput.text !== confirmPasswordInput.text) {
-            return onFail(ERR_PASSWORD_MISMATCH);
+            return onFail(this.ERR_PASSWORD_MISMATCH);
           }
 
           pokerogueApi.account.changePassword({ password: passwordInput.text }).then(error => {

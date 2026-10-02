@@ -3,6 +3,7 @@ import { speciesDataRegistry } from "#app/global-species-data-registry";
 import { DexAttr } from "#enums/dex-attr";
 import { SpeciesId } from "#enums/species-id";
 import type { SystemSaveMigrator } from "#types/save-migrators";
+import { getEnumValues } from "#utils/enums";
 
 const fixDexData: SystemSaveMigrator = {
   name: "fixDexData",
@@ -11,8 +12,8 @@ const fixDexData: SystemSaveMigrator = {
     const defaultStarterAttr =
       DexAttr.NON_SHINY | DexAttr.MALE | DexAttr.FEMALE | DexAttr.DEFAULT_VARIANT | DexAttr.DEFAULT_FORM;
 
-    for (const speciesId of speciesDataRegistry.getAllStarters()) {
-      if (defaultStarterSpecies.includes(speciesId)) {
+    for (const speciesId of getEnumValues(SpeciesId)) {
+      if (!speciesDataRegistry.isStarter(speciesId) || defaultStarterSpecies.includes(speciesId)) {
         continue;
       }
 

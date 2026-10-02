@@ -1,6 +1,5 @@
 import { ModifierTier } from "#enums/modifier-tier";
 import { MoveId } from "#enums/move-id";
-import { padInt } from "#utils/common";
 
 interface TmPoolTiers {
   [key: number]: Exclude<ModifierTier, ModifierTier.ROGUE | ModifierTier.MASTER | ModifierTier.LUXURY>;
@@ -184,7 +183,6 @@ export const tmPoolTiers: TmPoolTiers = {
   [MoveId.ROCK_POLISH]: ModifierTier.GREAT,
   [MoveId.POISON_JAB]: ModifierTier.GREAT,
   [MoveId.DARK_PULSE]: ModifierTier.GREAT,
-  [MoveId.NIGHT_SLASH]: ModifierTier.GREAT,
   [MoveId.AQUA_TAIL]: ModifierTier.GREAT,
   [MoveId.SEED_BOMB]: ModifierTier.GREAT,
   [MoveId.AIR_SLASH]: ModifierTier.GREAT,
@@ -259,7 +257,6 @@ export const tmPoolTiers: TmPoolTiers = {
   [MoveId.ELECTROWEB]: ModifierTier.GREAT,
   [MoveId.WILD_CHARGE]: ModifierTier.GREAT,
   [MoveId.DRILL_RUN]: ModifierTier.GREAT,
-  [MoveId.DUAL_CHOP]: ModifierTier.GREAT,
   [MoveId.RAZOR_SHELL]: ModifierTier.GREAT,
   [MoveId.HEAT_CRASH]: ModifierTier.GREAT,
   [MoveId.TAIL_SLAP]: ModifierTier.GREAT,
@@ -280,7 +277,6 @@ export const tmPoolTiers: TmPoolTiers = {
   [MoveId.DAZZLING_GLEAM]: ModifierTier.ULTRA,
   [MoveId.INFESTATION]: ModifierTier.COMMON,
   [MoveId.POWER_UP_PUNCH]: ModifierTier.GREAT,
-  [MoveId.FIRST_IMPRESSION]: ModifierTier.ULTRA,
   [MoveId.DARKEST_LARIAT]: ModifierTier.GREAT,
   [MoveId.HIGH_HORSEPOWER]: ModifierTier.ULTRA,
   [MoveId.SOLAR_BLADE]: ModifierTier.ULTRA,
@@ -330,12 +326,3 @@ export const tmPoolTiers: TmPoolTiers = {
   [MoveId.PSYCHIC_NOISE]: ModifierTier.GREAT,
   [MoveId.UPPER_HAND]: ModifierTier.COMMON,
 };
-
-/**
- * Get the TM number for a given move ID.
- * @param moveId - The MoveId for which to retrieve the TM number
- * @returns The TM number as a string or `null` if the move is not in the TM pool
- */
-export function getTmNumber(moveId: MoveId): string | null {
-  return padInt(Object.keys(tmPoolTiers).indexOf(moveId.toString()) + 1, 3);
-}

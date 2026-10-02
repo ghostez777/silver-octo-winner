@@ -637,6 +637,4 @@ export enum AbilityId {
   ABILITY_317,
   /** {@link https://bulbapedia.bulbagarden.net/wiki/Spicy_Spray_(Ability) | Source} */
   SPICY_SPRAY,
-  /** {@link https://bulbapedia.bulbagarden.net/wiki/Aura_Guard_(Ability) | Source} */
-  AURA_GUARD,
 }

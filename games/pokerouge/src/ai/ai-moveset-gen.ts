@@ -9,8 +9,8 @@
 import { EVOLVE_MOVE, RELEARN_MOVE } from "#app/constants";
 import { globalScene } from "#app/global-scene";
 import { speciesDataRegistry } from "#app/global-species-data-registry";
-import { speciesEggMoves } from "#balance/egg-moves";
-import { FORBIDDEN_SINGLES_MOVES, FORBIDDEN_TM_MOVES, LEVEL_BASED_DENYLIST } from "#balance/forbidden-moves";
+import { speciesEggMoves } from "#balance/moves/egg-moves";
+import { FORBIDDEN_SINGLES_MOVES, FORBIDDEN_TM_MOVES, LEVEL_BASED_DENYLIST } from "#balance/moves/forbidden-moves";
 import {
   BASE_LEVEL_WEIGHT_OFFSET,
   BASE_WEIGHT_MULTIPLIER,
@@ -30,21 +30,22 @@ import {
   LEVEL_BASED_DENYLIST_THRESHOLD,
   MOVE_POWER_CEILING,
   RARE_EGG_MOVE_LEVEL_REQUIREMENT,
-  RELEARN_LEVEL_REQUIREMENT,
   RELEARN_MOVE_WEIGHT,
   STAB_BLACKLIST,
   ULTRA_TIER_TM_LEVEL_REQUIREMENT,
   ULTRA_TM_MOVESET_WEIGHT,
-} from "#balance/moveset-generation";
-import { EXCLUDED_MOVES_FOR_WORSE_OFFENSIVE_STAT, getSpeciesDeniedOffensiveStat } from "#balance/off-stat-denylist";
-import { FORCED_RIVAL_SIGNATURE_MOVES, FORCED_SIGNATURE_MOVES } from "#balance/signature-moves";
-import { SUPERCEDED_MOVES } from "#balance/superceded-moves";
+} from "#balance/moves/moveset-generation";
+import {
+  EXCLUDED_MOVES_FOR_WORSE_OFFENSIVE_STAT,
+  getSpeciesDeniedOffensiveStat,
+} from "#balance/moves/off-stat-denylist";
+import { FORCED_RIVAL_SIGNATURE_MOVES, FORCED_SIGNATURE_MOVES } from "#balance/moves/signature-moves";
+import { SUPERCEDED_MOVES } from "#balance/moves/superceded-moves";
 import { tmPoolTiers } from "#balance/tm-pool-tiers";
 import { IS_TEST, isBeta, isDev } from "#constants/app-constants";
 import { allMoves } from "#data/data-lists";
 import { AbilityId } from "#enums/ability-id";
 import { BattlerTagType } from "#enums/battler-tag-type";
-import { ChallengeType } from "#enums/challenge-type";
 import { ModifierTier } from "#enums/modifier-tier";
 import { MoveCategory } from "#enums/move-category";
 import { MoveFlags } from "#enums/move-flags";
@@ -58,12 +59,9 @@ import type { EnemyPokemon, Pokemon } from "#field/pokemon";
 import { targetSleptOrComatoseCondition, userSleptOrComatoseCondition } from "#moves/move-condition";
 import { isWeatherInstantCharge } from "#moves/move-utils";
 import { PokemonMove } from "#moves/pokemon-move";
-import type { LevelMovesWithSource } from "#types/level-moves";
 import type { Move, StatStageChangeAttr } from "#types/move-types";
-import type { StarterSpeciesId } from "#types/starter-species-id";
-import { applyChallenges } from "#utils/challenge-utils";
+import type { LevelMovesWithSource } from "#types/pokemon-species";
 import { NumberHolder, randSeedInt, randSeedItem } from "#utils/common";
-import { deepCopy } from "#utils/data";
 import { willTerastallize } from "#utils/pokemon-utils";
 import { ValueHolder } from "#utils/value-holder";
 
@@ -87,12 +85,7 @@ function getAndWeightLevelMoves(pokemon: Pokemon): Map<MoveId, number> {
   let allLevelMoves: LevelMovesWithSource;
   // TODO: Investigate why there needs to be error handling here
   try {
-    allLevelMoves = pokemon.getLevelMoves({
-      startingLevel: 1,
-      includeEvolutionMoves: true,
-      includePrevolutionMoves: true,
-      includeRelearnerMoves: pokemon.hasTrainer(),
-    });
+    allLevelMoves = pokemon.getLevelMoves(1, true, true, pokemon.hasTrainer());
   } catch (e) {
     console.warn("Error encountered trying to generate moveset for %s: %s", pokemon.species.name, e);
     return movePool;
@@ -108,7 +101,7 @@ function getAndWeightLevelMoves(pokemon: Pokemon): Map<MoveId, number> {
     }
     const move = allMoves[id];
     // Skip unimplemented moves or moves that are already in the pool
-    if (move.isUnimplemented || movePool.has(id)) {
+    if (move.name.endsWith(" (N)") || movePool.has(id)) {
       continue;
     }
 
@@ -124,8 +117,7 @@ function getAndWeightLevelMoves(pokemon: Pokemon): Map<MoveId, number> {
         }
         break;
       case RELEARN_MOVE:
-        weight = hasTrainer && level >= RELEARN_LEVEL_REQUIREMENT ? RELEARN_MOVE_WEIGHT : 0;
-        break;
+        weight = hasTrainer ? RELEARN_MOVE_WEIGHT : 0;
     }
 
     movePool.set(id, weight);
@@ -170,9 +162,7 @@ function getTmPoolForSpecies(
   allowedTiers = getAllowedTmTiers(level),
 ): void {
   const [allowCommon, allowGreat, allowUltra] = allowedTiers;
-  const species = speciesDataRegistry.getSpecies(speciesId);
-  const tms = species.getTms(formKey);
-  applyChallenges(ChallengeType.ENEMY_TM_COMPATIBILITY, species, tms);
+  const tms = speciesDataRegistry.getSpecies(speciesId).getTms(formKey);
 
   for (const tm of tms) {
     if (FORBIDDEN_TM_MOVES.has(tm) || levelPool.has(tm) || eggPool.has(tm) || tmPool.has(tm)) {
@@ -272,7 +262,7 @@ function getEggPoolForSpecies(
   excludeRare: boolean,
   rareEggMoveWeight = 0,
 ): void {
-  const eggMoves = speciesEggMoves[rootSpeciesId as Exclude<StarterSpeciesId, SpeciesId.PIKACHU>];
+  const eggMoves = speciesEggMoves[rootSpeciesId];
   if (eggMoves == null) {
     return;
   }
@@ -282,7 +272,6 @@ function getEggPoolForSpecies(
     }
     eggPool.set(moveId, Math.max(eggPool.get(moveId) ?? 0, idx === 3 ? rareEggMoveWeight : eggMoveWeight));
   }
-  applyChallenges(ChallengeType.AI_MOVE_GENERATION_EGG_POOL, rootSpeciesId, eggPool);
 }
 
 /**
@@ -333,8 +322,6 @@ function getAndWeightEggMoves(
  */
 function filterSupercededMoves(pool: Map<MoveId, number>, ...otherPools: Map<MoveId, number>[]): void {
   const currentMoves = new Set<MoveId>(pool.keys());
-  const supercededMoves = deepCopy(SUPERCEDED_MOVES);
-  applyChallenges(ChallengeType.AI_MOVE_GENERATION_SUPERCEDED_MAP, supercededMoves);
 
   for (const otherPool of otherPools) {
     for (const moveId of otherPool.keys()) {
@@ -342,7 +329,7 @@ function filterSupercededMoves(pool: Map<MoveId, number>, ...otherPools: Map<Mov
     }
   }
   for (const move of pool.keys()) {
-    const superceded = supercededMoves[move];
+    const superceded = SUPERCEDED_MOVES[move];
     if (superceded == null || new Set(superceded).isDisjointFrom(currentMoves)) {
       continue;
     }
@@ -391,7 +378,7 @@ function filterMovePool(
       !ignoreSoftBlocklists && (noDoublesMovesInSingles || applyLevelBasedDenyList || excludeWorseOffensiveStatMoves);
     if (
       weight <= 0
-      || move.isUnimplemented // Forbid unimplemented moves
+      || move.name.endsWith(" (N)") // Forbid unimplemented moves
       || move.hasAttr("SacrificialAttrOnHit") // No one gets Memento or Final Gambit
       || (isBoss && (move.hasAttr("SacrificialAttr") || move.hasAttr("HpSplitAttr"))) // Bosses never get self ko moves or Pain Split
       || (hasTrainer && move.hasAttr("OneHitKOAttr")) // trainers never get OHKO moves
@@ -1249,6 +1236,7 @@ export function generateMoveset(pokemon: Pokemon, forceRivalSignatures = false):
   if (hasTrainer) {
     getAndWeightEggMoves(pokemon, learnPool, eggMovePool);
     if (eggMovePool.size > 0) {
+      filterSupercededMoves(eggMovePool, learnPool);
       debugMoveWeights(pokemon, eggMovePool, "Initial Egg Moves");
     }
     getAndWeightTmMoves(pokemon, learnPool, eggMovePool, tmPool);

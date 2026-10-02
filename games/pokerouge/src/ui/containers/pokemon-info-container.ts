@@ -8,6 +8,7 @@ import type { Pokemon } from "#field/pokemon";
 import { getVariantTint } from "#sprites/variant";
 import type { DexEntry } from "#types/dex-data";
 import type { StarterDataEntry } from "#types/save-data";
+import { ConfirmUiHandler } from "#ui/confirm-ui-handler";
 import { addBBCodeTextObject, addTextObject, getTextColor } from "#ui/text";
 import { addWindow } from "#ui/ui-theme";
 import { playTween } from "#utils/anim-utils";
@@ -482,16 +483,18 @@ export class PokemonInfoContainer extends Phaser.GameObjects.Container {
     this.pokemonMovesContainer.setVisible(false);
   }
 
-  public async makeRoomForOptionSelectUi(requiredSpace: number): Promise<void> {
+  public async makeRoomForConfirmUi(speedMultiplier = 1, fromCatch = false): Promise<void> {
+    const xPosition = this.initialX - this.infoWindowWidth - (fromCatch ? 67 : ConfirmUiHandler.windowWidth);
+
     const infoTween = globalScene.tweens.getTweensOf(this)[0];
     const duration = Math.max(infoTween ? infoTween.duration - infoTween.elapsed : 0, 150);
     infoTween?.destroy();
 
     await playTween({
       targets: this,
-      duration: fixedInt(duration),
+      duration: fixedInt(Math.floor(duration / speedMultiplier)),
       ease: "Cubic.easeInOut",
-      x: this.initialX - this.infoWindowWidth - requiredSpace,
+      x: xPosition,
     });
   }
 

@@ -1,6 +1,5 @@
 // biome-ignore-all lint/performance/noNamespaceImport: Convenience (there's no need to worry about tree-shaking/etc here)
 
-import { GameDataType } from "#enums/game-data-type";
 import { version } from "#package.json";
 import { SessionMigrationError } from "#system/migration-errors";
 import type { AppliedMigrators, SessionSaveData, SystemSaveData } from "#types/save-data";
@@ -10,7 +9,6 @@ import type {
   SettingsSaveMigrator,
   SystemSaveMigrator,
 } from "#types/save-migrators";
-import { getDataTypeKey } from "#utils/data";
 import { compareVersions, validateIsArrayOfObjects } from "#utils/migrator-utils";
 
 /*
@@ -76,7 +74,6 @@ import * as v1_12_0_0 from "#system/v1_12_0_0";
 import * as v1_12_0_1 from "#system/v1_12_0_1";
 import * as v1_12_0_3 from "#system/v1_12_0_3";
 import * as v1_12_0_10 from "#system/v1_12_0_10";
-import * as v1_12_1_0 from "#system/v1_12_1_0";
 
 // To add a new set of migrators, add them to the appropriate array of migrators
 
@@ -90,7 +87,6 @@ const systemMigrators: SystemSaveMigrator[] = [
   ...v1_12_0_1.systemMigrators,
   ...v1_12_0_3.systemMigrators,
   ...v1_12_0_10.systemMigrators,
-  ...v1_12_1_0.systemMigrators,
 ];
 
 /** All session save migrators */
@@ -103,11 +99,7 @@ const sessionMigrators: SessionSaveMigrator[] = [
 ];
 
 /** All settings migrators */
-const settingsMigrators: SettingsSaveMigrator[] = [
-  ...v1_0_4.settingsMigrators,
-  ...v1_11_19.settingsMigrators,
-  ...v1_12_1_0.settingsMigrators,
-];
+const settingsMigrators: SettingsSaveMigrator[] = [...v1_0_4.settingsMigrators, ...v1_11_19.settingsMigrators];
 
 // Ensure the migrators are in the correct order so that they are consistently applied from oldest to newest
 sortMigrators(systemMigrators);
@@ -185,18 +177,11 @@ export function applySessionVersionMigration(data: Record<string, unknown>): voi
  * @param data - The settings data object to migrate
  */
 export function applySettingsVersionMigration(data: object): void {
-  if (!data || typeof data !== "object") {
-    console.warn("No valid settings data to migrate. Skipping settings migrators.");
-    return;
-  }
-
-  const prevVersion: string = data["gameVersion"] ?? data["meta"]["gameVersion"] ?? "1.0.0";
+  const prevVersion: string = Object.hasOwn(data, "gameVersion") ? data["gameVersion"] : "1.0.0";
   const isCurrentVersionHigher = compareVersions(prevVersion, LATEST_VERSION) === -1;
 
   if (isCurrentVersionHigher) {
     applyMigrators(settingsMigrators, data, prevVersion);
-    data["meta"]["gameVersion"] = LATEST_VERSION;
-    localStorage.setItem(getDataTypeKey(GameDataType.SETTINGS), JSON.stringify(data));
     console.log(`Settings successfully migrated to v${LATEST_VERSION}!`);
   }
 }

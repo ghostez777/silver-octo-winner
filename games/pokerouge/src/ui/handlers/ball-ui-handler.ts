@@ -19,6 +19,10 @@ export class BallUiHandler extends UiHandler {
 
   private scale = 0.1666666667;
 
+  constructor() {
+    super(UiMode.BALL);
+  }
+
   setup() {
     const ui = this.getUi();
 

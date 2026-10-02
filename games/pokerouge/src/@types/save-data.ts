@@ -101,20 +101,17 @@ export interface StarterMoveData {
   [key: number]: StarterMoveset | StarterFormMoveData;
 }
 
-/** The starter's current attributes (such as selected nature, nickname, etc). */
-export interface StarterPreferences {
-  abilityIndex?: number | undefined;
-  favorite?: boolean | undefined;
-  female?: boolean | undefined;
-  formIndex?: number | undefined;
+export interface StarterAttributes {
   nature?: number | undefined;
-  nickname?: string | undefined;
+  ability?: number | undefined;
+  variant?: number | undefined;
+  form?: number | undefined;
+  female?: boolean | undefined;
   shiny?: boolean | undefined;
+  favorite?: boolean | undefined;
+  nickname?: string | undefined;
   tera?: PokemonType | undefined;
-  variant?: Variant | undefined;
 }
-
-export type AllStarterPreferences = Partial<Record<SpeciesId, StarterPreferences | undefined>>;
 
 export interface DexAttrProps {
   shiny: boolean;

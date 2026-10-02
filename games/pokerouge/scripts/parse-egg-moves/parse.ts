@@ -59,6 +59,5 @@ export function parseEggMoves(csv: string): string {
   }
 
   // NB: We omit the semicolon as it is contained in the template string itself
-  // TODO: update when regular Pikachu is removed as a starter
-  return output + "} satisfies Record<Exclude<StarterSpeciesId, SpeciesId.PIKACHU>, [MoveId, MoveId, MoveId, MoveId]>";
+  return output + "} satisfies Partial<Record<SpeciesId, [MoveId, MoveId, MoveId, MoveId]>>";
 }

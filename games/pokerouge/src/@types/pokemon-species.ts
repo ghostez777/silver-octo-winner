@@ -3,10 +3,9 @@ import type { SpeciesFormChange } from "#data/pokemon-forms";
 import type { PokemonSpecies } from "#data/pokemon-species";
 import type { AbilityId } from "#enums/ability-id";
 import type { EggTier } from "#enums/egg-type";
+import type { LearnableMoveSource } from "#enums/learnable-move-source";
 import type { MoveId } from "#enums/move-id";
 import type { SpeciesId } from "#enums/species-id";
-import type { LevelMoves } from "./level-moves";
-import type { StarterSpeciesId } from "./starter-species-id";
 
 /**
  * Mapping of formIndex to passive ability for species with multiple passives.
@@ -14,6 +13,9 @@ import type { StarterSpeciesId } from "./starter-species-id";
 interface PokemonSpeciesPassives {
   [key: number]: AbilityId;
 }
+
+export type LevelMoves = [level: number, move: MoveId][];
+export type LevelMovesWithSource = [level: number, move: MoveId, source: LearnableMoveSource][];
 
 export interface SpeciesFormLevelMoves {
   [key: string]: LevelMoves;
@@ -25,7 +27,7 @@ export interface SpeciesFormTmMoves {
 
 export interface PokemonSpeciesData {
   species: PokemonSpecies;
-  starter: StarterSpeciesId;
+  starter: SpeciesId;
   /** The starter cost. Should be omitted for non starters */
   starterCost?: number;
   evolutions: SpeciesFormEvolution[];

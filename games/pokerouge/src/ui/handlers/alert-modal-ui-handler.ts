@@ -15,6 +15,10 @@ export class AlertModalUiHandler extends ModalUiHandler {
   private width = 250;
   private height = 32;
 
+  constructor(mode: UiMode | null = null) {
+    super(mode);
+  }
+
   public override getModalTitle(): string {
     return "";
   }
@@ -96,7 +100,7 @@ export class AlertModalUiHandler extends ModalUiHandler {
       return false;
     }
     const { ui } = globalScene;
-    if (ui.mode === UiMode.ALERT_MODAL) {
+    if (ui.getMode() === UiMode.ALERT_MODAL) {
       ui.revertMode()
         .then(() => playTween({ targets: this.overlay, alpha: 0, duration: 500, ease: "Sine.easeOut" }))
         .then(() => ui.remove(this.overlay, true));
