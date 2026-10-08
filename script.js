@@ -12,19 +12,14 @@ let timerSeconds = 300;
 let timerInterval = null;
 let toastTimeout = null;
 
-const SUPABASE_URL = "https://fcaurruifyeoofapuqcs.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_njYaCOufPHLjbkxo3brV0Q_eD6m6RLW";
+const SUPABASE_URL = "https://abmrhhqubpxmzrjvsqay.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_oNPl0ont-81TGySbqG1roA_RX02JTFh";
 const supabaseClient = window.supabase?.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
 );
-const cloudSaveManager = (
-  supabaseClient &&
-  typeof CloudSaveManager !== "undefined"
-) ? new CloudSaveManager(supabaseClient) : null;
-window.cloudSaveManager = cloudSaveManager;
-window.gameHubCloudSaves = cloudSaveManager;
 let authMode = "login";
+
 
 function loadFavorites() {
   try {
@@ -35,67 +30,12 @@ function loadFavorites() {
   }
 }
 
-function buildSaveKey(gameId, slotName = "autosave") {
-  return `game-save-${gameId}-${slotName}`;
-}
-
-async function saveGameProgress(gameId, slotName = "autosave", gameState = null) {
-  if (!gameId) return false;
-
-  const payload = gameState && typeof gameState === "object"
-    ? gameState
-    : { savedAt: Date.now() };
-
-  const saveBundle = {
-    timestamp: Date.now(),
-    slotName,
-    gameId,
-    gameState: payload
-  };
-
-  if (cloudSaveManager && cloudSaveManager.getAuthStatus().isAuthenticated) {
-    const success = await cloudSaveManager.saveGame(gameId, slotName, payload);
-    if (success) return true;
-  }
-
-  try {
-    localStorage.setItem(buildSaveKey(gameId, slotName), JSON.stringify(saveBundle));
-    return true;
-  } catch (error) {
-    console.error("Could not save local progress:", error);
-    return false;
-  }
-}
-
-async function loadGameProgress(gameId, slotName = "autosave") {
-  if (!gameId) return null;
-
-  if (cloudSaveManager && cloudSaveManager.getAuthStatus().isAuthenticated) {
-    const cloudState = await cloudSaveManager.loadGame(gameId, slotName);
-    if (cloudState) return cloudState;
-  }
-
-  try {
-    const raw = localStorage.getItem(buildSaveKey(gameId, slotName));
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return parsed.gameState || null;
-  } catch (error) {
-    console.error("Could not load local progress:", error);
-    return null;
-  }
-}
-
-window.saveGameProgress = saveGameProgress;
-window.loadGameProgress = loadGameProgress;
-
 document.addEventListener("DOMContentLoaded", () => {
   setupNavigation();
   setupSearch();
   setupFilters();
   setupPlayer();
   setupKeyboard();
-  setupRandom();
   setupAuth();
   loadNotes();
   setupNotes();
@@ -106,8 +46,10 @@ function parseCatalog(text) {
   try {
     return JSON.parse(text);
   } catch (error) {
+    // A previously edited catalog contained an unterminated GameSnacks URL.
+    // Repair that one field so the remaining catalog can still be displayed.
     const repaired = text.replace(
-      /("html"\s*:\s*"[^\n]*?features=\[[^\n]*?)(,\s*"thumb")/,
+      /(\"html\"\s*:\s*\"[^\n]*?features=\[[^\n]*?)(,\s*\"thumb\")/,
       '$1"$2'
     );
 
@@ -127,6 +69,7 @@ async function loadGames() {
 
   let lastError = null;
 
+  // Use a previously cached catalog immediately when available.
   try {
     const cached = localStorage.getItem("gamehub-games-cache");
     if (cached) {
@@ -146,18 +89,7 @@ async function loadGames() {
 
   for (const url of catalogUrls) {
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000);
-
-      let response;
-      try {
-        response = await fetch(url, {
-          cache: "no-store",
-          signal: controller.signal
-        });
-      } finally {
-        clearTimeout(timeout);
-      }
+      const response = await fetch(url, { cache: "no-store" });
       if (!response.ok) throw new Error(`Request failed: ${response.status}`);
 
       const text = await response.text();
@@ -311,7 +243,9 @@ function renderGBA() {
 function renderFavorites() {
   renderCards(
     $("#favoritesGrid"),
-    state.games.filter((game) => state.favorites.includes(game.id)),
+    state.games.filter((game) =>
+      state.favorites.includes(game.id)
+    ),
     "You haven't added any favorites yet."
   );
 }
@@ -339,18 +273,7 @@ function renderCards(container, games, emptyMessage) {
 function launchGame(game) {
   state.currentGame = game;
 
-  const isIOSLike =
-    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-
   if (game.gba) {
-    if (isIOSLike) {
-      window.location.href = new URL(
-        "jsemu/?rom=" + encodeURIComponent(game.gba),
-        document.baseURI
-      ).href;
-      return;
-    }
     const modal = $("#playerModal");
     const frame = $("#gameFrame");
     const ruffleFrame = $("#ruffleFrame");
@@ -383,6 +306,10 @@ function launchGame(game) {
   showToast("This game does not have a playable location yet.");
 }
 
+/* =========================================================
+   HTML GAME PLAYER
+   ========================================================= */
+
 function openPlayer(game, url) {
   state.currentGame = game;
 
@@ -392,22 +319,18 @@ function openPlayer(game, url) {
 
   $("#playerTitle").textContent = game.name || "Game";
 
+  // Make sure Ruffle is completely removed/hidden.
   ruffleFrame.replaceChildren();
   ruffleFrame.style.display = "none";
 
-  const isIOSLike =
-    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-
-  const gameUrl = new URL(url, document.baseURI).href;
-  if (isIOSLike) {
-    window.location.href = gameUrl;
-    return;
-  }
-  frame.src = gameUrl;
+  // Load the HTML game.
+  frame.src = new URL(url, document.baseURI).href;
   frame.style.display = "block";
 
+  // Open the fullscreen player modal.
   modal.classList.add("open");
+
+  // Prevent the page behind the game from scrolling.
   document.body.classList.add("player-open");
   document.body.style.overflow = "hidden";
 
@@ -415,6 +338,10 @@ function openPlayer(game, url) {
     frame.focus();
   });
 }
+
+/* =========================================================
+   RUFFLE / FLASH PLAYER
+   ========================================================= */
 
 async function openRufflePlayer(game) {
   const modal = $("#playerModal");
@@ -425,17 +352,31 @@ async function openRufflePlayer(game) {
 
   $("#playerTitle").textContent = game.name || "Game";
 
+  // Completely reset the HTML iframe.
   frame.src = "about:blank";
   frame.style.display = "none";
 
+  // Completely reset Ruffle container.
   ruffleFrame.replaceChildren();
   ruffleFrame.style.display = "block";
 
+  // Open player.
   modal.classList.add("open");
+
+  // Stop background page scrolling.
   document.body.classList.add("player-open");
   document.body.style.overflow = "hidden";
 
   try {
+    /*
+     * Use the modern self-hosted Ruffle API.
+     *
+     * Older versions used:
+     *   player.load(...)
+     *
+     * Newer versions use:
+     *   player.ruffle().load(...)
+     */
     const ruffleApi =
       window.RufflePlayer &&
       typeof window.RufflePlayer.newest === "function"
@@ -447,6 +388,14 @@ async function openRufflePlayer(game) {
     }
 
     const player = ruffleApi.createPlayer();
+
+    /*
+     * Force the custom Ruffle player itself to fill
+     * the entire available player container.
+     *
+     * The CSS in style.css handles the actual viewport
+     * sizing and these inline values reinforce it.
+     */
     player.style.display = "block";
     player.style.width = "100%";
     player.style.height = "100%";
@@ -455,7 +404,8 @@ async function openRufflePlayer(game) {
 
     ruffleFrame.appendChild(player);
 
-    const url = new URL(game.file, document.baseURI).href;
+    const url =
+      new URL(game.file, document.baseURI).href;
 
     await player.ruffle().load({
       url,
@@ -466,7 +416,10 @@ async function openRufflePlayer(game) {
     });
 
   } catch (error) {
-    console.error("Could not load Flash game:", error);
+    console.error(
+      "Could not load Flash game:",
+      error
+    );
 
     ruffleFrame.innerHTML = `
       <div class="player-error">
@@ -478,6 +431,10 @@ async function openRufflePlayer(game) {
     `;
   }
 }
+
+/* =========================================================
+   CLOSE PLAYER
+   ========================================================= */
 
 async function togglePlayerFullscreen() {
   const windowEl = $("#playerWindow");
@@ -523,23 +480,48 @@ async function closePlayer() {
     }
   }
 
+  // Close modal.
   modal.classList.remove("open");
+
+  // Stop HTML game.
   frame.src = "about:blank";
   frame.style.display = "none";
+
+  // Destroy the Ruffle player.
   ruffleFrame.replaceChildren();
   ruffleFrame.style.display = "none";
 
+  // Clear current game.
   state.currentGame = null;
+
+  // Restore page scrolling.
   document.body.classList.remove("player-open");
   document.body.style.overflow = "";
 }
 
+/* =========================================================
+   PLAYER CONTROLS
+   ========================================================= */
+
 function setupPlayer() {
-  $("#closePlayer")?.addEventListener("click", closePlayer);
-  $("#fullscreenPlayer")?.addEventListener("click", togglePlayerFullscreen);
+  $("#closePlayer")?.addEventListener(
+    "click",
+    closePlayer
+  );
 
-  document.addEventListener("fullscreenchange", syncFullscreenButton);
+  $("#fullscreenPlayer")?.addEventListener(
+    "click",
+    togglePlayerFullscreen
+  );
 
+  document.addEventListener(
+    "fullscreenchange",
+    syncFullscreenButton
+  );
+
+  /*
+   * Open the current game in a new browser tab.
+   */
   $("#openNewTab")?.addEventListener("click", () => {
     if (!state.currentGame) return;
 
@@ -548,16 +530,30 @@ function setupPlayer() {
     const url = game.gba
       ? `jsemu/?rom=${encodeURIComponent(game.gba)}`
       : game.html
-        ? new URL(game.html, document.baseURI).href
+        ? new URL(
+            game.html,
+            document.baseURI
+          ).href
         : game.file
-          ? new URL(game.file, document.baseURI).href
+          ? new URL(
+              game.file,
+              document.baseURI
+            ).href
           : "";
 
     if (url) {
-      window.open(url, "_blank", "noopener,noreferrer");
+      window.open(
+        url,
+        "_blank",
+        "noopener,noreferrer"
+      );
     }
   });
 
+  /*
+   * Close the player if the dark background itself
+   * is clicked.
+   */
   $("#playerModal")?.addEventListener("click", (event) => {
     if (event.target === $("#playerModal")) {
       closePlayer();
@@ -565,14 +561,9 @@ function setupPlayer() {
   });
 }
 
-function setupRandom() {
-  const randomButton = $("#randomBtn");
-  if (!randomButton) return;
-
-  randomButton.addEventListener("click", () => {
-    randomGame();
-  });
-}
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
 
 function setupNavigation() {
   $$("[data-page]").forEach((button) => {
@@ -593,26 +584,39 @@ function showPage(id) {
   }
 }
 
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
 function setupSearch() {
-  const searchInput = $("#searchInput");
-  if (!searchInput) return;
+  $("#searchInput").addEventListener(
+    "input",
+    (event) => {
+      const query =
+        event.target.value
+          .trim()
+          .toLowerCase();
 
-  searchInput.addEventListener("input", (event) => {
-    const query = event.target.value.trim().toLowerCase();
+      const games = query
+        ? state.games.filter((game) =>
+            String(game.name || "")
+              .toLowerCase()
+              .includes(query)
+          )
+        : [...state.games];
 
-    const games = query
-      ? state.games.filter((game) =>
-          String(game.name || "").toLowerCase().includes(query)
-        )
-      : [...state.games];
-
-    renderCards(
-      $("#gamesGrid"),
-      games,
-      "No games match your search."
-    );
-  });
+      renderCards(
+        $("#gamesGrid"),
+        games,
+        "No games match your search."
+      );
+    }
+  );
 }
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
 
 function setupFilters() {
   $$(".filter").forEach((button) => {
@@ -622,62 +626,128 @@ function setupFilters() {
       });
 
       button.classList.add("active");
-      state.filter = button.dataset.filter || "all";
+
+      state.filter =
+        button.dataset.filter || "all";
+
       renderGames();
     });
   });
 }
 
-function toggleFavorite(id) {
-  state.favorites = state.favorites.includes(id)
-    ? state.favorites.filter((item) => item !== id)
-    : [...state.favorites, id];
+/* =========================================================
+   FAVORITES
+   ========================================================= */
 
-  localStorage.setItem("gamehub-favorites", JSON.stringify(state.favorites));
+function toggleFavorite(id) {
+  state.favorites =
+    state.favorites.includes(id)
+      ? state.favorites.filter(
+          (item) => item !== id
+        )
+      : [
+          ...state.favorites,
+          id
+        ];
+
+  localStorage.setItem(
+    "gamehub-favorites",
+    JSON.stringify(
+      state.favorites
+    )
+  );
+
   renderFavorites();
   renderGames();
 }
 
+/* =========================================================
+   QUICK APPS
+   ========================================================= */
+
 function setupApps() {
-  $("#notesBtn").addEventListener("click", () => {
-    $("#notesModal").classList.add("open");
-  });
+  $("#notesBtn").addEventListener(
+    "click",
+    () => {
+      $("#notesModal").classList.add("open");
+    }
+  );
 
-  $("#timerBtn").addEventListener("click", () => {
-    $("#timerModal").classList.add("open");
-  });
+  $("#timerBtn").addEventListener(
+    "click",
+    () => {
+      $("#timerModal").classList.add("open");
+    }
+  );
 
-  $("#randomAppBtn")?.addEventListener("click", randomGame);
+  $("#randomAppBtn")?.addEventListener(
+    "click",
+    randomGame
+  );
 
-  $("#timerStart").addEventListener("click", startTimer);
-  $("#timerReset").addEventListener("click", resetTimer);
+  $("#timerStart").addEventListener(
+    "click",
+    startTimer
+  );
 
-  document.querySelectorAll("[data-close]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const modal = document.getElementById(button.dataset.close);
-      if (modal) modal.classList.remove("open");
+  $("#timerReset").addEventListener(
+    "click",
+    resetTimer
+  );
+
+  document
+    .querySelectorAll("[data-close]")
+    .forEach((button) => {
+      button.addEventListener(
+        "click",
+        () => {
+          const modal =
+            document.getElementById(
+              button.dataset.close
+            );
+
+          if (modal) {
+            modal.classList.remove("open");
+          }
+        }
+      );
     });
-  });
 }
 
-function setupNotes() {
-  const saveNotes = $("#saveNotes");
-  const notesArea = $("#notesArea");
-  if (!saveNotes || !notesArea) return;
+/* =========================================================
+   NOTES
+   ========================================================= */
 
-  saveNotes.addEventListener("click", () => {
-    localStorage.setItem("gamehub-notes", notesArea.value);
-  });
+function setupNotes() {
+  $("#saveNotes").addEventListener(
+    "click",
+    () => {
+      localStorage.setItem(
+        "gamehub-notes",
+        $("#notesArea").value
+      );
+    }
+  );
 }
 
 function loadNotes() {
-  const notesArea = $("#notesArea");
-  if (!notesArea) return;
-  notesArea.value = localStorage.getItem("gamehub-notes") || "";
+  $("#notesArea").value =
+    localStorage.getItem(
+      "gamehub-notes"
+    ) || "";
 }
 
+/* =========================================================
+   TIMER
+   ========================================================= */
+
 function updateTimerDisplay() {
-  $("#timerDisplay").textContent = `${String(Math.floor(timerSeconds / 60)).padStart(2, "0")}:${String(timerSeconds % 60).padStart(2, "0")}`;
+  $("#timerDisplay").textContent =
+    `${String(
+      Math.floor(timerSeconds / 60)
+    ).padStart(2, "0")}:${String(
+      timerSeconds % 60
+    ).padStart(2, "0")}`;
 }
 
 function startTimer() {
@@ -687,102 +757,210 @@ function startTimer() {
     if (timerSeconds <= 0) {
       clearInterval(timerInterval);
       timerInterval = null;
-      showToast("Timer finished.");
+
+      showToast(
+        "Timer finished."
+      );
+
       return;
     }
 
     timerSeconds -= 1;
+
     updateTimerDisplay();
   }, 1000);
 }
 
 function resetTimer() {
   clearInterval(timerInterval);
+
   timerInterval = null;
   timerSeconds = 300;
+
   updateTimerDisplay();
 }
 
+/* =========================================================
+   RANDOM GAME
+   ========================================================= */
+
 function randomGame() {
   if (!state.games.length) {
-    showToast("No games are loaded.");
+    showToast(
+      "No games are loaded."
+    );
+
     return;
   }
 
-  const game = state.games[Math.floor(Math.random() * state.games.length)];
+  const game =
+    state.games[
+      Math.floor(
+        Math.random() *
+          state.games.length
+      )
+    ];
+
   launchGame(game);
 }
 
+/* =========================================================
+   SETTINGS
+   ========================================================= */
+
 function setupSettings() {
-  const animationsToggle = $("#animationsToggle");
-  const compactToggle = $("#compactToggle");
-  const resetFavorites = $("#resetFavorites");
-  if (!animationsToggle || !compactToggle || !resetFavorites) return;
+  $("#animationsToggle").checked =
+    localStorage.getItem(
+      "gamehub-animations"
+    ) !== "false";
 
-  animationsToggle.checked = localStorage.getItem("gamehub-animations") !== "false";
-  compactToggle.checked = localStorage.getItem("gamehub-compact") === "true";
+  $("#compactToggle").checked =
+    localStorage.getItem(
+      "gamehub-compact"
+    ) === "true";
 
-  animationsToggle.addEventListener("change", () => {
-    localStorage.setItem("gamehub-animations", animationsToggle.checked ? "true" : "false");
-    applySettings();
-  });
+  $("#animationsToggle").addEventListener(
+    "change",
+    () => {
+      localStorage.setItem(
+        "gamehub-animations",
+        $("#animationsToggle").checked
+          ? "true"
+          : "false"
+      );
 
-  compactToggle.addEventListener("change", () => {
-    localStorage.setItem("gamehub-compact", compactToggle.checked ? "true" : "false");
-    applySettings();
-  });
+      applySettings();
+    }
+  );
 
-  resetFavorites.addEventListener("click", () => {
-    state.favorites = [];
-    localStorage.setItem("gamehub-favorites", "[]");
-    renderFavorites();
-    renderGames();
-  });
+  $("#compactToggle").addEventListener(
+    "change",
+    () => {
+      localStorage.setItem(
+        "gamehub-compact",
+        $("#compactToggle").checked
+          ? "true"
+          : "false"
+      );
+
+      applySettings();
+    }
+  );
+
+  $("#resetFavorites").addEventListener(
+    "click",
+    () => {
+      state.favorites = [];
+
+      localStorage.setItem(
+        "gamehub-favorites",
+        "[]"
+      );
+
+      renderFavorites();
+      renderGames();
+    }
+  );
 
   applySettings();
 }
 
 function applySettings() {
-  const animationsToggle = $("#animationsToggle");
-  const compactToggle = $("#compactToggle");
-  if (!animationsToggle || !compactToggle) return;
-  document.body.classList.toggle("no-animations", !animationsToggle.checked);
-  document.body.classList.toggle("compact", compactToggle.checked);
+  document.body.classList.toggle(
+    "no-animations",
+    !$("#animationsToggle").checked
+  );
+
+  document.body.classList.toggle(
+    "compact",
+    $("#compactToggle").checked
+  );
 }
+
+/* =========================================================
+   KEYBOARD
+   ========================================================= */
 
 function setupKeyboard() {
-  document.addEventListener("keydown", (event) => {
-    if (event.ctrlKey && event.key.toLowerCase() === "k") {
-      event.preventDefault();
-      $("#searchInput").focus();
-    }
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      /*
+       * CTRL + K focuses the search box.
+       */
+      if (
+        event.ctrlKey &&
+        event.key.toLowerCase() === "k"
+      ) {
+        event.preventDefault();
 
-    if (event.key === "Escape") {
-      closePlayer();
+        $("#searchInput").focus();
+      }
+
+      /*
+       * ESC closes the game player.
+       */
+      if (event.key === "Escape") {
+        closePlayer();
+      }
     }
-  });
+  );
 }
+
+/* =========================================================
+   TOAST
+   ========================================================= */
 
 function showToast(message) {
   const toast = $("#toast");
+
   toast.textContent = message;
+
   toast.classList.add("show");
+
   clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => toast.classList.remove("show"), 1800);
+
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 1800);
 }
+
+/* =========================================================
+   SECURITY / HTML ESCAPING
+   ========================================================= */
 
 function escapeHTML(value) {
   return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
 }
 
 function escapeAttribute(value) {
   return escapeHTML(value);
 }
+
+
+/* =========================================================
+   GAMEHUB AUTH
+   ========================================================= */
 
 function setupAuth() {
   const authButton = $("#authButton");
@@ -819,7 +997,9 @@ function setupAuth() {
     const status = $("#authStatus");
 
     submit.disabled = true;
-    status.textContent = authMode === "login" ? "Logging in..." : "Creating your account...";
+    status.textContent = authMode === "login"
+      ? "Logging in..."
+      : "Creating your account...";
 
     try {
       const result = authMode === "login"
@@ -890,7 +1070,9 @@ function updateAuthForm() {
 
   if (!title || !form) return;
 
-  const loggedIn = Boolean(supabaseClient && document.body.dataset.gamehubLoggedIn === "true");
+  const loggedIn = Boolean(
+    supabaseClient && document.body.dataset.gamehubLoggedIn === "true"
+  );
 
   form.hidden = loggedIn;
   logout.hidden = !loggedIn;
@@ -935,19 +1117,5 @@ function updateAuthUI(session) {
   button.textContent = "Account";
   if (status) status.textContent = session.user.email || "Signed in";
   updateAuthForm();
+  updateAuthForm();
 }
-
-window.addEventListener("beforeunload", () => {
-  if (!state.currentGame) return;
-  const currentKey = state.currentGame?.id || "current-game";
-  saveGameProgress(currentKey, "autosave", {
-    name: state.currentGame.name,
-    playedAt: Date.now(),
-    page: window.location.pathname,
-    game: state.currentGame
-  });
-});
-
-window.CloudSaveManager = CloudSaveManager;
-window.saveGameProgress = saveGameProgress;
-window.loadGameProgress = loadGameProgress;
