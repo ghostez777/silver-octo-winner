@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>New tab</title>
-  <meta name="description" content="ghostez.">
+  <meta name="description" content="Browse and play the Ghostez Arcade collection of browser games and retro classics.">
   <meta name="theme-color" content="#080b12">
 
   <link rel="stylesheet" href="style.css?v=20260924-3">
@@ -27,11 +27,11 @@
 <body>
   <main class="main">
     <header class="topbar">
-      <a class="brand" href="#top" aria-label="Ghostez home">
+      <a class="brand" href="#top" aria-label="Ghostez Arcade home">
         <span class="brand-icon">G</span>
         <span>
-          <strong></strong>
-          <small></small>
+          <strong>GHOSTEZ</strong>
+          <small>ARCADE</small>
         </span>
       </a>
 
@@ -103,47 +103,94 @@
     </section>
   </main>
 
-  <div id="playerModal" class="player-modal" aria-hidden="true">
-    <div id="playerWindow" class="player-window" role="dialog" aria-modal="true" aria-label="Game player">
+  <div
+    id="playerModal"
+    class="player-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Game player"
+  >
+    <div class="player-window" id="playerWindow">
       <div class="player-topbar">
-        <strong id="playerTitle">Game</strong>
+        <strong>
+          <span class="player-status"></span>
+          <span id="playerTitle">Game</span>
+        </strong>
+
         <div class="player-actions">
-          <button id="openNewTab" class="player-button" type="button" title="Open in new tab" aria-label="Open in new tab"></button>
-          <button id="fullscreenPlayer" class="player-button" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
-          <button id="closePlayer" class="player-button player-close-button" type="button" title="Close" aria-label="Close">×</button>
+          <button id="openNewTab" class="player-button" type="button" title="Open in new tab" aria-label="Open in new tab">↗</button>
+          <button id="closePlayer" class="player-button" type="button" title="Close game" aria-label="Close game">✕</button>
         </div>
       </div>
-      <iframe id="gameFrame" title="Game" src="about:blank" allow="fullscreen; autoplay; gamepad" loading="eager"></iframe>
-      <div id="ruffleFrame" aria-label="Flash game player"></div>
+
+      <iframe
+        id="gameFrame"
+        src="about:blank"
+        title="Game frame"
+        allow="fullscreen; autoplay; gamepad"
+        allowfullscreen
+      ></iframe>
+
+      <div id="ruffleFrame" aria-live="polite"></div>
     </div>
   </div>
 
-  <div id="authModal" class="auth-modal" aria-hidden="true">
-    <div class="auth-box" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-      <button class="modal-close" type="button" data-close="authModal" aria-label="Close">×</button>
+  <div id="notesModal" class="small-modal">
+    <div class="small-modal-box">
+      <button class="modal-close" data-close="notesModal" type="button">✕</button>
+      <h2>Notes</h2>
+      <textarea id="notesArea" placeholder="Write something..."></textarea>
+      <button class="primary-button" id="saveNotes" data-close="notesModal" type="button">Save</button>
+    </div>
+  </div>
+
+  <div id="timerModal" class="small-modal">
+    <div class="small-modal-box">
+      <button class="modal-close" data-close="timerModal" type="button">✕</button>
+      <h2>Timer</h2>
+
+      <div id="timerDisplay" class="timer-display">05:00</div>
+
+      <div class="timer-controls">
+        <button id="timerStart" class="secondary-button" type="button">Start</button>
+        <button id="timerReset" class="danger-button" type="button">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="authModal" class="small-modal" aria-hidden="true">
+    <div class="small-modal-box auth-box">
+      <button class="modal-close" data-close="authModal" type="button">✕</button>
       <div class="auth-heading">
         <span class="section-label">GAMEHUB ACCOUNT</span>
         <h2 id="authTitle">Log in</h2>
         <p id="authStatus">Use your GameHub account to save your session.</p>
       </div>
+
       <form id="authForm">
         <label class="auth-field">
           <span>Email</span>
           <input id="authEmail" type="email" autocomplete="email" required>
         </label>
+
         <label class="auth-field">
           <span>Password</span>
           <input id="authPassword" type="password" autocomplete="current-password" minlength="6" required>
         </label>
-        <button id="authSubmit" class="top-button" type="submit">Log in</button>
-        <button id="authSwitch" class="auth-switch" type="button">Need an account? Sign up</button>
+
+        <button id="authSubmit" class="primary-button full" type="submit">Log in</button>
       </form>
-      <button id="authLogout" class="top-button" type="button" hidden>Log out</button>
+
+      <button id="authSwitch" class="auth-switch" type="button">Need an account? Sign up</button>
+      <button id="authLogout" class="danger-button full" type="button" hidden>Log out</button>
     </div>
   </div>
 
+  <div id="toast" role="status"></div>
+
+  <script src="reliability.js"></script>
+  <script src="ruffle/ruffle.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="lib/cloud-save-manager.js"></script>
-  <script src="script.js"></script>
+  <script src="script.js?v=20260924-3"></script>
 </body>
 </html>
