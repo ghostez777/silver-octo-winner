@@ -1,11 +1,5 @@
 [
-  {
-    "id": "yoho",
-    "name": "YoHoHo.io",
-    "html": "games/yohohoio.html",
-    "thumb": "thumbs/yohohoio.png"
-  },
-  {
+ {
     "id": "badpig",
     "name": "Bad Piggies",
     "html": "games/bad-piggies.html",
@@ -20,7 +14,7 @@
   {
     "id": "pokerouge",
     "name": "Pokerouge",
-    "html": "games/pokerouge/index.html",
+    "html": "games/pokerouge/dist/index.html",
     "thumb": "thumbs/pokerouge.png"
   },
   {
@@ -711,3 +705,4 @@
     "html": "games/jetpackjoyride.html"
   }
 ]
+
