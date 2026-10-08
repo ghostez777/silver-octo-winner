@@ -366,8 +366,12 @@ function renderCards(container, games, emptyMessage) {
   });
 }
 
-function launchGame(game) {
+async function launchGame(game) {
   state.currentGame = game;
+
+  // Restore this game's autosave before its document starts.
+  await restoreGameAutosave(game.id);
+  startGameAutosave(game.id);
 
   if (game.gba) {
     const modal = $("#playerModal");
@@ -382,6 +386,7 @@ function launchGame(game) {
       document.baseURI
     ).href;
     frame.style.display = "block";
+    frame.onload = () => injectGameSaveBridge(frame, game.id);
     modal.classList.add("open");
     document.body.classList.add("player-open");
     document.body.style.overflow = "hidden";
@@ -399,9 +404,9 @@ function launchGame(game) {
     return;
   }
 
+  stopGameAutosave();
   showToast("This game does not have a playable location yet.");
 }
-
 /* =========================================================
    HTML GAME PLAYER
    ========================================================= */
@@ -421,6 +426,7 @@ function openPlayer(game, url) {
 
   // Load the HTML game.
   frame.src = new URL(url, document.baseURI).href;
+  frame.onload = () => injectGameSaveBridge(frame, game.id);
   frame.style.display = "block";
 
   // Open the fullscreen player modal.
@@ -564,6 +570,11 @@ function syncFullscreenButton() {
 }
 
 async function closePlayer() {
+  if (state.currentGame) {
+    await saveCurrentGameAutosave(state.currentGame.id);
+  }
+  stopGameAutosave();
+
   const modal = $("#playerModal");
   const frame = $("#gameFrame");
   const ruffleFrame = $("#ruffleFrame");
