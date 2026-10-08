@@ -12,8 +12,8 @@ let timerSeconds = 300;
 let timerInterval = null;
 let toastTimeout = null;
 
-const SUPABASE_URL = "https://abmrhhqubpxmzrjvsqay.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_oNPl0ont-81TGySbqG1roA_RX02JTFh";
+const SUPABASE_URL = "https://fcaurruifyeoofapuqcs.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_njYaCOufPHLjbkxo3brV0Q_eD6m6RLW";
 const supabaseClient = window.supabase?.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
