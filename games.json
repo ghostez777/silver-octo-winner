@@ -1,5 +1,11 @@
 [
  {
+    "id": "yoho",
+    "name": "YoHoOh.io",
+    "html": "games/yohoho.html",
+    "thumb": "thumbs/yohoho.png"
+  },
+ {
     "id": "badpig",
     "name": "Bad Piggies",
     "html": "games/bad-piggies.html",
