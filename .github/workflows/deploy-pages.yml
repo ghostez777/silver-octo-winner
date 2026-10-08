@@ -21,67 +21,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 1
 
-      - name: Fetch PokéRogue runtime assets
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf /tmp/pokerogue-assets
-          git clone --depth 1 --branch beta --single-branch --recurse-submodules --shallow-submodules https://github.com/pagefaultgames/pokerogue.git /tmp/pokerogue-assets
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.34.5
-          run_install: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "24.9.0"
-
-      - name: Install local PokéRogue dependencies
-        working-directory: games/pokerouge
-        run: pnpm install --frozen-lockfile
-
-      - name: Build local PokéRogue source
-        working-directory: games/pokerouge
-        run: pnpm build
-
-      - name: Assemble GitHub Pages site
+      - name: Assemble static site
         shell: bash
         run: |
           set -euo pipefail
           rm -rf _site
           mkdir -p _site
-          rsync -a --exclude='.git' --exclude='games/pokerouge' ./ _site/
-          mkdir -p _site/games/pokerouge
-          rsync -a games/pokerouge/dist/ _site/games/pokerouge/
+          rsync -a --exclude='.git' --exclude='_site' ./ _site/
 
-          # The local source tree does not contain the upstream asset/locales
-          # submodules, so copy only those runtime resources from the pinned
-          # upstream checkout. The game JavaScript itself comes from this repo.
-          rsync -a --exclude='.git' /tmp/pokerogue-assets/assets/ _site/games/pokerouge/assets/
-          rsync -a --exclude='.git' /tmp/pokerogue-assets/locales/ _site/games/pokerouge/locales/
-
-          mkdir -p _site/games/pokerouge/fonts
-          rsync -a /tmp/pokerogue-assets/assets/fonts/ _site/games/pokerouge/fonts/
-          cp /tmp/pokerogue-assets/assets/logo128.png _site/games/pokerouge/logo128.png
-          cp /tmp/pokerogue-assets/assets/logo512.png _site/games/pokerouge/logo512.png
-          cp /tmp/pokerogue-assets/assets/manifest.webmanifest _site/games/pokerouge/manifest.webmanifest
-          cp /tmp/pokerogue-assets/assets/service-worker.js _site/games/pokerouge/service-worker.js
-          cp /tmp/pokerogue-assets/manifest.json _site/games/pokerouge/manifest.json
-
+          # PokéRogue is a finished static game in this repository.
+          # Publish the user's copy exactly as-is; do not install, build,
+          # clone upstream assets, or replace it with a generated dist/.
           test -s _site/games/pokerouge/index.html
-          test -s _site/games/pokerouge/asset-manifest.json
-
-          # Verify the deployed HTML uses the built bundle, never raw TypeScript.
-          if grep -q 'src/main.ts' _site/games/pokerouge/index.html; then
-            echo "ERROR: raw TypeScript entry leaked into Pages output"
-            exit 1
-          fi
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
