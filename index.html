@@ -103,7 +103,31 @@
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.min.js"></script>
+  <div id="authModal" class="auth-modal" aria-hidden="true">
+    <div class="auth-box" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <button class="modal-close" type="button" data-close="authModal" aria-label="Close">×</button>
+      <div class="auth-heading">
+        <span class="section-label">GAMEHUB ACCOUNT</span>
+        <h2 id="authTitle">Log in</h2>
+        <p id="authStatus">Use your GameHub account to save your session.</p>
+      </div>
+      <form id="authForm">
+        <label class="auth-field">
+          <span>Email</span>
+          <input id="authEmail" type="email" autocomplete="email" required>
+        </label>
+        <label class="auth-field">
+          <span>Password</span>
+          <input id="authPassword" type="password" autocomplete="current-password" minlength="6" required>
+        </label>
+        <button id="authSubmit" class="top-button" type="submit">Log in</button>
+        <button id="authSwitch" class="auth-switch" type="button">Need an account? Sign up</button>
+      </form>
+      <button id="authLogout" class="top-button" type="button" hidden>Log out</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="lib/cloud-save-manager.js"></script>
   <script src="script.js"></script>
 </body>
