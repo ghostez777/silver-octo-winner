@@ -18,6 +18,88 @@ const supabaseClient = window.supabase?.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
 );
+
+let gameSaveTimer = null;
+let gameSaveGameId = null;
+
+function isGameStorageKey(key) {
+  return key && !key.startsWith("gamehub-") && !key.startsWith("sb-");
+}
+
+async function restoreGameAutosave(gameId) {
+  if (!window.gameHubCloudSaves) return;
+  try {
+    await window.gameHubCloudSaves.restoreStorageSnapshot(gameId);
+  } catch (error) {
+    console.warn("[GameHub Save] Could not restore autosave:", error);
+  }
+}
+
+async function saveCurrentGameAutosave(gameId) {
+  if (!window.gameHubCloudSaves || !gameId) return;
+  try {
+    await window.gameHubCloudSaves.saveStorageSnapshot(gameId);
+  } catch (error) {
+    console.warn("[GameHub Save] Could not save autosave:", error);
+  }
+}
+
+function startGameAutosave(gameId) {
+  stopGameAutosave();
+  gameSaveGameId = gameId;
+  gameSaveTimer = setInterval(() => {
+    saveCurrentGameAutosave(gameSaveGameId);
+  }, 5000);
+}
+
+function stopGameAutosave() {
+  if (gameSaveTimer) clearInterval(gameSaveTimer);
+  gameSaveTimer = null;
+  gameSaveGameId = null;
+}
+
+function setupGameSaveBridge() {
+  window.addEventListener("message", (event) => {
+    if (event.origin !== location.origin) return;
+    const data = event.data;
+    if (!data || data.type !== "gamehub-storage-save") return;
+    if (!state.currentGame || data.gameId !== state.currentGame.id) return;
+    if (!window.gameHubCloudSaves) return;
+
+    const storage = data.storage;
+    if (!storage || typeof storage !== "object") return;
+
+    window.gameHubCloudSaves.saveGame(data.gameId, "autosave", {
+      version: 1,
+      type: "localStorage",
+      savedAt: new Date().toISOString(),
+      storage
+    }).catch((error) => {
+      console.warn("[GameHub Save] Bridge autosave failed:", error);
+    });
+  });
+}
+
+function injectGameSaveBridge(frame, gameId) {
+  try {
+    const doc = frame.contentDocument;
+    if (!doc || !doc.documentElement) return false;
+
+    doc.documentElement.dataset.gamehubGameId = gameId;
+
+    if (doc.getElementById("gamehub-save-bridge")) return true;
+
+    const script = doc.createElement("script");
+    script.id = "gamehub-save-bridge";
+    script.src = new URL("lib/game-save-bridge.js", document.baseURI).href;
+    doc.head.appendChild(script);
+    return true;
+  } catch (error) {
+    // Cross-origin games cannot be injected; their own save systems still work normally.
+    return false;
+  }
+}
+
 let authMode = "login";
 
 
@@ -33,6 +115,7 @@ function loadFavorites() {
 document.addEventListener("DOMContentLoaded", () => {
   // Load the game catalogue first. Optional UI features must never prevent
   // the game library from starting.
+  setupGameSaveBridge();
   loadGames();
 
   const setupSteps = [
