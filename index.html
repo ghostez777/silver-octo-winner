@@ -103,6 +103,21 @@
     </section>
   </main>
 
+  <div id="playerModal" class="player-modal" aria-hidden="true">
+    <div id="playerWindow" class="player-window" role="dialog" aria-modal="true" aria-label="Game player">
+      <div class="player-topbar">
+        <strong id="playerTitle">Game</strong>
+        <div class="player-actions">
+          <button id="openNewTab" class="player-button" type="button" title="Open in new tab" aria-label="Open in new tab"></button>
+          <button id="fullscreenPlayer" class="player-button" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
+          <button id="closePlayer" class="player-button player-close-button" type="button" title="Close" aria-label="Close">×</button>
+        </div>
+      </div>
+      <iframe id="gameFrame" title="Game" src="about:blank" allow="fullscreen; autoplay; gamepad" loading="eager"></iframe>
+      <div id="ruffleFrame" aria-label="Flash game player"></div>
+    </div>
+  </div>
+
   <div id="authModal" class="auth-modal" aria-hidden="true">
     <div class="auth-box" role="dialog" aria-modal="true" aria-labelledby="authTitle">
       <button class="modal-close" type="button" data-close="authModal" aria-label="Close">×</button>
