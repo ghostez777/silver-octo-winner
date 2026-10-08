@@ -31,15 +31,28 @@ function loadFavorites() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  setupNavigation();
-  setupSearch();
-  setupFilters();
-  setupPlayer();
-  setupKeyboard();
-  setupAuth();
-  loadNotes();
-  setupNotes();
+  // Load the game catalogue first. Optional UI features must never prevent
+  // the game library from starting.
   loadGames();
+
+  const setupSteps = [
+    setupNavigation,
+    setupSearch,
+    setupFilters,
+    setupPlayer,
+    setupKeyboard,
+    setupAuth,
+    loadNotes,
+    setupNotes
+  ];
+
+  for (const setup of setupSteps) {
+    try {
+      setup();
+    } catch (error) {
+      console.error("[GameHub] Optional startup feature failed:", setup.name, error);
+    }
+  }
 });
 
 function parseCatalog(text) {
