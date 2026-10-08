@@ -1635,3 +1635,32 @@ body {
 .player-window:fullscreen .player-topbar {
   background: transparent !important;
 }
+
+
+/* Account modal */
+.auth-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: none;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, .65);
+  backdrop-filter: blur(6px);
+}
+.auth-modal[aria-hidden="false"] { display: grid; }
+.auth-box {
+  position: relative;
+  width: min(100%, 430px);
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.auth-box #authSubmit,
+.auth-box #authLogout {
+  width: 100%;
+  margin-top: 16px;
+  justify-content: center;
+}
