@@ -580,7 +580,10 @@ function showPage(id) {
 }
 
 function setupSearch() {
-  $("#searchInput").addEventListener("input", (event) => {
+  const searchInput = $("#searchInput");
+  if (!searchInput) return;
+
+  searchInput.addEventListener("input", (event) => {
     const query = event.target.value.trim().toLowerCase();
 
     const games = query
@@ -644,13 +647,19 @@ function setupApps() {
 }
 
 function setupNotes() {
-  $("#saveNotes").addEventListener("click", () => {
-    localStorage.setItem("gamehub-notes", $("#notesArea").value);
+  const saveNotes = $("#saveNotes");
+  const notesArea = $("#notesArea");
+  if (!saveNotes || !notesArea) return;
+
+  saveNotes.addEventListener("click", () => {
+    localStorage.setItem("gamehub-notes", notesArea.value);
   });
 }
 
 function loadNotes() {
-  $("#notesArea").value = localStorage.getItem("gamehub-notes") || "";
+  const notesArea = $("#notesArea");
+  if (!notesArea) return;
+  notesArea.value = localStorage.getItem("gamehub-notes") || "";
 }
 
 function updateTimerDisplay() {
@@ -691,20 +700,25 @@ function randomGame() {
 }
 
 function setupSettings() {
-  $("#animationsToggle").checked = localStorage.getItem("gamehub-animations") !== "false";
-  $("#compactToggle").checked = localStorage.getItem("gamehub-compact") === "true";
+  const animationsToggle = $("#animationsToggle");
+  const compactToggle = $("#compactToggle");
+  const resetFavorites = $("#resetFavorites");
+  if (!animationsToggle || !compactToggle || !resetFavorites) return;
 
-  $("#animationsToggle").addEventListener("change", () => {
-    localStorage.setItem("gamehub-animations", $("#animationsToggle").checked ? "true" : "false");
+  animationsToggle.checked = localStorage.getItem("gamehub-animations") !== "false";
+  compactToggle.checked = localStorage.getItem("gamehub-compact") === "true";
+
+  animationsToggle.addEventListener("change", () => {
+    localStorage.setItem("gamehub-animations", animationsToggle.checked ? "true" : "false");
     applySettings();
   });
 
-  $("#compactToggle").addEventListener("change", () => {
-    localStorage.setItem("gamehub-compact", $("#compactToggle").checked ? "true" : "false");
+  compactToggle.addEventListener("change", () => {
+    localStorage.setItem("gamehub-compact", compactToggle.checked ? "true" : "false");
     applySettings();
   });
 
-  $("#resetFavorites").addEventListener("click", () => {
+  resetFavorites.addEventListener("click", () => {
     state.favorites = [];
     localStorage.setItem("gamehub-favorites", "[]");
     renderFavorites();
@@ -715,8 +729,11 @@ function setupSettings() {
 }
 
 function applySettings() {
-  document.body.classList.toggle("no-animations", !$("#animationsToggle").checked);
-  document.body.classList.toggle("compact", $("#compactToggle").checked);
+  const animationsToggle = $("#animationsToggle");
+  const compactToggle = $("#compactToggle");
+  if (!animationsToggle || !compactToggle) return;
+  document.body.classList.toggle("no-animations", !animationsToggle.checked);
+  document.body.classList.toggle("compact", compactToggle.checked);
 }
 
 function setupKeyboard() {
