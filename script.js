@@ -92,6 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFilters();
   setupPlayer();
   setupKeyboard();
+  setupRandom();
   setupAuth();
   loadNotes();
   setupNotes();
@@ -547,6 +548,15 @@ function setupPlayer() {
     if (event.target === $("#playerModal")) {
       closePlayer();
     }
+  });
+}
+
+function setupRandom() {
+  const randomButton = $("#randomBtn");
+  if (!randomButton) return;
+
+  randomButton.addEventListener("click", () => {
+    randomGame();
   });
 }
 
