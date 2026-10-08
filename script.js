@@ -27,29 +27,41 @@ function isGameStorageKey(key) {
 }
 
 async function restoreGameAutosave(gameId) {
-  if (!window.gameHubCloudSaves) return;
+  if (!window.gameHubCloudSaves) return false;
   try {
-    await window.gameHubCloudSaves.restoreStorageSnapshot(gameId);
+    if (window.gameHubCloudSaves.ready) {
+      await window.gameHubCloudSaves.ready;
+    }
+    return await window.gameHubCloudSaves.restoreStorageSnapshot(gameId);
   } catch (error) {
     console.warn("[GameHub Save] Could not restore autosave:", error);
+    return false;
   }
 }
 
 async function saveCurrentGameAutosave(gameId) {
-  if (!window.gameHubCloudSaves || !gameId) return;
+  if (!window.gameHubCloudSaves || !gameId) return false;
   try {
-    await window.gameHubCloudSaves.saveStorageSnapshot(gameId);
+    if (window.gameHubCloudSaves.ready) {
+      await window.gameHubCloudSaves.ready;
+    }
+    return await window.gameHubCloudSaves.saveStorageSnapshot(gameId);
   } catch (error) {
     console.warn("[GameHub Save] Could not save autosave:", error);
+    return false;
   }
 }
 
 function startGameAutosave(gameId) {
   stopGameAutosave();
   gameSaveGameId = gameId;
+  // PokéRogue can write several storage keys during one save. Ten seconds
+  // is frequent enough to protect progress without flooding Supabase.
   gameSaveTimer = setInterval(() => {
-    saveCurrentGameAutosave(gameSaveGameId);
-  }, 5000);
+    if (document.visibilityState === "visible") {
+      saveCurrentGameAutosave(gameSaveGameId);
+    }
+  }, 10000);
 }
 
 function stopGameAutosave() {
@@ -78,6 +90,18 @@ function setupGameSaveBridge() {
       console.warn("[GameHub Save] Bridge autosave failed:", error);
     });
   });
+
+  // Save when the tab is backgrounded/closed. This complements the in-game
+  // bridge and the periodic autosave timer.
+  const saveOnLifecycleChange = () => {
+    if (state.currentGame) {
+      saveCurrentGameAutosave(state.currentGame.id);
+    }
+  };
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") saveOnLifecycleChange();
+  });
+  window.addEventListener("pagehide", saveOnLifecycleChange);
 }
 
 function injectGameSaveBridge(frame, gameId) {
@@ -93,6 +117,8 @@ function injectGameSaveBridge(frame, gameId) {
     script.id = "gamehub-save-bridge";
     script.src = new URL("lib/game-save-bridge.js", document.baseURI).href;
     doc.head.appendChild(script);
+    // Capture the initial state after the bridge is installed as well.
+    setTimeout(() => saveCurrentGameAutosave(gameId), 250);
     return true;
   } catch (error) {
     // Cross-origin games cannot be injected; their own save systems still work normally.
