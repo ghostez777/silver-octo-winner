@@ -18,7 +18,10 @@ const supabaseClient = window.supabase?.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
 );
-const cloudSaveManager = supabaseClient ? new CloudSaveManager(supabaseClient) : null;
+const cloudSaveManager = (
+  supabaseClient &&
+  typeof CloudSaveManager !== "undefined"
+) ? new CloudSaveManager(supabaseClient) : null;
 window.cloudSaveManager = cloudSaveManager;
 window.gameHubCloudSaves = cloudSaveManager;
 let authMode = "login";
@@ -143,7 +146,18 @@ async function loadGames() {
 
   for (const url of catalogUrls) {
     try {
-      const response = await fetch(url, { cache: "no-store" });
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 8000);
+
+      let response;
+      try {
+        response = await fetch(url, {
+          cache: "no-store",
+          signal: controller.signal
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
       if (!response.ok) throw new Error(`Request failed: ${response.status}`);
 
       const text = await response.text();
