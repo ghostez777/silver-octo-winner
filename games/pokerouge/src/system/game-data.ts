@@ -77,6 +77,7 @@ import { applyChallenges } from "#utils/challenge-utils";
 import { fixedInt, NumberHolder, randInt, randSeedItem } from "#utils/common";
 import { decrypt, encrypt } from "#utils/data";
 import { getEnumKeys } from "#utils/enums";
+import { loadCloudSession, loadCloudSystem, saveCloudSession, saveCloudSystem } from "#utils/cloud-save";
 import { compareVersions } from "#utils/migrator-utils";
 import { toCamelCase } from "#utils/strings";
 import { AES, enc } from "crypto-js";
@@ -342,15 +343,26 @@ export class GameData {
     console.log("Client Session:", clientSessionId);
 
     if (bypassLogin && !localStorage.getItem(`data_${loggedInUser?.username}`)) {
-      return false;
+      const cloud = await loadCloudSystem();
+      if (!cloud) {
+        return false;
+      }
+      return await this.initSystem(JSON.stringify(cloud.data));
     }
 
     if (bypassLogin) {
       return await this.initSystem(decrypt(localStorage.getItem(`data_${loggedInUser?.username}`)!, bypassLogin)); // TODO: is this bang correct?
     }
+
     const saveDataOrErr = await pokerogueApi.savedata.system.get({ clientSessionId });
+    const cloud = await loadCloudSystem();
 
     if (typeof saveDataOrErr === "number" || !saveDataOrErr || saveDataOrErr.length === 0 || saveDataOrErr[0] !== "{") {
+      if (cloud) {
+        console.info("[CloudSave] Restoring system save from Supabase");
+        localStorage.setItem(`data_${loggedInUser?.username}`, encrypt(JSON.stringify(cloud.data), bypassLogin));
+        return await this.initSystem(JSON.stringify(cloud.data));
+      }
       if (saveDataOrErr === 404) {
         globalScene.phaseManager.queueMessage(ErrorMessages.DATA_NOT_FOUND, null, true);
         return true;
@@ -363,10 +375,23 @@ export class GameData {
     }
 
     const cachedSystem = localStorage.getItem(`data_${loggedInUser?.username}`);
-    return await this.initSystem(
-      saveDataOrErr,
+    let systemData = saveDataOrErr;
+
+    if (cloud && cloud.data.timestamp > GameData.parseSystemData(saveDataOrErr).timestamp) {
+      console.info("[CloudSave] Using newer Supabase system save");
+      systemData = JSON.stringify(cloud.data);
+    }
+
+    const loaded = await this.initSystem(
+      systemData,
       cachedSystem ? AES.decrypt(cachedSystem, saveKey).toString(enc.Utf8) : undefined,
     );
+
+    if (loaded) {
+      await saveCloudSystem(GameData.parseSystemData(systemData));
+    }
+
+    return loaded;
   }
 
   /**
@@ -909,35 +934,56 @@ export class GameData {
   }
 
   async getSession(slotId: number): Promise<SessionSaveData | undefined> {
-    // TODO: Do we need this fallback anymore?
     if (slotId < 0) {
       return;
     }
 
     console.log("Getting Session Slot id: %d", slotId);
 
-    // Check local storage for the cached session data
-    if (bypassLogin || localStorage.getItem(getSessionDataLocalStorageKey(slotId))) {
-      const sessionData = localStorage.getItem(getSessionDataLocalStorageKey(slotId));
-      if (!sessionData) {
-        console.error("No session data found!");
-        return;
+    const localEncrypted = localStorage.getItem(getSessionDataLocalStorageKey(slotId));
+    let localSession: SessionSaveData | undefined;
+
+    if (localEncrypted) {
+      try {
+        localSession = this.parseSessionData(decrypt(localEncrypted, bypassLogin));
+      } catch (error) {
+        console.warn("[CloudSave] Local session could not be parsed", error);
       }
-      return this.parseSessionData(decrypt(sessionData, bypassLogin));
     }
 
-    // Ask the server API for the save data and store it in localstorage
+    const cloudSession = await loadCloudSession(slotId);
+    if (cloudSession && (!localSession || cloudSession.data.timestamp > localSession.timestamp)) {
+      console.info("[CloudSave] Using newer Supabase session save for slot", slotId);
+      localStorage.setItem(
+        getSessionDataLocalStorageKey(slotId),
+        encrypt(JSON.stringify(cloudSession.data), bypassLogin),
+      );
+      return cloudSession.data;
+    }
+
+    if (localSession) {
+      await saveCloudSession(slotId, localSession);
+      return localSession;
+    }
+
+    if (bypassLogin) {
+      return cloudSession?.data;
+    }
+
     const response = await pokerogueApi.savedata.session.get({ slot: slotId, clientSessionId });
 
-    // TODO: This is a far cry from proper JSON validation
     if (response == null || response.length === 0 || response.charAt(0) !== "{") {
+      if (cloudSession) {
+        return cloudSession.data;
+      }
       console.error("Invalid save data JSON detected!", response);
       return;
     }
 
+    const sessionData = this.parseSessionData(response);
     localStorage.setItem(getSessionDataLocalStorageKey(slotId), encrypt(response, bypassLogin));
-
-    return this.parseSessionData(response);
+    await saveCloudSession(slotId, sessionData);
+    return sessionData;
   }
 
   async renameSession(slotId: number, newName: string): Promise<boolean> {
@@ -1369,6 +1415,12 @@ export class GameData {
     );
 
     console.debug(`Session data saved to slot ${globalScene.sessionSlotId}!`);
+
+    // Keep Supabase account saves in sync without replacing the existing PokéRogue server save.
+    await Promise.all([
+      saveCloudSystem(systemData),
+      saveCloudSession(globalScene.sessionSlotId, sessionData),
+    ]);
 
     if (bypassLogin || !sync) {
       const verified = await this.verify();
