@@ -1,7 +1,8 @@
 /**
- * PokéRogue Cloud Save Integration
+ * PokéRogue Cloud Save Integration (Autosave Only)
  * 
  * This script integrates cloud saves with PokéRogue's localStorage system.
+ * Uses only autosave slot - no manual save slots.
  * When a user is logged in, game saves are synced to their cloud account.
  * When logged out, saves use local browser storage.
  */
@@ -10,7 +11,9 @@ class PokéRogueCloudSave {
   constructor() {
     this.cloudSaveManager = window.gameHubCloudSaves;
     this.gameId = 'pokerouge';
+    this.slotName = 'autosave'; // Always use autosave
     this.isReady = false;
+    this.saveTimeout = null;
     this.init();
   }
 
@@ -24,10 +27,37 @@ class PokéRogueCloudSave {
     }
 
     this.isReady = true;
-    console.log('[PokéRogueCloudSave] Initialized and ready');
+    console.log('[PokéRogueCloudSave] Initialized (autosave only)');
+
+    // Load any existing cloud save on init
+    this.load();
 
     // Hook into window unload to save on exit
     window.addEventListener('beforeunload', () => this.forceSaveAll());
+
+    // Intercept localStorage writes to sync automatically
+    this.hookLocalStorage();
+  }
+
+  /**
+   * Hook into localStorage to auto-sync saves
+   */
+  hookLocalStorage() {
+    const originalSetItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = (key, value) => {
+      originalSetItem.call(this, key, value);
+
+      // If this is a PokéRogue save key, queue a sync
+      if (key.includes('pokerouge') || key.includes('save') || key.includes('session')) {
+        if (this.isReady) {
+          clearTimeout(this.saveTimeout);
+          this.saveTimeout = setTimeout(() => {
+            this.save();
+            this.saveTimeout = null;
+          }, 2000); // Wait 2 seconds after last change
+        }
+      }
+    };
   }
 
   /**
@@ -35,35 +65,17 @@ class PokéRogueCloudSave {
    */
   getCurrentSaveData() {
     try {
-      // PokéRogue stores game data in multiple localStorage keys
       const saveData = {};
-      
-      // Common PokéRogue save keys
-      const keys = [
-        'pokerogueSession',
-        'pokerogueData',
-        'pokerogueSettings',
-        'pokerogueStats'
-      ];
 
-      keys.forEach(key => {
-        const value = localStorage.getItem(key);
-        if (value) {
-          saveData[key] = value;
-        }
-      });
-
-      // Also try to grab any key that starts with 'pokerouge' or looks like save data
+      // Grab all PokéRogue-related keys
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key && (key.includes('pokerouge') || key.includes('save') || key.includes('session'))) {
-          if (!saveData[key]) {
-            saveData[key] = localStorage.getItem(key);
-          }
+          saveData[key] = localStorage.getItem(key);
         }
       }
 
-      return saveData;
+      return Object.keys(saveData).length > 0 ? saveData : null;
     } catch (error) {
       console.error('[PokéRogueCloudSave] Error getting save data:', error);
       return null;
@@ -71,38 +83,39 @@ class PokéRogueCloudSave {
   }
 
   /**
-   * Save game to cloud (if logged in) and local storage
+   * Save game to cloud (if logged in) or local storage
    */
   async save() {
     if (!this.isReady) return false;
 
     const saveData = this.getCurrentSaveData();
-    if (!saveData || Object.keys(saveData).length === 0) {
+    if (!saveData) {
       console.log('[PokéRogueCloudSave] No save data to persist');
       return false;
     }
 
     try {
-      if (this.cloudSaveManager.getAuthStatus().isAuthenticated) {
-        const payload = {
-          timestamp: Date.now(),
-          version: '1.0',
-          saveData: saveData
-        };
+      const payload = {
+        timestamp: Date.now(),
+        version: '1.0',
+        saveData: saveData
+      };
 
+      if (this.cloudSaveManager.getAuthStatus().isAuthenticated) {
         const success = await this.cloudSaveManager.saveGame(
           this.gameId,
-          'autosave',
+          this.slotName,
           payload
         );
 
         if (success) {
-          console.log('[PokéRogueCloudSave] Cloud save successful');
+          console.log('[PokéRogueCloudSave] ☁️ Cloud autosave successful');
           return true;
         }
       }
 
-      console.log('[PokéRogueCloudSave] Using local storage (not logged in)');
+      // Local storage already has it, just note it
+      console.log('[PokéRogueCloudSave] 💾 Local autosave (not logged in)');
       return true;
     } catch (error) {
       console.error('[PokéRogueCloudSave] Save failed:', error);
@@ -119,19 +132,19 @@ class PokéRogueCloudSave {
     try {
       let saveData = null;
 
-      // Try cloud first
+      // Try cloud first if logged in
       if (this.cloudSaveManager.getAuthStatus().isAuthenticated) {
-        const cloudState = await this.cloudSaveManager.loadGame(this.gameId, 'autosave');
+        const cloudState = await this.cloudSaveManager.loadGame(this.gameId, this.slotName);
         if (cloudState && cloudState.saveData) {
           saveData = cloudState.saveData;
-          console.log('[PokéRogueCloudSave] Loaded from cloud');
+          console.log('[PokéRogueCloudSave] ☁️ Loaded from cloud');
         }
       }
 
-      // If no cloud save, use local storage (already in place)
+      // If no cloud save, local storage is already in place
       if (!saveData) {
-        console.log('[PokéRogueCloudSave] Using local storage');
-        return false; // Let PokéRogue handle its own local storage
+        console.log('[PokéRogueCloudSave] Using browser storage');
+        return false;
       }
 
       // Restore the save data to localStorage
@@ -139,7 +152,7 @@ class PokéRogueCloudSave {
         localStorage.setItem(key, value);
       });
 
-      console.log('[PokéRogueCloudSave] Save data restored from cloud');
+      console.log('[PokéRogueCloudSave] ✓ Autosave restored from cloud');
       return true;
     } catch (error) {
       console.error('[PokéRogueCloudSave] Load failed:', error);
@@ -152,57 +165,23 @@ class PokéRogueCloudSave {
    */
   async forceSaveAll() {
     const saveData = this.getCurrentSaveData();
-    if (!saveData || Object.keys(saveData).length === 0) return;
+    if (!saveData) return;
 
     try {
       if (this.cloudSaveManager && this.cloudSaveManager.getAuthStatus().isAuthenticated) {
         await this.cloudSaveManager.saveGame(
           this.gameId,
-          'autosave',
+          this.slotName,
           {
             timestamp: Date.now(),
             version: '1.0',
             saveData: saveData
           }
         );
-        console.log('[PokéRogueCloudSave] Forced cloud save on exit');
+        console.log('[PokéRogueCloudSave] ☁️ Forced autosave on exit');
       }
     } catch (error) {
       console.error('[PokéRogueCloudSave] Forced save failed:', error);
-    }
-  }
-
-  /**
-   * Get all saved games for this user
-   */
-  async listSaves() {
-    try {
-      if (!this.cloudSaveManager.getAuthStatus().isAuthenticated) {
-        return null;
-      }
-
-      return await this.cloudSaveManager.getSavesForGame(this.gameId);
-    } catch (error) {
-      console.error('[PokéRogueCloudSave] Failed to list saves:', error);
-      return null;
-    }
-  }
-
-  /**
-   * Delete a specific save
-   */
-  async deleteSave(slotName = 'autosave') {
-    try {
-      if (!this.cloudSaveManager.getAuthStatus().isAuthenticated) {
-        return false;
-      }
-
-      await this.cloudSaveManager.deleteSave(this.gameId, slotName);
-      console.log(`[PokéRogueCloudSave] Deleted save slot: ${slotName}`);
-      return true;
-    } catch (error) {
-      console.error('[PokéRogueCloudSave] Failed to delete save:', error);
-      return false;
     }
   }
 
@@ -212,31 +191,31 @@ class PokéRogueCloudSave {
   isLoggedIn() {
     return this.cloudSaveManager && this.cloudSaveManager.getAuthStatus().isAuthenticated;
   }
+
+  /**
+   * Get autosave info
+   */
+  async getAutosaveInfo() {
+    try {
+      if (!this.cloudSaveManager.getAuthStatus().isAuthenticated) {
+        return { status: 'local', message: 'Using browser storage' };
+      }
+
+      const saves = await this.cloudSaveManager.getSavesForGame(this.gameId);
+      const autosave = saves?.find(s => s.slotName === this.slotName);
+
+      return {
+        status: 'cloud',
+        lastSaved: autosave?.formattedDate || 'Never',
+        message: `Cloud autosave${autosave ? ' - Last saved: ' + autosave.formattedDate : ''}`
+      };
+    } catch (error) {
+      return { status: 'error', message: 'Could not get autosave info' };
+    }
+  }
 }
 
 // Initialize globally
 window.pokéRogueCloudSave = new PokéRogueCloudSave();
 
-// Hook into PokéRogue's save points
-// This runs every time PokéRogue saves to localStorage
-if (window.addEventListener) {
-  const originalSetItem = Storage.prototype.setItem;
-  Storage.prototype.setItem = function(key, value) {
-    originalSetItem.call(this, key, value);
-
-    // If this is a PokéRogue save key and cloud save is ready, sync it
-    if (key.includes('pokerouge') || key.includes('save') || key.includes('session')) {
-      if (window.pokéRogueCloudSave && window.pokéRogueCloudSave.isReady) {
-        // Debounce rapid saves
-        if (!window.pokéRogueCloudSave._saveTimeout) {
-          window.pokéRogueCloudSave._saveTimeout = setTimeout(() => {
-            window.pokéRogueCloudSave.save();
-            window.pokéRogueCloudSave._saveTimeout = null;
-          }, 2000); // Wait 2 seconds after last change before saving
-        }
-      }
-    }
-  };
-}
-
-console.log('[PokéRogueCloudSave] Integration loaded');
+console.log('[PokéRogueCloudSave] Autosave-only integration loaded');
