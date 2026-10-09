@@ -1,6 +1,18 @@
 [
  
  {
+    "id": "Stake Mines",
+    "name": "Stake Mines",
+    "html": "games/stake-mines.html",
+    "thumb": "thumbs/sm.png"
+  },
+ {
+    "id": "s3",
+    "name": "Skate 3",
+    "html": "games/skate-3-rust-demo.html",
+    "thumb": "thumbs/ksp.png"
+  },
+ {
     "id": "ksp",
     "name": "Kerbal Space Program",
     "html": "games/kerbal-space-program.html",
