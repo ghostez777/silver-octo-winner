@@ -1,5 +1,11 @@
 [
-
+ 
+ {
+    "id": "ksp",
+    "name": "Kerbal Space Program",
+    "html": "games/kerbal-space-program.html",
+    "thumb": "thumbs/ksp.png"
+  },
  {
     "id": "hks",
     "name": "Hollow Knight Silksong",
