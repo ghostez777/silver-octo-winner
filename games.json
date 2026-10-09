@@ -1,6 +1,18 @@
 [
 
  {
+    "id": "hks",
+    "name": "Hollow Knight Silksong",
+    "html": "games/hollow-knight-silksong.html",
+    "thumb": "thumbs/hkss.png"
+  },
+ {
+    "id": "Counter Strike",
+    "name": "Counter Strike",
+    "html": "games/russian-counter-strike.html",
+    "thumb": "thumbs/cs.png"
+  },
+ {
     "id": "pvz2",
     "name": "Plants v Zombies 2",
     "html": "games/plants-vs-zombies-2.html",
