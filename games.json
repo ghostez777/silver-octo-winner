@@ -1,6 +1,32 @@
 [
 
  {
+    "id": "pvz2",
+    "name": "Plants v Zombies 2",
+    "html": "games/plants-vs-zombies-2.html",
+    "thumb": "thumbs/pvz2.png"
+  },
+
+ {
+    "id": "cc",
+    "name": "Cookie Clicker",
+    "html": "games/cookie-clicker.html",
+    "thumb": "thumbs/cc.png"
+  },
+
+ {
+    "id": "UTF8’s",
+    "name": "How To Fish",
+    "html": "games/how-to-fish.html",
+    "thumb": "thumbs/htf.png"
+  },
+ {
+    "id": "yoho ",
+    "name": "Yohoho.io",
+    "html": "games/yohohoio.html",
+    "thumb": "thumbs/yoho.png"
+  },
+ {
     "id": "little",
     "name": "Little Alchemy 2",
     "html": "games/little-alchemy-2.html",
