@@ -1,4 +1,11 @@
 [
+
+ {
+    "id": "little",
+    "name": "Little Alchemy 2",
+    "html": "games/little-alchemy-2.html",
+    "thumb": "thumbs/little.png"
+  },
  {
     "id": "badpig",
     "name": "Bad Piggies",
