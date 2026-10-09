@@ -14,16 +14,45 @@ let toastTimeout = null;
 
 const SUPABASE_URL = "https://fcaurruifyeoofapuqcs.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_njYaCOufPHLjbkxo3brV0Q_eD6m6RLW";
-const supabaseClient = window.supabase?.createClient(
-  SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY
-);
+// Share one Supabase client with the cloud save manager so login state is
+// always the same for the account UI and for cloud saves.
+const supabaseClient =
+  window.gameHubCloudSaves?.supabaseClient ||
+  window.supabase?.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 let gameSaveTimer = null;
 let gameSaveGameId = null;
 
 function isGameStorageKey(key) {
-  return key && !key.startsWith("gamehub-") && !key.startsWith("sb-");
+  return key && !key.startsWith("gamehub-") && !key.startsWith("sb-") && !key.startsWith("game-save-");
+}
+
+// When someone logs in (or switches account) while a game is open, load that
+// account's cloud save and restart the game so it reads the cloud progress
+// instead of overwriting it with whatever was on this device.
+let lastAuthUserId = null;
+async function handleAuthUserChange(session) {
+  const userId = session?.user?.id || null;
+  if (userId === lastAuthUserId) return;
+  const firstCheck = lastAuthUserId === null && !session;
+  lastAuthUserId = userId;
+  if (!userId || firstCheck) return;
+
+  const game = state.currentGame;
+  const frame = $("#gameFrame");
+  if (!game || !frame || frame.style.display === "none") return;
+
+  stopGameAutosave();
+  const restored = await restoreGameAutosave(game.id);
+  if (state.currentGame !== game) return;
+  if (restored) {
+    showToast("Loaded your cloud save.");
+    const src = frame.src;
+    frame.onload = () => injectGameSaveBridge(frame, game.id);
+    frame.src = "about:blank";
+    setTimeout(() => { frame.src = src; }, 50);
+  }
+  startGameAutosave(game.id);
 }
 
 async function restoreGameAutosave(gameId) {
@@ -1186,10 +1215,13 @@ function setupAuth() {
 
   supabaseClient.auth.onAuthStateChange((_event, session) => {
     updateAuthUI(session);
+    // Run outside the auth callback so Supabase is not blocked.
+    setTimeout(() => handleAuthUserChange(session), 0);
   });
 
   supabaseClient.auth.getSession().then(({ data }) => {
     updateAuthUI(data.session);
+    if (lastAuthUserId === null) lastAuthUserId = data.session?.user?.id || null;
   });
 }
 
