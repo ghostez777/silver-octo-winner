@@ -1,5 +1,10 @@
 [
- 
+  {
+    "id": "mines",
+    "name": "Minesweep",
+    "html": "games/minesweep/index.html",
+    "thumb": "thumbs/mss.png"
+  },
  {
     "id": "Stake Mines",
     "name": "Stake Mines",
