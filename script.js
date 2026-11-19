@@ -1169,7 +1169,7 @@ async function verifySavedAccessCode() {
 async function refreshDeveloperAccess(session) {
   const button = $("#developerButton");
   if (!button) return;
-  const allowed = String(session?.user?.email || "").toLowerCase() === "hextallfinley@gmail.com";
+  const allowed = String(session?.user?.email || "").toLowerCase() === "finley.hextall@gmail.com";
   button.hidden = !allowed;
   const gateLogin = $("#accessLoginButton");
   if (gateLogin && allowed) gateLogin.textContent = "Open developer panel";
@@ -1202,7 +1202,7 @@ function setupAccessControl() {
 
   $("#accessLoginButton")?.addEventListener("click", async () => {
     const { data } = await supabaseClient.auth.getSession();
-    if (String(data.session?.user?.email || "").toLowerCase() === "hextallfinley@gmail.com") {
+    if (String(data.session?.user?.email || "").toLowerCase() === "finley.hextall@gmail.com") {
       $("#developerPanel").classList.add("open");
       $("#developerPanel").setAttribute("aria-hidden", "false");
       return;
