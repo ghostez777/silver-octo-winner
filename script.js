@@ -1417,10 +1417,10 @@ function updateAuthForm() {
     supabaseClient && document.body.dataset.gamehubLoggedIn === "true"
   );
 
-  form.hidden = loggedIn;
-  logout.hidden = !loggedIn;
+  form.hidden = loggedIn && authMode !== "recovery";
+  logout.hidden = !loggedIn || authMode === "recovery";
 
-  if (loggedIn) {
+  if (loggedIn && authMode !== "recovery") {
     title.textContent = "You're logged in";
     switchButton.hidden = true;
     return;
