@@ -12,8 +12,11 @@ let timerSeconds = 300;
 let timerInterval = null;
 let toastTimeout = null;
 
-const SUPABASE_URL = "https://fcaurruifyeoofapuqcs.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_njYaCOufPHLjbkxo3brV0Q_eD6m6RLW";
+const SUPABASE_URL = "https://abmrhhqubpxmzrjvsqay.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_oNPl0ont-81TGySbqG1roA_RX02JTFh";
+const ACCESS_CONTROL_URL = `${SUPABASE_URL}/functions/v1/access-control`;
+const ACCESS_DEVICE_KEY = "ghostez-access-device";
+const ACCESS_CODE_KEY = "ghostez-access-code";
 // Share one Supabase client with the cloud save manager so login state is
 // always the same for the account UI and for cloud saves.
 const supabaseClient =
@@ -171,6 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Load the game catalogue first. Optional UI features must never prevent
   // the game library from starting.
   setupGameSaveBridge();
+  setupAccessControl();
   loadGames();
 
   const setupSteps = [
@@ -1120,6 +1124,119 @@ function escapeAttribute(value) {
 }
 
 
+
+/* =========================================================
+   DEVICE-BOUND WEBSITE ACCESS
+   ========================================================= */
+function getAccessDeviceId() {
+  let id = localStorage.getItem(ACCESS_DEVICE_KEY);
+  if (!id) {
+    id = (crypto.randomUUID ? crypto.randomUUID() : `device-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    localStorage.setItem(ACCESS_DEVICE_KEY, id);
+  }
+  return id;
+}
+
+async function callAccessControl(payload, token) {
+  const headers = { "Content-Type": "application/json", apikey: SUPABASE_PUBLISHABLE_KEY };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const response = await fetch(ACCESS_CONTROL_URL, {
+    method: "POST", headers, body: JSON.stringify(payload)
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.error || "Access request failed.");
+  return result;
+}
+
+function setAccessGranted(granted) {
+  document.body.classList.toggle("access-locked", !granted);
+  $("#accessGate").hidden = granted;
+}
+
+async function verifySavedAccessCode() {
+  const code = localStorage.getItem(ACCESS_CODE_KEY);
+  if (!code) { setAccessGranted(false); return; }
+  try {
+    await callAccessControl({ action: "claim", code, deviceId: getAccessDeviceId() });
+    setAccessGranted(true);
+  } catch (error) {
+    localStorage.removeItem(ACCESS_CODE_KEY);
+    setAccessGranted(false);
+    $("#accessGateStatus").textContent = error.message;
+  }
+}
+
+async function refreshDeveloperAccess(session) {
+  const button = $("#developerButton");
+  if (!button) return;
+  const allowed = String(session?.user?.email || "").toLowerCase() === "hextallfinley@gmail.com";
+  button.hidden = !allowed;
+}
+
+function setupAccessControl() {
+  setAccessGranted(false);
+  verifySavedAccessCode();
+
+  $("#accessCodeForm")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = $("#accessCodeSubmit");
+    const status = $("#accessGateStatus");
+    const code = $("#accessCodeInput").value.trim();
+    button.disabled = true;
+    status.textContent = "Checking code and registering this device...";
+    try {
+      await callAccessControl({ action: "claim", code, deviceId: getAccessDeviceId() });
+      localStorage.setItem(ACCESS_CODE_KEY, code);
+      $("#accessCodeInput").value = "";
+      setAccessGranted(true);
+      status.textContent = "";
+      showToast("Website unlocked on this device.");
+    } catch (error) {
+      status.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  $("#accessLoginButton")?.addEventListener("click", () => {
+    authMode = "login";
+    updateAuthForm();
+    $("#authModal").classList.add("open");
+    $("#authModal").setAttribute("aria-hidden", "false");
+  });
+
+  $("#developerButton")?.addEventListener("click", () => {
+    $("#developerPanel").classList.add("open");
+    $("#developerPanel").setAttribute("aria-hidden", "false");
+  });
+
+  $("#generateAccessCodes")?.addEventListener("click", async () => {
+    const status = $("#developerStatus");
+    const button = $("#generateAccessCodes");
+    button.disabled = true;
+    status.textContent = "Generating...";
+    try {
+      const { data } = await supabaseClient.auth.getSession();
+      if (!data.session) throw new Error("Log in with the developer account first.");
+      const count = Math.max(1, Math.min(25, Number($("#accessCodeCount").value) || 1));
+      const result = await callAccessControl({ action: "generate", count }, data.session.access_token);
+      $("#generatedAccessCodes").value = result.codes.join("\n");
+      status.textContent = `${result.codes.length} code(s) created. Copy them now; they cannot be displayed again.`;
+    } catch (error) {
+      status.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+
+  $("#copyAccessCodes")?.addEventListener("click", async () => {
+    const value = $("#generatedAccessCodes").value;
+    if (!value) return;
+    try { await navigator.clipboard.writeText(value); $("#developerStatus").textContent = "Codes copied."; }
+    catch { $("#developerStatus").textContent = "Select and copy the codes manually."; }
+  });
+}
+
 /* =========================================================
    GAMEHUB AUTH
    ========================================================= */
@@ -1215,12 +1332,14 @@ function setupAuth() {
 
   supabaseClient.auth.onAuthStateChange((_event, session) => {
     updateAuthUI(session);
+    refreshDeveloperAccess(session);
     // Run outside the auth callback so Supabase is not blocked.
     setTimeout(() => handleAuthUserChange(session), 0);
   });
 
   supabaseClient.auth.getSession().then(({ data }) => {
     updateAuthUI(data.session);
+    refreshDeveloperAccess(data.session);
     if (lastAuthUserId === null) lastAuthUserId = data.session?.user?.id || null;
   });
 }
