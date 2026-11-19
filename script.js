@@ -1171,6 +1171,8 @@ async function refreshDeveloperAccess(session) {
   if (!button) return;
   const allowed = String(session?.user?.email || "").toLowerCase() === "hextallfinley@gmail.com";
   button.hidden = !allowed;
+  const gateLogin = $("#accessLoginButton");
+  if (gateLogin && allowed) gateLogin.textContent = "Open developer panel";
 }
 
 function setupAccessControl() {
@@ -1198,7 +1200,13 @@ function setupAccessControl() {
     }
   });
 
-  $("#accessLoginButton")?.addEventListener("click", () => {
+  $("#accessLoginButton")?.addEventListener("click", async () => {
+    const { data } = await supabaseClient.auth.getSession();
+    if (String(data.session?.user?.email || "").toLowerCase() === "hextallfinley@gmail.com") {
+      $("#developerPanel").classList.add("open");
+      $("#developerPanel").setAttribute("aria-hidden", "false");
+      return;
+    }
     authMode = "login";
     updateAuthForm();
     $("#authModal").classList.add("open");
