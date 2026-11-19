@@ -1682,3 +1682,6 @@ body {
 .developer-box { max-width:480px; }
 .developer-box textarea { margin-top:14px;resize:vertical; }
 .developer-box .auth-field { display:grid;gap:8px;margin:18px 0; }
+
+/* Keep the sign-in dialog accessible above the private-site gate. */
+#authModal, #developerPanel { z-index: 10003; }
