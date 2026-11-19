@@ -1286,23 +1286,37 @@ function setupAuth() {
     submit.disabled = true;
     status.textContent = authMode === "login"
       ? "Logging in..."
-      : "Creating your account...";
+      : authMode === "signup"
+        ? "Creating your account..."
+        : authMode === "recovery"
+          ? "Updating your password..."
+          : "Please wait...";
 
     try {
-      const result = authMode === "login"
-        ? await supabaseClient.auth.signInWithPassword({ email, password })
-        : await supabaseClient.auth.signUp({ email, password });
-
-      if (result.error) throw result.error;
-
-      if (authMode === "signup" && !result.data.session) {
-        status.textContent = "Account created. Check your email to confirm it, then log in.";
-        showToast("Check your email to finish signup.");
+      if (authMode === "recovery") {
+        const { error } = await supabaseClient.auth.updateUser({ password });
+        if (error) throw error;
+        status.textContent = "Password updated. You can now use your new password to log in.";
+        showToast("GameHub password updated.");
+        authMode = "login";
+        updateAuthForm();
+        $("#authPassword").value = "";
       } else {
-        status.textContent = "You're logged in.";
-        showToast("Logged in to GameHub.");
-        authModal.classList.remove("open");
-        authModal.setAttribute("aria-hidden", "true");
+        const result = authMode === "login"
+          ? await supabaseClient.auth.signInWithPassword({ email, password })
+          : await supabaseClient.auth.signUp({ email, password });
+
+        if (result.error) throw result.error;
+
+        if (authMode === "signup" && !result.data.session) {
+          status.textContent = "Account created. Check your email to confirm it, then log in.";
+          showToast("Check your email to finish signup.");
+        } else {
+          status.textContent = "You're logged in.";
+          showToast("Logged in to GameHub.");
+          authModal.classList.remove("open");
+          authModal.setAttribute("aria-hidden", "true");
+        }
       }
     } catch (error) {
       console.error("GameHub auth error:", error);
@@ -1315,6 +1329,33 @@ function setupAuth() {
   authSwitch.addEventListener("click", () => {
     authMode = authMode === "login" ? "signup" : "login";
     updateAuthForm();
+  });
+
+  $("#authForgot")?.addEventListener("click", async () => {
+    const email = $("#authEmail").value.trim();
+    const status = $("#authStatus");
+    if (!email) {
+      status.textContent = "Enter your account email above first.";
+      $("#authEmail").focus();
+      return;
+    }
+
+    const button = $("#authForgot");
+    button.disabled = true;
+    status.textContent = "Sending a password reset email...";
+    try {
+      const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: "https://ghostez777.github.io/silver-octo-winner/"
+      });
+      if (error) throw error;
+      status.textContent = "If an account exists for that address, a password reset link has been sent. Check your inbox and spam folder.";
+      showToast("Password reset email requested.");
+    } catch (error) {
+      console.error("GameHub password reset error:", error);
+      status.textContent = error?.message || "Could not send the reset email.";
+    } finally {
+      button.disabled = false;
+    }
   });
 
   authLogout.addEventListener("click", async () => {
@@ -1338,7 +1379,15 @@ function setupAuth() {
     }
   });
 
-  supabaseClient.auth.onAuthStateChange((_event, session) => {
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (event === "PASSWORD_RECOVERY") {
+      authMode = "recovery";
+      updateAuthForm();
+      authModal.classList.add("open");
+      authModal.setAttribute("aria-hidden", "false");
+      $("#authPassword").value = "";
+      $("#authPassword").focus();
+    }
     updateAuthUI(session);
     refreshDeveloperAccess(session);
     // Run outside the auth callback so Supabase is not blocked.
@@ -1357,6 +1406,8 @@ function updateAuthForm() {
   const status = $("#authStatus");
   const submit = $("#authSubmit");
   const switchButton = $("#authSwitch");
+  const forgotButton = $("#authForgot");
+  const passwordLabel = $("#authPasswordLabel");
   const logout = $("#authLogout");
   const form = $("#authForm");
 
@@ -1375,19 +1426,31 @@ function updateAuthForm() {
     return;
   }
 
-  title.textContent = authMode === "login" ? "Log in" : "Create account";
-  submit.textContent = authMode === "login" ? "Log in" : "Sign up";
+  const isRecovery = authMode === "recovery";
+  title.textContent = isRecovery
+    ? "Choose a new password"
+    : authMode === "login" ? "Log in" : "Create account";
+  submit.textContent = isRecovery
+    ? "Update password"
+    : authMode === "login" ? "Log in" : "Sign up";
   switchButton.textContent = authMode === "login"
     ? "Need an account? Sign up"
     : "Already have an account? Log in";
-  switchButton.hidden = false;
+  switchButton.hidden = isRecovery;
+  if (forgotButton) forgotButton.hidden = authMode !== "login";
+  if (passwordLabel) passwordLabel.textContent = isRecovery ? "New password" : "Password";
+  $("#authEmail").disabled = isRecovery;
+  $("#authPassword").autocomplete = authMode === "login" ? "current-password" : "new-password";
 
-  if (authMode === "login") {
+  if (isRecovery) {
+    status.textContent = "Enter a new password for your GameHub account.";
+    $("#authPassword").setAttribute("minlength", "8");
+  } else if (authMode === "login") {
     status.textContent = "Use your GameHub account to save your session.";
-    $("#authPassword").autocomplete = "current-password";
+    $("#authPassword").setAttribute("minlength", "6");
   } else {
     status.textContent = "Create a GameHub account with your email and a password.";
-    $("#authPassword").autocomplete = "new-password";
+    $("#authPassword").setAttribute("minlength", "6");
   }
 }
 
