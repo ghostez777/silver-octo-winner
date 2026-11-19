@@ -1664,3 +1664,21 @@ body {
   margin-top: 16px;
   justify-content: center;
 }
+
+
+/* Device-bound access gate */
+.access-gate { position:fixed; inset:0; z-index:10000; display:grid; place-items:center; padding:24px; background:radial-gradient(ellipse at top,#18223a 0%,#080b12 58%); }
+.access-gate[hidden] { display:none; }
+.access-locked { overflow:hidden !important; }
+.access-locked > .main, .access-locked > .player-modal { pointer-events:none; }
+.access-card { width:min(100%,430px); padding:38px; border:1px solid rgba(145,166,210,.2); border-radius:22px; background:rgba(14,19,32,.96); box-shadow:0 25px 90px #0009; text-align:center; }
+.access-mark { width:54px;height:54px;margin:0 auto 20px;display:grid;place-items:center;border-radius:16px;background:linear-gradient(135deg,#7657ff,#32206d);font-size:27px;font-weight:900;color:white; }
+.access-card h1 { margin:10px 0;font-size:30px; }
+.access-card p { color:#9aa8c2;line-height:1.6; }
+.access-form { display:grid;gap:12px;text-align:left;margin-top:24px; }
+.access-form label { color:#cbd5e8;font-size:13px; }
+.access-form input,.developer-box input,.developer-box textarea { width:100%;padding:13px 14px;border:1px solid #303b53;border-radius:10px;background:#090e19;color:#fff; }
+.access-status { min-height:22px;font-size:13px;color:#ffb4b4 !important; }
+.developer-box { max-width:480px; }
+.developer-box textarea { margin-top:14px;resize:vertical; }
+.developer-box .auth-field { display:grid;gap:8px;margin:18px 0; }
